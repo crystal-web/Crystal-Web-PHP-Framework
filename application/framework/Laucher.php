@@ -77,6 +77,69 @@ $breadcrumb.='<li>'.$mvc->router->controller_info['page_title'].'</li>';
 //$tmp.='<li>&nbsp;&gt;&gt;&nbsp;</li><li id="thispage">' . $this->mvc->router->controller_info['page_title'] . '</li>';	
 $breadcrumb.='</ul>';
 // END BREADCRUMB
+$debuging = null;
+if (__DEV_MODE)
+    {
+    /*  Problematique
+    echo '<div style="margin:7px;padding:5px;"><fieldset style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#0000FF;">&nbsp;&nbsp;ENTETE&nbsp;&nbsp;&nbsp;</legend>';
+            if($EnteteHTTP = @get_headers(__CW_PATH))
+            {
+                    foreach($EnteteHTTP as $Valeur) echo $Valeur."<br/>";
+            }
+    echo '</fieldset>';//*/
+    $get = (count($_GET)) ? '<pre>'.print_r($_GET, true).'</pre>' : 'Aucune donn&eacute;e GET';
+    $post = (count($_POST)) ? '<pre>'.print_r($_POST, true).'</pre>' : 'Aucune donn&eacute;e POST';
+    $session = (count($_SESSION)) ? '<pre>'.print_r($_SESSION, true).'</pre>' : 'Aucune donn&eacute;e SESSION';
+    $cookie = (count($_COOKIE)) ? '<pre>'.print_r($_COOKIE, true).'</pre>' : 'Aucune donn&eacute;e SESSION';
+    if (count($mvc->template->getVars()))
+    {
+    $envTmp=array();
+            foreach($mvc->template->getVars() AS $envK => $null)
+                    $envTmp[$envK] = '$'.$envK;
+
+    $env = '<pre>'.print_r($envTmp, true).'</pre>';
+    }
+    else
+    {
+    $env = 'Aucune donn&eacute;e ENVIRONEMENT';
+    }
+
+    $poidSysteme = count( (array) $mvc, COUNT_RECURSIVE);
+   $debuging = '<fieldset style="border:1px solid #021EB4;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#021EB4;">&nbsp;&nbsp;DONNEES ENVIRONEMENT&nbsp;&nbsp;</legend>
+    <div style="color:#021EB4;font-weight:normal;padding:4px 0 4px 0">' . $env . '</div></fieldset>
+
+    <fieldset style="border:1px solid #021EB4;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#021EB4;">&nbsp;&nbsp;DONNEES GET&nbsp;&nbsp;</legend>
+    <div style="color:#021EB4;font-weight:normal;padding:4px 0 4px 0">' . $get . '</div></fieldset>
+
+    <fieldset style="border:1px solid #009900;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#009900;">&nbsp;&nbsp;DONNEES POST&nbsp;&nbsp;</legend>
+    <div style="color:#009900;font-weight:normal;padding:4px 0 4px 0">' . $post . '</div></fieldset>
+
+
+    <fieldset style="border:1px solid #CC00B4;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#CC00B4;">&nbsp;&nbsp;DONNEES SESSION&nbsp;&nbsp;</legend>
+    <div style="color:#CC00B4;font-weight:normal;padding:4px 0 4px 0">' . $session . '</div></fieldset>
+
+    <fieldset style="border:1px solid #A73500;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#A73500;">&nbsp;&nbsp;DONNEES COOKIE&nbsp;&nbsp;</legend>
+    <div style="color:#A73500;font-weight:normal;padding:4px 0 4px 0">' . $cookie . '</div></fieldset>
+
+    <fieldset style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#0000FF;">&nbsp;&nbsp;BASE DE DONNEES&nbsp;&nbsp;&nbsp;</legend>
+    <div style="color:#0000FF;font-weight:normal;padding:4px 0 4px 0">
+    table  ' . __SQL .'<br />
+    </div></fieldset>
+
+    <fieldset style="border:1px solid #0000FF;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee">
+    <legend style="color:#0000FF;">&nbsp;&nbsp;POIDS DONNEES&nbsp;&nbsp;&nbsp;</legend>
+    <div style="color:#0000FF;font-weight:normal;padding:4px 0 4px 0">
+    Co&ucirc;t systeme ' . $poidSysteme .'<br />
+    </div></fieldset>
+    </div>';
+    }
 
 
 $content = $mvc->html->getContent();
@@ -101,7 +164,7 @@ $skin = array(
 	'THEME_SERVER_TIME' => date('G:i', time()),
 	'PSEUDO' => (isSet($_SESSION['user']['pseudo'])) ? $_SESSION['user']['pseudo'] : '',
 	'THEME_CONTENT' => $content['main'].$mvc->contenu,
-	'THEME_SITETITLE' => 'IYC.fr',
+	'THEME_SITETITLE' => SITE_NAME,
 	'THEME_TITLE' => $mvc->router->controller_info['page_title'],
 	'THEME_URI' => __PAGE,
 	'THEME_LINKTO' => __CW_PATH,
@@ -112,6 +175,7 @@ $skin = array(
 	'THEME_LANGUAGE' => NULL,
 	'THEME_HEAD' => $mvc->html->getHead(),
 	'THEME_FIL' => $breadcrumb,
+        'DEBUGING' => $debuging,
 	//'THEME_ASIDE' => (in_array($mvc->router->controller, $this->admin_spc)) ? menu::build_tree($this->aside_spc) : $aside,
 /*	'PLUGINS_CONTENT_HEADER' => $plugins_content_header,
 	'PLUGINS_CONTENT_FOOTER' => $plugins_content_footer,*/
@@ -122,11 +186,7 @@ $skin = array(
 
 
 ob_start();
-if (preg_match('#Java#', $_SERVER['HTTP_USER_AGENT']) && !isSet($_GET['cw']))
-{
-require_once './themes/java/wrapper.phtml';
-}
-elseif(!isSet($_GET['cw']))
+if(!isSet($_GET['cw']))
 {
 require_once './themes/boot/wrapper.phtml';
 }

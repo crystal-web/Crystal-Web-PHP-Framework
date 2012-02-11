@@ -1,7 +1,7 @@
 <?php
-if (count($errors_registration))
-{
 
+if (count($errors_registration) && !empty($errors_registration))
+{
 $err=NULL;
 	foreach ($errors_registration AS $value)
 	{

@@ -37,7 +37,7 @@ $this->setInfo('page_title', 'Connection au site');
 $this->mvc->template->link_registration = url('index.php?module=registration');
 $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=forgotpassword');
 
-	/* Retour a la page précédente après connection */
+	/* Retour a la page prï¿½cï¿½dente aprï¿½s connection */
 	if (!isSet($_SESSION['pageBeforeConnect']))
 	{
 
@@ -52,10 +52,10 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 		}
 	}
 
-	// Création d'un tableau des erreurs
+	// Crï¿½ation d'un tableau des erreurs
 	$errors_connection = array();
 
-	// Validation des champs suivant les règles
+	// Validation des champs suivant les rï¿½gles
 	if (isSet($_POST['user']))
 	{
 	$user = $_POST['user']; 
@@ -133,7 +133,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 
 			$errors_connection[] = "Couple nom d'utilisateur / mot de passe inexistant.";
 
-			// On réaffiche le formulaire de connexion
+			// On rï¿½affiche le formulaire de connexion
 			
 			/*** Variables ***/
 			$this->mvc->template->errors_connection = $errors_connection;
@@ -144,7 +144,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 
 	} else {
 
-		// On réaffiche le formulaire de connexion
+		// On rï¿½affiche le formulaire de connexion
 		/*** Variables ***/
 		$this->mvc->template->errors_connection = $errors_connection;
 
@@ -174,7 +174,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 		$errors_forgot=array();
 			if ($info_user != false)
 			{
-			// Génére le nouveau mots de passe
+			// Gï¿½nï¿½re le nouveau mots de passe
 			$pass = NULL;
 			$charlist = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz0123456789';
 			$ps_len = strlen($charlist);
@@ -235,7 +235,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	/*********************************************/
 	public function logout(){
 	$this->setInfo('sitemap', false);
-	$this->setInfo('page_title', 'Confirmation de déconnexion');
+	$this->setInfo('page_title', 'Confirmation de dï¿½connexion');
 	
 		if (isSet($_SESSION['user']['pseudo']))
 		{
@@ -266,7 +266,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	$this->setInfo('sitemap', true);
 	$this->setInfo('page_title', 'Cr&eacute;ation d\'un compte');
 	
-	$errors_registration = array();
+	
 	
 
 	
@@ -278,14 +278,14 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	$login = (isSet($_POST['user'])) ? $_POST['user'] : NULL;
 	
 	$cleaner = strtr($login, 
-	'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ', 
+	'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', 
 	'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy');
 	$login = preg_replace('/([^.a-z0-9]+)/i', '-', $cleaner);
 		$this->mvc->template->login = $login;
 	
 		if (isSet($_POST['otherpassword']))
 		{
-		
+		$errors_registration = array();
 		$declare_coche = (isSet($_POST['declare_coche'])) ? $_POST['declare_coche'] : NULL;
 		$email = (isSet($_POST['mail'])) ? $_POST['mail'] : NULL;
 		$password = (isSet($_POST['password'])) ? $_POST['password'] : NULL;
@@ -362,7 +362,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 				Login: '.$login.'<br />
 				Mot de passe: '.$password.'<br />
 				<br />
-				Les r&ecirc,gles que vous avez accepté:<br />
+				Les r&ecirc,gles que vous avez acceptï¿½:<br />
 				'.__CGU.'
 				
 				</p>
@@ -400,10 +400,10 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	$this->setInfo('sitemap', false);
 	$this->setInfo('page_title', 'V&eacute;rification du compte');
 	$hash = (isSet($_GET['hash'])) ? $_GET['hash'] : null;
-		// On vérifie qu'un hash est présent
+		// On vï¿½rifie qu'un hash est prï¿½sent
 		if (!empty($hash)) {
 		
-			// valider_compte_avec_hash() est définit dans ~/modeles/membres.php
+			// valider_compte_avec_hash() est dï¿½finit dans ~/modeles/membres.php
 			if (Auth::checkHash($hash)==true)
 			{
 				/*** Affichage ***/

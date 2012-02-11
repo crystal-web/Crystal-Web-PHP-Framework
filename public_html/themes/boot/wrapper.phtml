@@ -7,6 +7,7 @@
 */
 function bootMenu($arr, $level=1)
 {
+    $mem=NULL;
 	foreach ($arr AS $key => $value)
 	{
 		// Si un sous menu existe
@@ -536,17 +537,18 @@ echo '<ul>'.bootMenu($skin['menuUp']).'</ul>';
 if (!$level = Auth::isAuth())
 {
 echo '<form action="'.url('index.php?module=auth').'" method="post" class="pull-right">
+	<span style="color:#fff;">Connection auto :</span> <input type="checkbox" name="connection_auto">
 	<input class="input-small" type="text" name="user" placeholder="Pseudo">
 	<input class="input-small" type="password" name="password" placeholder="Password">
 	<button class="btn" type="submit">Sign in</button>
+        <a class="btn" href="'.url('index.php?module=auth&action=subscribe').'">Subscribe</a>
 </form>';
 }
 else
 {
 echo '<ul class="nav secondary-nav">'.bootMenu($skin['menuUpUser'], $level).'</ul>';
 }
-
-					?>
+?>
                </div>
             </div>
         </div>
@@ -568,6 +570,8 @@ echo '<ul class="nav secondary-nav">'.bootMenu($skin['menuUpUser'], $level).'</u
                     </div>
 					<?php
 					echo $skin['THEME_CONTENT'];
+                                        echo $skin['DEBUGING'];
+                                        
 					?>
 
 					

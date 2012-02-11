@@ -1,74 +1,181 @@
 <?php
+
+
+/**
+* Chargement automatique des class
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $class_name
+* @return void
+*/
+function __autoload($class_name)
+{
+$filename = $class_name . '.class.php';
+$filePath = __APP . '/libs/' . $filename;
+	if (file_exists($filePath) == false)
+	{
+	exit('Class '.$class_name.' not found in '.$filePath);
+	}
+include_once ($filePath);
+}
+
+
+/**
+* Retourne le timestamp,milleseconde
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @return float
+*/
 function getmicrotime()
 {
-	list($usec, $sec) = explode(" ",microtime());
-	return ((float)$usec + (float)$sec);
+    if (function_exists('gettimeofday'))
+    {
+    // retourne le timestamp Unix, avec les microsecondes. 
+    // Cette fonction est uniquement disponible
+    //  sur les systèmes qui supportent la fonction gettimeofday().
+    list($usec, $sec) = explode(" ",microtime());
+    return ((float)$usec + (float)$sec);
+    }
+    else
+    {
+    return time();
+    }
 }
 
 function convert($size, $precision = 2)
 {
-if (!is_numeric($size))
-	return '?';
-$notation = 1024;
-// Fixes large disk size overflow issue
-// Found at http://www.php.net/manual/en/function.disk-free-space.php#81207
-$types = array('B', 'KB', 'MB', 'GB', 'TB');
-$types_i = array('B', 'KiB', 'MiB', 'GiB', 'TiB');
-for($i = 0; $size >= $notation && $i < (count($types) -1 ); $size /= $notation, $i++);
-return(round($size, $precision) . ' ' . ($notation == 1000 ? $types[$i] : $types_i[$i]));
+    if (!is_numeric($size)) return '?';
+
+    $notation = 1024;
+    // Fixes large disk size overflow issue
+    // Found at http://www.php.net/manual/en/function.disk-free-space.php#81207
+    $types = array('B', 'KB', 'MB', 'GB', 'TB');
+    $types_i = array('B', 'KiB', 'MiB', 'GiB', 'TiB');
+    for($i = 0; $size >= $notation && $i < (count($types) -1 ); $size /= $notation, $i++);
+    return(round($size, $precision) . ' ' . ($notation == 1000 ? $types[$i] : $types_i[$i]));
 }
 
+
+/**
+* Retourne une alerte "alerte"
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $msg|Message retourné par la fonction
+* @param bool $echo|Le message doit être print ou return
+* @return string
+*/
 function alerte($msg, $echo = false)
 {
 $box = '<div class="MSGbox MSGalerte"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
 
+
+/**
+* Retourne une alerte "astuce"
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $msg|Message retourné par la fonction
+* @param bool $echo|Le message doit être print ou return
+* @return string
+*/
 function astuce($msg, $echo = false)
 { 
 $box = '<div class="MSGbox MSGastuce"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
 
+
+/**
+* Retourne une alerte "beta"
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $msg|Message retourné par la fonction
+* @param bool $echo|Le message doit être print ou return
+* @return string
+*/
 function beta($msg, $echo = false)
 {
 $box = '<div class="MSGbox MSGbeta"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
 
+
+/**
+* Retourne une alerte "info"
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $msg|Message retourné par la fonction
+* @param bool $echo|Le message doit être print ou return
+* @return string
+*/
 function info($msg, $echo = false)
 {
 $box = '<div class="MSGbox MSGinfo"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
 
+
+/**
+* Retourne une alerte "note"
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $msg|Message retourné par la fonction
+* @param bool $echo|Le message doit être print ou return
+* @return string
+*/
 function note($msg, $echo = false)
 {
 $box = '<div class="MSGbox MSGnote"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
 
+
+/**
+* Retourne une alerte "valide"
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $msg|Message retourné par la fonction
+* @param bool $echo|Le message doit être print ou return
+* @return string
+*/
 function valide($msg, $echo = false)
 {
 $box = '<div class="MSGbox MSGvalide"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
-function db($var)
-{
-echo '<p><strong>Debug:</strong><pre class="code">';
-var_dump($var);
-echo '</pre></p>';
-}
 
 
+/**
+* Test si string est une url
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $url|URL du site
+* @return bool
+*/
 function isURL($url)
 {
 return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
 }
 
+
 /**
- * Parcourir un dossier et récupérer le contenu de chaque fichier
- * par Jay Salvat - http://blog.jaysalvat.com/article/zipper-des-dossiers-a-la-volee-avec-php */
+* Parcourir un dossier et récupérer le contenu de chaque fichier
+*
+* @author Jay Salvat
+* @link http://blog.jaysalvat.com/article/zipper-des-dossiers-a-la-volee-avec-php
+* @param string $folder|Dossier a scanner 
+* @return array
+*/
 function scanfolder($folder) {
     $files = array();
     $dh = opendir($folder);
@@ -95,104 +202,133 @@ function scanfolder($folder) {
     return $files;
 }
 
-/***
-Debuging visuel
-***/
-function debug ($text=null, $return=false)
+
+/**
+* Debug tools
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $arg|Variable a dumper
+* @param bool $return|Ecris ou renvois
+* @return string
+*/
+function debug ($arg=null, $return=false)
 {
 
 $var = '<p><strong>Crystal-Web Debug Tools:</strong><pre class="code">';
-	if (is_array($text) || is_object($text)) {
-	$var .= print_r($text, true);
-	} elseif($text==null) {
-	$var .= print_r($GLOBALS, true);
-	}
-	else {
-	$var .= $text;
-	}
+    if (is_array($arg) || is_object($arg))
+    {
+    $var .= print_r($arg, true);
+    }
+    else
+    {
+    $var .= $arg;
+    }
 $var .= '</pre></p>';
-if ($return == false) {echo $var;}else{return $var;}
+
+    // Retourne ou ecris ?
+    if ($return == false)
+    {
+    echo $var;
+    }
+    else
+    {
+    return $var;
+    }
 }
-/***
-END Debuging visuel
-***/
 
 
-/***
-Protection des variables POST & GET
-***/
+/**
+* Méthode de protection des variables automatique
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param array $data|Tableau de variables
+* @return array
+*/
 function protectMethod($data)
 {
 
-if (is_array($data)) {
-	foreach ($data AS $cle => $valeur) {
-		if (is_array($data)) {
-			$data[$cle] = protectMethod($data[$cle]);
-		} else {
-			if (is_numeric($valeur)) {
-				//cast pour les nombres
-				$data[$cle] = intval($valeur);
-			} else {
-				//protection des chaines
-				$data[$cle] = htmlentities($valeur);
-			}
-		}
-	}
-		if (isSet($_SERVER['HTTP_REFERER']))
-		{
-			if (!preg_match('#'.$_SERVER['SERVER_NAME'].'#', $_SERVER['HTTP_REFERER']))
-			{
-			$data['__internal'] = false;
-			$data['__external'] = true;
-			}
-			else
-			{
-			$data['__internal'] = true;
-			$data['__external'] = false;
-			}
-		}
-		else
-		{
-			$data['__direct'] = true;
-		}
+    if (is_array($data))
+    {
+        foreach ($data AS $cle => $valeur)
+        {
+            if (is_array($data))
+            {
+            $data[$cle] = protectMethod($data[$cle]);
+            }
+            else
+            {
+                if (is_numeric($valeur))
+                {
+                //cast pour les nombres
+                $data[$cle] = intval($valeur);
+                }
+                else
+                {
+                //protection des chaines
+                $data[$cle] = htmlentities($valeur);
+                }
+            }
+        }
 
-} else {
-	$data = htmlentities($data);
-}
+        if (isSet($_SERVER['HTTP_REFERER']))
+        {
+            if (!preg_match('#'.$_SERVER['SERVER_NAME'].'#', $_SERVER['HTTP_REFERER']))
+            {
+            $data['__internal'] = false;
+            $data['__external'] = true;
+            }
+            else
+            {
+            $data['__internal'] = true;
+            $data['__external'] = false;
+            }
+        }
+        else
+        {
+            $data['__direct'] = true;
+        }
+
+    }
+    else
+    {
+    $data = htmlentities($data);
+    }
+
 return $data;
 }
 if (!empty($_GET))	$_GET = protectMethod($_GET);
 if (!empty($_POST))	$_POST = protectMethod($_POST);
 if (!empty($_COOKIE))	$_COOKIE = protectMethod($_COOKIE);
-// //*/
 
-/*if(get_magic_quotes_gpc()) {
-        $_POST = array_map('htmlentities', $_POST);
-        $_GET = array_map('htmlentities', $_GET);
-        $_COOKIE = array_map('htmlentities', $_COOKIE);
-}//*/
 
-/***
-END Protection des variables POST & GET
-***/
 
-/* $errno : type de l'erreur
-$errstr : message d'erreur
-$errfile : fichier correspondant à l'erreur
-$errline : ligne correspondante à l'erreur */
+/**
+* Enregistrement des erreurs dans un fichier cache
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param array $data|Tableau de variables
+* @param string $errno|type de l'erreur
+* @param string $errstr|message d'erreur
+* @param string $errfile|fichier correspondant à l'erreur
+* @param string $errline|ligne correspondante à l'erreur 
+* @return mixed
+*/
 function erreur_alerte($errno,$errstr,$errfile,$errline)
 {
-// On définit le type de l'erreur
-switch($errno)
-{
-case E_USER_ERROR : $type = "Fatal:"; break;
-case E_USER_WARNING : $type = "Erreur:"; break;
-case E_USER_NOTICE : $type = "Warning:"; break;
-case E_ERROR : $type = "Fatal"; break;
-case E_WARNING : $type = "Erreur:"; break;
-case E_NOTICE :	$type = "Warning:"; break;
-default : $type = "Inconnu:"; break;
-}
+    // On définit le type de l'erreur
+    switch($errno)
+    {
+    case E_USER_ERROR : $type = "Fatal:"; break;
+    case E_USER_WARNING : $type = "Erreur:"; break;
+    case E_USER_NOTICE : $type = "Warning:"; break;
+    case E_ERROR : $type = "Fatal"; break;
+    case E_WARNING : $type = "Erreur:"; break;
+    case E_NOTICE :	$type = "Warning:"; break;
+    default : $type = "Inconnu:"; break;
+    }
 
 // On définit l'erreur.
 $erreur = "Type : " . $type . "
@@ -204,15 +340,14 @@ Fichier : " . $errfile;
 Le rapport d'erreur contient le type de l'erreur, la date, l'ip, et les tableaux. */
 $variables = get_defined_vars(); // Donne le contenu et les valeurs de toutes les variables dans la portée actuelle 
 $info = date("d/m/Y H:i:s",time())." :
-GET:".print_r($_GET, true).
-"POST:".print_r($_POST, true).
-"SERVER:".print_r($_SERVER, true).
-"COOKIE:".(isset($_COOKIE)? print_r($_COOKIE, true) : "Undefined").
-"SESSION:".(isset($_SESSION)? print_r($_SESSION, true) : "Undefined");
+    GET:".print_r($_GET, true).
+    "POST:".print_r($_POST, true).
+    "SERVER:".print_r($_SERVER, true).
+    "COOKIE:".(isset($_COOKIE)? print_r($_COOKIE, true) : "Undefined").
+    "SESSION:".(isset($_SESSION)? print_r($_SESSION, true) : "Undefined");
 
 
 $error_array['more'] = $info;
-
 $error_array['type'] = $type;
 $error_array['msg'] = "[".$errno."] ".$errstr;
 $error_array['errline'] = $errline;
@@ -227,29 +362,41 @@ $error_cache[time()] = $error_array;
 $cache_error_p = new Cache('erreur_alerte', $error_cache);
 $cache_error_p->setCache();
 
-if (__DEV_MODE==true) {echo nl2br('<div class="MSGbox MSGalerte"><p>'.$erreur.'</p></div>');}
+    if (__DEV_MODE==true)
+    {
+    echo nl2br('<div class="MSGbox MSGalerte"><p>'.$erreur.'</p></div>');
+    }
 }
 set_error_handler('erreur_alerte');
 
-/***
-Detection de Internet Explorer 
-***/
+
+
+/**
+* Detection de Internet Explorer
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @return mixed
+*/
 function is_ie() {
 $user_agent = (isSet($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT']: '';
 $match=preg_match('/msie ([0-9]\.[0-9])/',strtolower($user_agent),$reg);
 if($match==0) return false;
 else return floatval($reg[1]);
 }
-/***
-END Detection de Internet Explorer 
-***/
-
-/***
-Fin des fonctions des base
-***/
 
 
-// Réduit la chaine si elle est trop longue.
+
+/**
+* Réduit la chaine si elle est trop longue.
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $string|chaine a tronquer
+* @param int $lengthMax|longueur max de la chaine
+* @param bool $safe_word|Empécher le troncage de mots
+* @return string
+*/
 function truncatestr($string, $lengthMax, $safe_word=true)
 {
 if (strlen($string) < $lengthMax) return $string;
@@ -270,60 +417,75 @@ if (strlen($string) < $lengthMax) return $string;
 	return $string."...";
 }
 
-/***
-Création d'un arbre ul li 
-***/
-function build_tree($tree) 
-{
-$listgrp='';
-$result = '<ul>';
-foreach ($tree as $key => $valeur) 
-{
-	//Si un fils existe
-	if (is_array($tree[$key]))
-	{
-	//Nouveau groupe
-	$result .= '<li class="closed">'.$key;
-	$result .= build_tree($tree[$key]);
-	}
-	else
-	{
-	$result .= '<li class="closed"><a href="' . $key . '">'.$valeur.'</a>';
-	}
-}
-$result .= '</ul>';
-return $result;
-}
-/***
-END Création d'un arbre ul li
-***/
 
-/***
-Suppréssion des espaces inutiles
-***/
+
+/**
+* Réduit la chaine si elle est trop longue.
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $string|chaine a tronquer
+* @param int $lengthMax|longueur max de la chaine
+* @deprecated utiliser truncatestr() a la place
+* @return string
+*/
+function truncate($string, $lengthMax){
+ // Variable locale
+    $positionDernierEspace = 0;
+ 
+    if( strlen($string) >= $lengthMax )
+    {
+      $string = substr($string,0,$lengthMax); 
+      $positionDernierEspace = strrpos($string,' '); 
+      $string = substr($string,0,$positionDernierEspace).'...';
+    }
+	return $string;
+}
+
+
+/**
+* Suppréssion des espaces inutiles
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param string $str|chaine a nettoyer
+* @return string
+*/
 function stripspace($str){
 $str = trim($str);
 $str = preg_replace ("/\s+/", " ", $str);
 return $str;
 }
-/***
-END Suppréssion des espaces inutiles
-***/
 
-/***
-Math
-***/
 
+    /*******************/
+    /***    Math    ***/
+    /*****************/
+
+
+
+/**
+* Suppréssion des espaces inutiles
+*
+* @author Christophe BUFFET
+* @link http://crystal-web.org
+* @param int $nombre|chiffre
+* @return bool
+*/
 function is_paire($nombre){
 return ($nombre%2 == 0) ? true : false;
 }
 
 
 
+/**
+* parse php modules from phpinfo
+*
+* @author code at adspeed dot com
+* @package parsePHP
+* @return array
+*/
 
-
-
-/** parse php modules from phpinfo by code at adspeed dot com **/ 
 function parsePHPModules() { 
  ob_start(); 
  phpinfo(INFO_MODULES); 
@@ -353,7 +515,16 @@ function parsePHPModules() {
  } 
  return $vModules; 
 } 
-/** get a module setting */ 
+
+
+
+/**
+* get a module setting
+*
+* @author code at adspeed dot com
+* @package parsePHP
+* @return array
+*/
 function getModuleSetting($pModuleName,$pSetting) { 
  $vModules = parsePHPModules(); 
  return $vModules[$pModuleName][$pSetting]; 
@@ -362,24 +533,19 @@ function getModuleSetting($pModuleName,$pSetting) {
 
 
 
-function truncate($string, $lengthMax){
- // Variable locale
-    $positionDernierEspace = 0;
- 
-    if( strlen($string) >= $lengthMax )
-    {
-      $string = substr($string,0,$lengthMax); 
-      $positionDernierEspace = strrpos($string,' '); 
-      $string = substr($string,0,$positionDernierEspace).'...';
-    }
-	return $string;
-}
+
+    /*******************/
+    /***    Date   ***/
+    /*****************/
 
 
-/* Les dates */
-
-/* Fonction pour afficher les jours restants (ajouté par j-c)
-@ www.dyraz.com
+/**
+* Fonction pour afficher les jours restants
+*
+* @link http://www.dyraz.com
+* @author J-C
+* @param string $fin|date DD/MM/YYYY
+* @return string
 */
 function ecartdate($fin)
 {
@@ -393,54 +559,88 @@ function ecartdate($fin)
 	$annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
 	return $ecart; // $annonce;
 }
+
+
+
+/**
+* Retourne le temps relatif
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param string $date|date YYYY-MM-DD hh:mm:ss ou timestamp
+* @return string
+*/
 function getRelativeTime($date)
-	{
-	 // Test si $date est numerique et donc un timestamp
-	if (is_numeric($date))
-	{
-	$time = time() - $date;
-	}
-	else // Si pas c'est une date 2010-12-31 13:25:00
-	{// Déduction de la date donnée à la date actuelle
-	 $time = time() - strtotime($date);
-	}
-	 // Calcule si le temps est passé ou à venir
-	 if ($time > 0) {
-		  $when = "il y a";
-	 } else if ($time < 0) {
-		  $when = "dans environ";
-	 } else {
-		  return "il y a moins d'une seconde";
-	 }
-	 $time = abs($time);
+{
+     // Test si $date est numerique et donc un timestamp
+    if (is_numeric($date))
+    {
+    $time = time() - $date;
+    }
+    else // Si pas c'est une date 2010-12-31 13:25:00
+    {// Déduction de la date donnée à la date actuelle
+     $time = time() - strtotime($date);
+    }
+    
+    
+     // Calcule si le temps est passé ou à venir
+    if ($time > 0)
+    {
+    $when = "il y a";
+    }
+    else if ($time < 0)
+    {
+    $when = "dans environ";
+    }
+    else
+    {
+    return "il y a moins d'une seconde";
+    }
+$time = abs($time);
 
-	 // Tableau des unités et de leurs valeurs en secondes
-	 $times = array(
-					31104000 =>  'an{s}',		 // 12 * 30 * 24 * 60 * 60 secondes
-					2592000  =>  'mois',		  // 30 * 24 * 60 * 60 secondes
-					86400	 =>  'jour{s}',	  // 24 * 60 * 60 secondes
-					3600	  =>  'heure{s}',	 // 60 * 60 secondes
-					60		 =>  'minute{s}',	// 60 secondes
-					1		  =>  'seconde{s}'); // 1 seconde
+// Tableau des unités et de leurs valeurs en secondes
+$times = array(
+    31104000 =>  'an{s}',		 // 12 * 30 * 24 * 60 * 60 secondes
+    2592000  =>  'mois',		  // 30 * 24 * 60 * 60 secondes
+    86400	 =>  'jour{s}',	  // 24 * 60 * 60 secondes
+    3600	  =>  'heure{s}',	 // 60 * 60 secondes
+    60		 =>  'minute{s}',	// 60 secondes
+    1		  =>  'seconde{s}'); // 1 seconde
 
-		foreach ($times as $seconds => $unit) {
-			  // Calcule le delta entre le temps et l'unité donnée
-			  $delta = round($time / $seconds);
+    foreach ($times as $seconds => $unit)
+    {
+    // Calcule le delta entre le temps et l'unité donnée
+    $delta = round($time / $seconds);
 
-			  // Si le delta est supérieur à 1
-			  if ($delta >= 1) {
-					// L'unité est au singulier ou au pluriel ?
-					if ($delta == 1) {
-						 $unit = str_replace('{s}', '', $unit);
-					} else {
-						 $unit = str_replace('{s}', 's', $unit);
-					}
-					// Retourne la chaine adéquate
-					return $when." ".$delta." ".$unit;
-			  }
-		}
-	}
-	
+        // Si le delta est supérieur à 1
+        if ($delta >= 1)
+        {
+            // L'unité est au singulier ou au pluriel ?
+            if ($delta == 1)
+            {
+            $unit = str_replace('{s}', '', $unit);
+            }
+            else
+            {
+            $unit = str_replace('{s}', 's', $unit);
+            }
+        // Retourne la chaine adéquate
+        return $when." ".$delta." ".$unit;
+        }
+    }
+}
+
+
+
+/**
+* Retourne la date et heure en français
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param int $time|timestamp
+* @param string $format|fr_date ou fr_datetime
+* @return string
+*/
 function dates($time, $format)
 {
 /* Translation */
