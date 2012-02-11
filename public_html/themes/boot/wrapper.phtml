@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<?php
+/*	Gestion du menu
+*	Attend le contenu de $skin['menuUp']
+*/
+function bootMenu($arr, $level=1)
+{
+	foreach ($arr AS $key => $value)
+	{
+		// Si un sous menu existe
+		if (isSet($value['child']))
+		{
+		
+		$mem .= '<li class="dropdown" data-dropdown="dropdown"><a href="'.url($value['url']).'" class="dropdown-toggle">'.$key.'</a>';
+		$mem .= '<ul class="menu-dropdown">'.bootMenu($value['child'], $level).'</ul></li>';
+		}
+		else
+		{
+			if (isset($value['url'], $value['power_level']) && $value['power_level'] <= $level)
+			{
+			$mem .= '<li><a href="'.url($value['url']).'">'.$key.'</a></li>';
+			}
+		}
+	}
+	return $mem;
+}
+	
+	
+	?>
+        <title><?php echo $skin['THEME_TITLE'].' | '.$skin['THEME_SITETITLE']; ?></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="content-language" content="<?php echo $skin['THEME_LANGUAGE']; ?>" />
+		<meta name="dc.title" content="<?php echo $skin['THEME_TITLE'].' | '.$skin['THEME_SITETITLE']; ?>" />
+		<meta name="language" content="<?php echo $skin['THEME_LANGUAGE']; ?>" />
+		<meta name="identifier-url" content="<?php echo $skin['THEME_URI']; ?>" />
+		
+        <link rel="stylesheet" href="<?php echo __CDN; ?>/files/css/bootstrap/1.4.0/bootstrap.min.css">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-dropdown.js">$('#topbar').dropdown();</script>
+        <script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-tabs.js">$('.tabs').tabs();</script>
+        <script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-alerts.js">$(".alert-message").alert();</script>
+        <script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/tablesorter.js"></script>
+        <script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-twipsy.js"></script>
+        <script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-popover.js"></script>
+		<style type="text/css">.popover{z-index: 10000000;} body{background-color: #EEE;}
+		.container > .content {
+        background-color: #fff;
+        padding: 20px;
+        margin: 0 -20px; 
+        -webkit-border-radius: 0 0 6px 6px;
+           -moz-border-radius: 0 0 6px 6px;
+                border-radius: 0 0 6px 6px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                box-shadow: 0 1px 2px rgba(0,0,0,.15);
+      }
+
+[class^="icon-"]:last-child {
+  *margin-left: 0;
+}
+[class^="icon-"] {
+display: inline-block;
+width: 14px;
+height: 14px;
+vertical-align: text-top;
+background-image: url(<?php echo __CDN; ?>/files/images/bootstrap/glyphicons-halflings.png);
+background-position: 14px 14px;
+background-repeat: no-repeat;
+}
+.icon-white {
+  background-image: url(<?php echo __CDN; ?>/files/images/bootstrap/glyphicons-halflings-white.png);
+}
+.icon-black {
+  background-image: url(<?php echo __CDN; ?>/files/images/bootstrap/glyphicons-halflings.png);
+}
+.icon-glass {
+  background-position: 0      0;
+}
+.icon-music {
+  background-position: -24px 0;
+}
+.icon-search {
+  background-position: -48px 0;
+}
+.icon-envelope {
+  background-position: -72px 0;
+}
+.icon-heart {
+  background-position: -96px 0;
+}
+.icon-star {
+  background-position: -120px 0;
+}
+.icon-star-empty {
+  background-position: -144px 0;
+}
+.icon-user {
+  background-position: -168px 0;
+}
+.icon-film {
+  background-position: -192px 0;
+}
+.icon-th-large {
+  background-position: -216px 0;
+}
+.icon-th {
+  background-position: -240px 0;
+}
+.icon-th-list {
+  background-position: -264px 0;
+}
+.icon-ok {
+  background-position: -288px 0;
+}
+.icon-remove {
+  background-position: -312px 0;
+}
+.icon-zoom-in {
+  background-position: -336px 0;
+}
+.icon-zoom-out {
+  background-position: -360px 0;
+}
+.icon-off {
+  background-position: -384px 0;
+}
+.icon-signal {
+  background-position: -408px 0;
+}
+.icon-cog {
+  background-position: -432px 0;
+}
+.icon-trash {
+  background-position: -456px 0;
+}
+.icon-home {
+  background-position: 0 -24px;
+}
+.icon-file {
+  background-position: -24px -24px;
+}
+.icon-time {
+  background-position: -48px -24px;
+}
+.icon-road {
+  background-position: -72px -24px;
+}
+.icon-download-alt {
+  background-position: -96px -24px;
+}
+.icon-download {
+  background-position: -120px -24px;
+}
+.icon-upload {
+  background-position: -144px -24px;
+}
+.icon-inbox {
+  background-position: -168px -24px;
+}
+.icon-play-circle {
+  background-position: -192px -24px;
+}
+.icon-repeat {
+  background-position: -216px -24px;
+}
+.icon-refresh {
+  background-position: -240px -24px;
+}
+.icon-list-alt {
+  background-position: -264px -24px;
+}
+.icon-lock {
+  background-position: -287px -24px;
+}
+.icon-flag {
+  background-position: -312px -24px;
+}
+.icon-headphones {
+  background-position: -336px -24px;
+}
+.icon-volume-off {
+  background-position: -360px -24px;
+}
+.icon-volume-down {
+  background-position: -384px -24px;
+}
+.icon-volume-up {
+  background-position: -408px -24px;
+}
+.icon-qrcode {
+  background-position: -432px -24px;
+}
+.icon-barcode {
+  background-position: -456px -24px;
+}
+.icon-tag {
+  background-position: 0 -48px;
+}
+.icon-tags {
+  background-position: -25px -48px;
+}
+.icon-book {
+  background-position: -48px -48px;
+}
+.icon-bookmark {
+  background-position: -72px -48px;
+}
+.icon-print {
+  background-position: -96px -48px;
+}
+.icon-camera {
+  background-position: -120px -48px;
+}
+.icon-font {
+  background-position: -144px -48px;
+}
+.icon-bold {
+  background-position: -167px -48px;
+}
+.icon-italic {
+  background-position: -192px -48px;
+}
+.icon-text-height {
+  background-position: -216px -48px;
+}
+.icon-text-width {
+  background-position: -240px -48px;
+}
+.icon-align-left {
+  background-position: -264px -48px;
+}
+.icon-align-center {
+  background-position: -288px -48px;
+}
+.icon-align-right {
+  background-position: -312px -48px;
+}
+.icon-align-justify {
+  background-position: -336px -48px;
+}
+.icon-list {
+  background-position: -360px -48px;
+}
+.icon-indent-left {
+  background-position: -384px -48px;
+}
+.icon-indent-right {
+  background-position: -408px -48px;
+}
+.icon-facetime-video {
+  background-position: -432px -48px;
+}
+.icon-picture {
+  background-position: -456px -48px;
+}
+.icon-pencil {
+  background-position: 0 -72px;
+}
+.icon-map-marker {
+  background-position: -24px -72px;
+}
+.icon-adjust {
+  background-position: -48px -72px;
+}
+.icon-tint {
+  background-position: -72px -72px;
+}
+.icon-edit {
+  background-position: -96px -72px;
+}
+.icon-share {
+  background-position: -120px -72px;
+}
+.icon-check {
+  background-position: -144px -72px;
+}
+.icon-move {
+  background-position: -168px -72px;
+}
+.icon-step-backward {
+  background-position: -192px -72px;
+}
+.icon-fast-backward {
+  background-position: -216px -72px;
+}
+.icon-backward {
+  background-position: -240px -72px;
+}
+.icon-play {
+  background-position: -264px -72px;
+}
+.icon-pause {
+  background-position: -288px -72px;
+}
+.icon-stop {
+  background-position: -312px -72px;
+}
+.icon-forward {
+  background-position: -336px -72px;
+}
+.icon-fast-forward {
+  background-position: -360px -72px;
+}
+.icon-step-forward {
+  background-position: -384px -72px;
+}
+.icon-eject {
+  background-position: -408px -72px;
+}
+.icon-chevron-left {
+  background-position: -432px -72px;
+}
+.icon-chevron-right {
+  background-position: -456px -72px;
+}
+.icon-plus-sign {
+  background-position: 0 -96px;
+}
+.icon-minus-sign {
+  background-position: -24px -96px;
+}
+.icon-remove-sign {
+  background-position: -48px -96px;
+}
+.icon-ok-sign {
+  background-position: -72px -96px;
+}
+.icon-question-sign {
+  background-position: -96px -96px;
+}
+.icon-info-sign {
+  background-position: -120px -96px;
+}
+.icon-screenshot {
+  background-position: -144px -96px;
+}
+.icon-remove-circle {
+  background-position: -168px -96px;
+}
+.icon-ok-circle {
+  background-position: -192px -96px;
+}
+.icon-ban-circle {
+  background-position: -216px -96px;
+}
+.icon-arrow-left {
+  background-position: -240px -96px;
+}
+.icon-arrow-right {
+  background-position: -264px -96px;
+}
+.icon-arrow-up {
+  background-position: -289px -96px;
+}
+.icon-arrow-down {
+  background-position: -312px -96px;
+}
+.icon-share-alt {
+  background-position: -336px -96px;
+}
+.icon-resize-full {
+  background-position: -360px -96px;
+}
+.icon-resize-small {
+  background-position: -384px -96px;
+}
+.icon-plus {
+  background-position: -408px -96px;
+}
+.icon-minus {
+  background-position: -433px -96px;
+}
+.icon-asterisk {
+  background-position: -456px -96px;
+}
+.icon-exclamation-sign {
+  background-position: 0 -120px;
+}
+.icon-gift {
+  background-position: -24px -120px;
+}
+.icon-leaf {
+  background-position: -48px -120px;
+}
+.icon-fire {
+  background-position: -72px -120px;
+}
+.icon-eye-open {
+  background-position: -96px -120px;
+}
+.icon-eye-close {
+  background-position: -120px -120px;
+}
+.icon-warning-sign {
+  background-position: -144px -120px;
+}
+.icon-plane {
+  background-position: -168px -120px;
+}
+.icon-calendar {
+  background-position: -192px -120px;
+}
+.icon-random {
+  background-position: -216px -120px;
+}
+.icon-comment {
+  background-position: -240px -120px;
+}
+.icon-magnet {
+  background-position: -264px -120px;
+}
+.icon-chevron-up {
+  background-position: -288px -120px;
+}
+.icon-chevron-down {
+  background-position: -313px -119px;
+}
+.icon-retweet {
+  background-position: -336px -120px;
+}
+.icon-shopping-cart {
+  background-position: -360px -120px;
+}
+.icon-folder-close {
+  background-position: -384px -120px;
+}
+.icon-folder-open {
+  background-position: -408px -120px;
+}
+.icon-resize-vertical {
+  background-position: -432px -119px;
+}
+.icon-resize-horizontal {
+  background-position: -456px -118px;
+}
+		</style>
+		<script>
+		 $(function () {
+				  $("a[rel=popover]")
+					.popover({
+					  offset: 10
+					})
+				})
+		</script>
+		<script type="text/javascript" src="<?php echo $skin['THEME_LINKTO']; ?>/themes/xmlhttpr.js"></script>
+		<script type="text/javascript" src="<?php echo $skin['THEME_LINKTO']; ?>/themes/xCode.js"></script>
+		<?php echo $skin['THEME_HEAD']; ?>
+    </head>
+    <body>
+	
+        <div class="topbar">
+            <div class="fill">
+
+               <div class="container">
+                   <h3><a data-placement="below" rel="popover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="<?php echo $skin['THEME_SITETITLE']; ?>"><?php echo $skin['THEME_SITETITLE']; ?></a></h3>
+					
+
+<?php
+$skin['menuUp']=array(
+	'News' => array(
+		'url' => 'index.php?module=news',
+		'power_level' => '2'				
+		),
+	'Contact' => array(
+		'url' => 'index.php?module=contact',
+		'power_level' => '18',
+		)
+		
+	);
+					/*$skin['menuUp']=array(
+						'News' => array(
+							'url' => 'index.php?module=news',
+							'power_level' => '1',
+							'child' => array(
+								'sous1' => array(
+									'url' => 'index.php?module=news',
+									'name' => 'News',
+									'power_level' => '1'
+									),
+								'sous2' => array(
+									'url' => 'index.php?module=news',
+									'name' => 'News',
+									'power_level' => '1'
+									),
+								)						
+							),
+						'Contact' => array(
+							'url' => 'index.php?module=contact',
+							'power_level' => '1',
+							)
+							
+						);*/
+				$skin['menuUpUser']=array(
+						'User Panel' => array(
+						'power_level' => '2',
+							'url' => 'index.php?module=news',
+							'power_level' => '2',
+							'child' => array(
+								'Configuration des news' => array(
+									'url' => 'index.php?module=admin_news&action=config',
+									'power_level' => '5'
+									),
+								'Gestion des news' => array(
+									'url' => 'index.php?module=admin_news',
+									'power_level' => '5'
+									),
+								'Ajouter une cat&eacute;gorie' => array(
+									'url' => 'index.php?module=admin_news&action=addCat',
+									'power_level' => '5'
+									),
+								'Ajouter un poste' => array(
+									'url' => 'index.php?module=admin_news&action=addpost',
+									'power_level' => '5'
+									),
+								'Gestion des commentaires' => array(
+									'url' => 'index.php?module=admin_news&action=commentaire',
+									'power_level' => '5'
+									),								
+
+						
+								'D&eacute;connection' => array(
+									'url' => 'index.php?module=auth&action=logout',
+									'power_level' => '2'
+									),
+
+								)						
+							)						
+						);					
+if (isSet($skin['menuUp']))
+{
+echo '<ul>'.bootMenu($skin['menuUp']).'</ul>';
+}
+
+if (!$level = Auth::isAuth())
+{
+echo '<form action="'.url('index.php?module=auth').'" method="post" class="pull-right">
+	<input class="input-small" type="text" name="user" placeholder="Pseudo">
+	<input class="input-small" type="password" name="password" placeholder="Password">
+	<button class="btn" type="submit">Sign in</button>
+</form>';
+}
+else
+{
+echo '<ul class="nav secondary-nav">'.bootMenu($skin['menuUpUser'], $level).'</ul>';
+}
+
+					?>
+               </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="content" id="swithcontenu">
+
+			
+            <div class="row"  style="margin-top:60px;">
+                <div class="span16">
+				<?php echo $skin['THEME_FIL']; ?>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Page content -->
+                <div class="span16">
+                    <div class="page-header">
+                        <h1><?php echo $skin['THEME_SITETITLE']; echo ( !empty($skin['THEME_TITLE']) ) ? '<small>, '.$skin['THEME_TITLE'].'</small>' : ''; ?></h1>
+                    </div>
+					<?php
+					echo $skin['THEME_CONTENT'];
+					?>
+
+					
+					
+
+					
+					
+                </div>
+				<?php /* 
+                <!-- Page nav -->
+                <div class="span4">
+                    <ul  class="tabs" data-tabs="tabs">
+                        <li class="active"><a href="#tabs1">Tabs 1</a></li>
+                        <li><a href="#tabs2">Tabs 2</a></li>
+                    </ul>
+                    <div class="pill-content">
+                        <div class="active" id="tabs1">
+                            <p>
+                                Banksy do proident, brooklyn photo booth delectus sunt artisan sed organic exercitation eiusmod four loko. Quis tattooed iphone esse aliqua. Master cleanse vero fixie mcsweeney's. Ethical portland aute, irony food truck pitchfork lomo eu anim. Aesthetic blog DIY, ethical beard leggings tofu consequat whatever cardigan nostrud. Helvetica you probably haven't heard of them carles, marfa veniam occaecat lomo before they sold out in shoreditch scenester sustainable thundercats. Consectetur tofu craft beer, mollit brunch fap echo park pitchfork mustache dolor.
+                            </p>
+                        </div>
+                        <div id="tabs2">
+                            <p>
+                                Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress, commodo enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud organic, assumenda labore aesthetic magna delectus mollit. Keytar helvetica VHS salvia yr, vero magna velit sapiente labore stumptown. Vegan fanny pack odio cillum wes anderson 8-bit, sustainable jean shorts beard ut DIY ethical culpa terry richardson biodiesel. Art party scenester stumptown, tumblr butcher vero sint qui sapiente accusamus tattooed echo park
+                            </p>
+                        </div>
+                    </div>
+                </div>
+				PAS OUBLIER LE  SPAN4
+				//*/ ?>
+            </div>
+
+			</div>
+			
+			
+			<div class="row">
+			<div class="span4 offset6" style="margin-top:18px;margin-bottom:35px;"><?php echo $skin['POWERED_BY']; ?></div>
+			</div>
+
+        </div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-28962968-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+    </body>
+</html>
