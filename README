@@ -20,6 +20,8 @@ Installation:
 
 Modifier le fichier /includes/init.php
 Indiquer les informations pour votre script
+Chmod en 777 est requis pour application/cache
+Chmod en 777 est requis pour public_html/files/tmp
 
 
 
