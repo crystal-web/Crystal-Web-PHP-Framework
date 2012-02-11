@@ -697,6 +697,7 @@ $cleaner = strtr($url,
 'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy');
 return preg_replace('/([^.a-z0-9]+)/i', '-', $cleaner);
 }
+
 function url($url=null){
 
 if (empty($url) or $url=='index.php')
@@ -758,48 +759,71 @@ $url = stripAccents(html_entity_decode($url));
 return __CW_PATH.'/'.$rewirte_url;
 }
 
-function is_connected(){
-	if ($_SESSION['user']['power_level'] < 2){
-	return false;
-	}
-	else
-	{
-	return true;
-	}
+
+
+/**
+* Savoir si le cient est connecté
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @return bool
+* @deprecated utilisé Auth::isAuth()
+*/
+function is_connected()
+{
+    return Auth::isAuth();
 }
 
+
+
+/**
+* Supprime des dossiers de façon recurcive
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param string $dir
+* @return void
+*/
 function rmdir_recursive($dir)
 {
-	//Liste le contenu du répertoire dans un tableau
-	$dir_content = scandir($dir);
-	//Est-ce bien un répertoire?
-	if($dir_content !== FALSE){
-		//Pour chaque entrée du répertoire
-		foreach ($dir_content as $entry)
-		{
-			//Raccourcis symboliques sous Unix, on passe
-			if(!in_array($entry, array('.','..'))){
-				//On retrouve le chemin par rapport au début
-				$entry = $dir . '/' . $entry;
-				//Cette entrée n'est pas un dossier: on l'efface
-				if(!is_dir($entry)){
-					unlink($entry);
-				}
-				//Cette entrée est un dossier, on recommence sur ce dossier
-				else{
-					rmdir_recursive($entry);
-				}
-			}
-		}
-	}
-	//On a bien effacé toutes les entrées du dossier, on peut à présent l'effacer
-	rmdir($dir);
+    //Liste le contenu du répertoire dans un tableau
+    $dir_content = scandir($dir);
+    //Est-ce bien un répertoire?
+    if($dir_content !== FALSE){
+        //Pour chaque entrée du répertoire
+        foreach ($dir_content as $entry)
+        {
+            //Raccourcis symboliques sous Unix, on passe
+            if(!in_array($entry, array('.','..')))
+            {
+                //On retrouve le chemin par rapport au début
+                $entry = $dir . '/' . $entry;
+                //Cette entrée n'est pas un dossier: on l'efface
+                if(!is_dir($entry)){
+                        unlink($entry);
+                }
+                //Cette entrée est un dossier, on recommence sur ce dossier
+                else
+                {
+                   rmdir_recursive($entry);
+                }
+            }
+        }
+    }
+    //On a bien effacé toutes les entrées du dossier, on peut à présent l'effacer
+    rmdir($dir);
 }
 
 
-/***
-Caractère aléatoire
-***/
+
+/**
+* Caractère aléatoire
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param int $nb
+* @return string
+*/
 function randCar($nb=10)
 {
 $random_name=NULL;
@@ -818,52 +842,73 @@ $list_char = array("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "
 	}
 return $random_name;
 }
-/***
-END Caractère aléatoire
-***/
 
 
+
+/**
+* Retire les accents
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param string $string
+* @return string
+*/
 function stripAccents($string){
-	return strtr($string,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ',
-'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+    return strtr($string,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ',
+    'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
 }
 
-/***
-Encodage HEX
-***/ 
+
+
+/**
+* Encodage HEXADECIMAL
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param string $bin
+* @param string $plus|Caractere devant la valeur HEXADECIMAL
+* @return string
+*/
 function encodeHEX($bin, $plus=NULL) 
 {
-	$hex = '';
+    $hex = '';
     for($i = 0; $i < strlen($bin); $i++)
-		$hex.=$plus.bin2hex($bin[$i]); 
-	return $hex;
+    {
+        $hex.=$plus.bin2hex($bin[$i]); 
+    }
+    
+    return $hex;
 }
-/***
-END Encodage HEX
-***/
 
-/***
-Decodage HEX
-***/
+
+
+/**
+* Dencodage HEXADECIMAL
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param string $bin
+* @param string $moins|Caractere devant la valeur HEXADECIMAL
+* @return string
+*/
 function decodeHEX($hex, $moins="%") 
 {
 $hex=strtolower($hex);
-	if (preg_match("/".$moins."/i", $hex))
-	{
-	// On supprime les %
-	$trans = array($moins => "");
-	$hex=strtr($hex, $trans);
-	}
+    if (preg_match("/".$moins."/i", $hex))
+    {
+    // On supprime les %
+    $trans = array($moins => "");
+    $hex=strtr($hex, $trans);
+    }
 $bin="";
-	for ($i=0;$i<strlen($hex);$i=$i+2) 
-	{ 
-	$bin .= chr(hexdec(substr ($hex, $i,2))); 
-	} 
-	return $bin; 
+
+    for ($i=0;$i<strlen($hex);$i=$i+2) 
+    { 
+    $bin .= chr(hexdec(substr ($hex, $i,2))); 
+    } 
+return $bin; 
 }
-/***
-END Decodage HEX
-***/
+
 
 
 /**
@@ -878,7 +923,6 @@ END Decodage HEX
 * @return String containing either just a URL or a complete image tag
 * @source http://gravatar.com/site/implement/images/php/
 */
-
 function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array() ) {
 $url = 'http://www.gravatar.com/avatar/';
 $url .= md5( strtolower( trim( $email ) ) );
@@ -893,324 +937,29 @@ if ( $img ) {
 return $url;
 }
 
+/**
+* Acces aux librairies
+*
+* @link http://crystal-web.org
+* @author Christophe BUFFET
+* @param string $lib|country:flag:htmlentitie:fr_regions:fr_departements
+* @return array
+*/
+function library($lib)
+{
+$libraryList = array();
+$libraryList['country'] =  = array('Afghanistan', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua And Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia', 'Bosnia And Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Columbia', 'Comoros', 'Congo', 'Cook Islands', 'Costa Rica', 'Cote D\'Ivorie (Ivory Coast)', 'Croatia (Hrvatska)', 'Cuba', 'Cyprus', 'Czech Republic', 'Democratic Republic Of Congo (Zaire)', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'France, Metropolitan', 'French Guinea', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard And McDonald Islands', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macau', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar (Burma)', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'North Korea', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Reunion', 'Romania', 'Russia', 'Rwanda', 'Saint Helena', 'Saint Kitts And Nevis', 'Saint Lucia', 'Saint Pierre And Miquelon', 'Saint Vincent And The Grenadines', 'San Marino', 'Sao Tome And Principe', 'Saudi Arabia', 'Senegal', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovak Republic', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia And South Sandwich Islands', 'South Korea', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Svalbard And Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tokelau', 'Tonga', 'Trinidad And Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks And Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City (Holy See)', 'Venezuela', 'Vietnam', 'Virgin Islands (British)', 'Virgin Islands (US)', 'Wallis And Futuna Islands', 'Western Sahara', 'Western Samoa', 'Yemen', 'Yugoslavia', 'Zambia', 'Zimbabwe'
+);
+$libraryList['flag'] = array('af'=>'Afghanistan','za'=>'Afrique du Sud','al'=>'Albanie','dz'=>'Algérie','de'=>'Allemagne','as'=>'American Samoa','ad'=>'Andorre','ao'=>'Angola','ai'=>'Anguilla','aq'=>'Antarctique','ag'=>'Antigua et Barbuda','an'=>'Antilles Neerlandaises','sa'=>'Arabie Saoudite','ar'=>'Argentine','am'=>'Arménie','aw'=>'Aruba','ac'=>'Ascension (île)','au'=>'Australie','at'=>'Autriche','az'=>'Azerbaidjan','bs'=>'Bahamas','bh'=>'Bahrein','bd'=>'Bangladesh','bb'=>'Barbade','be'=>'Belgique','bm'=>'Bermudes','bt'=>'Bhoutan','by'=>'Biélorussie','bo'=>'Bolivie','ba'=>'Bosnie Herzégovine','bw'=>'Botswana','bv'=>'Bouvet (île)','bn'=>'Brunei','br'=>'Brésil','bg'=>'Bulgarie','bf'=>'Burkina Faso','bi'=>'Burundi','bz'=>'Bélize','bj'=>'Bénin','kh'=>'Cambodge','cm'=>'Cameroun','ca'=>'Canada','cv'=>'Cap Vert','ky'=>'Caïmanes (îles)','cl'=>'Chili','cn'=>'Chine','cx'=>'Christmas (île)','cy'=>'Chypre','cc'=>'Cocos (Keeling) îles','co'=>'Colombie','km'=>'Comores','ck'=>'Cook (îles)','kp'=>'Corée du nord','kr'=>'Corée du sud','cr'=>'Costa Rica','hr'=>'Croatie','cu'=>'Cuba','ci'=>'Côte d\'Ivoire','dk'=>'Danemark','dj'=>'Djibouti','dm'=>'Dominique','eg'=>'Egypte','ae'=>'Emirats Arabes Unis','ec'=>'Equateur','er'=>'Erythrée','es'=>'Espagne','ee'=>'Estonie','us'=>'Etats-Unis','et'=>'Ethiopie','su'=>'Ex U.R.S.S.','fk'=>'Falkland (Malouines) îles','fo'=>'Faroe (îles)','fj'=>'Fidji','fi'=>'Finlande','fr'=>'France','ga'=>'Gabon','gm'=>'Gambie','gh'=>'Ghana','gi'=>'Gibraltar','gb'=>'Grande Bretagne','gd'=>'Grenade','gl'=>'Groenland','gr'=>'Grèce','gp'=>'Guadeloupe','gu'=>'Guam','gt'=>'Guatemala','gg'=>'Guernsey','gn'=>'Guinée','gq'=>'Guinée Equatoriale','gw'=>'Guinée-Bissau','gy'=>'Guyana','gf'=>'Guyane Française','ge'=>'Géorgie','gs'=>'Géorgie du sud','ht'=>'Haiti','hm'=>'Heard et McDonald (îles)','hn'=>'Honduras','hk'=>'Hong Kong','hu'=>'Hongrie','im'=>'Ile de Man','in'=>'Inde','id'=>'Indonésie','ir'=>'Iran','iq'=>'Iraq','ie'=>'Irlande','is'=>'Islande','il'=>'Israël','it'=>'Italie','jm'=>'Jamaïque','jp'=>'Japon','je'=>'Jersey','jo'=>'Jordanie','kz'=>'Kazakhstan','ke'=>'Kenya','kg'=>'Kirghizistan','ki'=>'Kiribati','kw'=>'Koweït','la'=>'Laos','ls'=>'Lesotho','lv'=>'Lettonie','lb'=>'Liban','lr'=>'Liberia','ly'=>'Libye','li'=>'Liechtenstein','lt'=>'Lituanie','lu'=>'Luxembourg','mo'=>'Macao','mk'=>'Macédoine','mg'=>'Madagascar','my'=>'Malaisie','mw'=>'Malawi','mv'=>'Maldives','ml'=>'Mali','mt'=>'Malte','mp'=>'Mariannes du nord (îles)','ma'=>'Maroc','mh'=>'Marshall (îles)','mq'=>'Martinique','mu'=>'Maurice (île)','mr'=>'Mauritanie','yt'=>'Mayotte','mx'=>'Mexique','fm'=>'Micronésie','md'=>'Moldavie','mc'=>'Monaco','mn'=>'Mongolie','ms'=>'Montserrat','mz'=>'Mozambique','mm'=>'Myanmar','na'=>'Namibie','nr'=>'Nauru','ni'=>'Nicaragua','ne'=>'Niger','ng'=>'Nigéria','nu'=>'Niue','nf'=>'Norfolk (île)','no'=>'Norvège','nc'=>'Nouvelle Calédonie','nz'=>'Nouvelle Zélande','np'=>'Népal','om'=>'Oman','ug'=>'Ouganda','uz'=>'Ouzbékistan','pk'=>'Pakistan','pw'=>'Palau','pa'=>'Panama','pg'=>'Papouasie Nvelle Guinée','py'=>'Paraguay','nl'=>'Pays Bas','ph'=>'Philippines','pn'=>'Pitcairn (île)','pl'=>'Pologne','pf'=>'Polynésie Française','pr'=>'Porto Rico','pt'=>'Portugal','pe'=>'Pérou','qa'=>'Qatar','ro'=>'Roumanie','uk'=>'Royaume Uni','ru'=>'Russie','rw'=>'Rwanda','cf'=>'Rép Centrafricaine','do'=>'Rép Dominicaine','zr'=>'Rép. Dém. du Congo (ex Zaïre)','cd'=>'Rép. du Congo','re'=>'Réunion (île de la)','eh'=>'Sahara Occidental','kn'=>'Saint Kitts et Nevis','sm'=>'Saint-Marin','lc'=>'Sainte Lucie','sb'=>'Salomon (îles)','sv'=>'Salvador','st'=>'Sao Tome et Principe','sw'=>'Serbie','cs'=>'Serbie Montenegro','sc'=>'Seychelles','sl'=>'Sierra Leone','sg'=>'Singapour','sk'=>'Slovaquie','si'=>'Slovénie','so'=>'Somalie','sd'=>'Soudan','lk'=>'Sri Lanka','vc'=>'St Vincent et les Grenadines','sh'=>'St. Hélène','pm'=>'St. Pierre et Miquelon','ch'=>'Suisse','sr'=>'Suriname','se'=>'Suède','sj'=>'Svalbard/Jan Mayen (îles)','sz'=>'Swaziland','sy'=>'Syrie','sn'=>'Sénégal','tj'=>'Tadjikistan','tw'=>'Taiwan','tz'=>'Tanzanie','td'=>'Tchad','cz'=>'Tchéquie','io'=>'Ter. Brit. Océan Indien','tf'=>'Territoires Fr du sud','th'=>'Thailande','tp'=>'Timor Oriental','tg'=>'Togo','tk'=>'Tokelau','to'=>'Tonga','tt'=>'Trinité et Tobago','tn'=>'Tunisie','tm'=>'Turkménistan','tc'=>'Turks et Caïques (îles)','tr'=>'Turquie','tv'=>'Tuvalu','um'=>'US Minor Outlying (îles)','ua'=>'Ukraine','uy'=>'Uruguay','vu'=>'Vanuatu','va'=>'Vatican','ve'=>'Venezuela','vg'=>'Vierges Brit. (îles)','vi'=>'Vierges USA (îles)','vn'=>'Viêt Nam','wf'=>'Wallis et Futuna (îles)','ws'=>'Western Samoa','ye'=>'Yemen','yu'=>'Yugoslavie','zm'=>'Zambie','zw'=>'Zimbabwe');
+$libraryList['htmlentitie'] = array('À'=>'&Agrave;','à'=>'&agrave;','Á'=>'&Aacute;','á'=>'&aacute;','Â'=>'&Acirc;','â'=>'&acirc;','Ã'=>'&Atilde;','ã'=>'&atilde;','Ä'=>'&Auml;','ä'=>'&auml;','Å'=>'&Aring;','å'=>'&aring;','Æ'=>'&AElig;','æ'=>'&aelig;','Ç'=>'&Ccedil;','ç'=>'&ccedil;','Ð'=>'&ETH;','ð'=>'&eth;','È'=>'&Egrave;','è'=>'&egrave;','É'=>'&Eacute;','é'=>'&eacute;','Ê'=>'&Ecirc;','ê'=>'&ecirc;','Ë'=>'&Euml;','ë'=>'&euml;','Ì'=>'&Igrave;','ì'=>'&igrave;','Í'=>'&Iacute;','í'=>'&iacute;','Î'=>'&Icirc;','î'=>'&icirc;','Ï'=>'&Iuml;','ï'=>'&iuml;','Ñ'=>'&Ntilde;','ñ'=>'&ntilde;','Ò'=>'&Ograve;','ò'=>'&ograve;','Ó'=>'&Oacute;','ó'=>'&oacute;','Ô'=>'&Ocirc;','ô'=>'&ocirc;','Õ'=>'&Otilde;','õ'=>'&otilde;','Ö'=>'&Ouml;','ö'=>'&ouml;','Ø'=>'&Oslash;','ø'=>'&oslash;','Œ'=>'&OElig;','œ'=>'&oelig;','ß'=>'&szlig;','š'=>'&#353;', 'Š'=>'&#352;', 'Þ'=>'&THORN;','þ'=>'&thorn;','Ù'=>'&Ugrave;','ù'=>'&ugrave;','Ú'=>'&Uacute;','ú'=>'&uacute;','Û'=>'&Ucirc;','û'=>'&ucirc;','Ü'=>'&Uuml;','ü'=>'&uuml;','Ý'=>'&Yacute;','ý'=>'&yacute;','Ÿ'=>'&Yuml;','ÿ'=>'&yuml;','ž' => '&#382;', 'Ž' => '&#381;');
+$libraryList['fr_regions'] = array("Alsace","Aquitaine","Auvergne","Bourgogne","Bretagne","Centre","Champagne-Ardenne","Corse","Franche-Comté","Île-de-France","Languedoc-Roussillon","Limousin","Lorraine","Midi-Pyrénées","Nord-Pas-de-Calais","Basse-Normandie","Haute-Normandie","Pays de la Loire","Picardie","Poitou-Charentes","Provence-Alpes-Côte d'Azur","Rhône-Alpes","Guyane","Guadeloupe","Martinique","Réunion");
+$libraryList['fr_departements'] = array("01"=>"Ain", "02"=>"Aisne", "03"=>"Allier", "04"=>"Alpes-de-Haute-Provence", "05"=>"Hautes-Alpes", "06"=>"Alpes-Maritimes", "07"=>"Ardèche", "08"=>"Ardennes", "09"=>"Ariège", "10"=>"Aube", "11"=>"Aude", "12"=>"Aveyron", "13"=>"Bouches-du-Rhône", "14"=>"Calvados", "15"=>"Cantal", "16"=>"Charente", "17"=>"Charente-Maritime", "18"=>"Cher", "19"=>"Corrèze", "2A" => "Corse-du-Sud", "2B" => "Haute-Corse", "21"=>"Côte-d'Or", "22"=>"Côtes-d'Armor", "23"=>"Creuse", "24"=>"Dordogne", "25"=>"Doubs", "26"=>"Drôme", "27"=>"Eure", "28"=>"Eure-et-Loir", "29"=>"Finistère", "30"=>"Gard", "31"=>"Haute-Garonne", "32"=>"Gers", "33"=>"Gironde", "34"=>"Hérault", "35"=>"Ille-et-Vilaine", "36"=>"Indre", "37"=>"Indre-et-Loire", "38"=>"Isère", "39"=>"Jura", "40"=>"Landes", "41"=>"Loir-et-Cher", "42"=>"Loire", "43"=>"Haute-Loire", "44"=>"Loire-Atlantique", "45"=>"Loiret", "46"=>"Lot", "47"=>"Lot-et-Garonne", "48"=>"Lozère", "49"=>"Maine-et-Loire", "50"=>"Manche", "51"=>"Marne", "52"=>"Haute-Marne", "53"=>"Mayenne", "54"=>"Meurthe-et-Moselle", "55"=>"Meuse", "56"=>"Morbihan", "57"=>"Moselle", "58"=>"Nièvre", "59"=>"Nord", "60"=>"Oise", "61"=>"Orne", "62"=>"Pas-de-Calais", "63"=>"Puy-de-Dôme", "64"=>"Pyrénées-Atlantiques", "65"=>"Hautes-Pyrénées", "66"=>"Pyrénées-Orientales", "67"=>"Bas-Rhin", "68"=>"Haut-Rhin", "69"=>"Rhône", "70"=>"Haute-Saône", "71"=>"Saône-et-Loire", "72"=>"Sarthe", "73"=>"Savoie", "74"=>"Haute-Savoie", "75"=>"Paris", "76"=>"Seine-Maritime", "77"=>"Seine-et-Marne", "78"=>"Yvelines", "79"=>"Deux-Sèvres", "80"=>"Somme", "81"=>"Tarn", "82"=>"Tarn-et-Garonne", "83"=>"Var", "84"=>"Vaucluse", "85"=>"Vendée", "86"=>"Vienne", "87"=>"Haute-Vienne", "88"=>"Vosges", "89"=>"Yonne", "90"=>"Territoire de Belfort", "91"=>"Essonne", "92"=>"Hauts-de-Seine", "93"=>"Seine-Saint-Denis", "94"=>"Val-de-Marne", "95"=>"Val-d'Oise");
+
+return isSet($libraryList[$lib]) ? $libraryList[$lib] : false;
+}
+
+
 /* Librairie pays */
-$cw_flag=array('af'=>'Afghanistan',
-'za'=>'Afrique du Sud',
-'al'=>'Albanie',
-'dz'=>'Algérie',
-'de'=>'Allemagne',
-'as'=>'American Samoa',
-'ad'=>'Andorre',
-'ao'=>'Angola',
-'ai'=>'Anguilla',
-'aq'=>'Antarctique',
-'ag'=>'Antigua et Barbuda',
-'an'=>'Antilles Neerlandaises',
-'sa'=>'Arabie Saoudite',
-'ar'=>'Argentine',
-'am'=>'Arménie',
-'aw'=>'Aruba',
-'ac'=>'Ascension (île)',
-'au'=>'Australie',
-'at'=>'Autriche',
-'az'=>'Azerbaidjan',
-'bs'=>'Bahamas',
-'bh'=>'Bahrein',
-'bd'=>'Bangladesh',
-'bb'=>'Barbade',
-'be'=>'Belgique',
-'bm'=>'Bermudes',
-'bt'=>'Bhoutan',
-'by'=>'Biélorussie',
-'bo'=>'Bolivie',
-'ba'=>'Bosnie Herzégovine',
-'bw'=>'Botswana',
-'bv'=>'Bouvet (île)',
-'bn'=>'Brunei',
-'br'=>'Brésil',
-'bg'=>'Bulgarie',
-'bf'=>'Burkina Faso',
-'bi'=>'Burundi',
-'bz'=>'Bélize',
-'bj'=>'Bénin',
-'kh'=>'Cambodge',
-'cm'=>'Cameroun',
-'ca'=>'Canada',
-'cv'=>'Cap Vert',
-'ky'=>'Caïmanes (îles)',
-'cl'=>'Chili',
-'cn'=>'Chine',
-'cx'=>'Christmas (île)',
-'cy'=>'Chypre',
-'cc'=>'Cocos (Keeling) îles',
-'co'=>'Colombie',
-'km'=>'Comores',
-'ck'=>'Cook (îles)',
-'kp'=>'Corée du nord',
-'kr'=>'Corée du sud',
-'cr'=>'Costa Rica',
-'hr'=>'Croatie',
-'cu'=>'Cuba',
-'ci'=>'Côte d\'Ivoire',
-'dk'=>'Danemark',
-'dj'=>'Djibouti',
-'dm'=>'Dominique',
-'eg'=>'Egypte',
-'ae'=>'Emirats Arabes Unis',
-'ec'=>'Equateur',
-'er'=>'Erythrée',
-'es'=>'Espagne',
-'ee'=>'Estonie',
-'us'=>'Etats-Unis',
-'et'=>'Ethiopie',
-'su'=>'Ex U.R.S.S.',
-'fk'=>'Falkland (Malouines) îles',
-'fo'=>'Faroe (îles)',
-'fj'=>'Fidji',
-'fi'=>'Finlande',
-'fr'=>'France',
-'ga'=>'Gabon',
-'gm'=>'Gambie',
-'gh'=>'Ghana',
-'gi'=>'Gibraltar',
-'gb'=>'Grande Bretagne',
-'gd'=>'Grenade',
-'gl'=>'Groenland',
-'gr'=>'Grèce',
-'gp'=>'Guadeloupe',
-'gu'=>'Guam',
-'gt'=>'Guatemala',
-'gg'=>'Guernsey',
-'gn'=>'Guinée',
-'gq'=>'Guinée Equatoriale',
-'gw'=>'Guinée-Bissau',
-'gy'=>'Guyana',
-'gf'=>'Guyane Française',
-'ge'=>'Géorgie',
-'gs'=>'Géorgie du sud',
-'ht'=>'Haiti',
-'hm'=>'Heard et McDonald (îles)',
-'hn'=>'Honduras',
-'hk'=>'Hong Kong',
-'hu'=>'Hongrie',
-'im'=>'Ile de Man',
-'in'=>'Inde',
-'id'=>'Indonésie',
-'ir'=>'Iran',
-'iq'=>'Iraq',
-'ie'=>'Irlande',
-'is'=>'Islande',
-'il'=>'Israël',
-'it'=>'Italie',
-'jm'=>'Jamaïque',
-'jp'=>'Japon',
-'je'=>'Jersey',
-'jo'=>'Jordanie',
-'kz'=>'Kazakhstan',
-'ke'=>'Kenya',
-'kg'=>'Kirghizistan',
-'ki'=>'Kiribati',
-'kw'=>'Koweït',
-'la'=>'Laos',
-'ls'=>'Lesotho',
-'lv'=>'Lettonie',
-'lb'=>'Liban',
-'lr'=>'Liberia',
-'ly'=>'Libye',
-'li'=>'Liechtenstein',
-'lt'=>'Lituanie',
-'lu'=>'Luxembourg',
-'mo'=>'Macao',
-'mk'=>'Macédoine',
-'mg'=>'Madagascar',
-'my'=>'Malaisie',
-'mw'=>'Malawi',
-'mv'=>'Maldives',
-'ml'=>'Mali',
-'mt'=>'Malte',
-'mp'=>'Mariannes du nord (îles)',
-'ma'=>'Maroc',
-'mh'=>'Marshall (îles)',
-'mq'=>'Martinique',
-'mu'=>'Maurice (île)',
-'mr'=>'Mauritanie',
-'yt'=>'Mayotte',
-'mx'=>'Mexique',
-'fm'=>'Micronésie',
-'md'=>'Moldavie',
-'mc'=>'Monaco',
-'mn'=>'Mongolie',
-'ms'=>'Montserrat',
-'mz'=>'Mozambique',
-'mm'=>'Myanmar',
-'na'=>'Namibie',
-'nr'=>'Nauru',
-'ni'=>'Nicaragua',
-'ne'=>'Niger',
-'ng'=>'Nigéria',
-'nu'=>'Niue',
-'nf'=>'Norfolk (île)',
-'no'=>'Norvège',
-'nc'=>'Nouvelle Calédonie',
-'nz'=>'Nouvelle Zélande',
-'np'=>'Népal',
-'om'=>'Oman',
-'ug'=>'Ouganda',
-'uz'=>'Ouzbékistan',
-'pk'=>'Pakistan',
-'pw'=>'Palau',
-'pa'=>'Panama',
-'pg'=>'Papouasie Nvelle Guinée',
-'py'=>'Paraguay',
-'nl'=>'Pays Bas',
-'ph'=>'Philippines',
-'pn'=>'Pitcairn (île)',
-'pl'=>'Pologne',
-'pf'=>'Polynésie Française',
-'pr'=>'Porto Rico',
-'pt'=>'Portugal',
-'pe'=>'Pérou',
-'qa'=>'Qatar',
-'ro'=>'Roumanie',
-'uk'=>'Royaume Uni',
-'ru'=>'Russie',
-'rw'=>'Rwanda',
-'cf'=>'Rép Centrafricaine',
-'do'=>'Rép Dominicaine',
-'zr'=>'Rép. Dém. du Congo (ex Zaïre)',
-'cd'=>'Rép. du Congo',
-'re'=>'Réunion (île de la)',
-'eh'=>'Sahara Occidental',
-'kn'=>'Saint Kitts et Nevis',
-'sm'=>'Saint-Marin',
-'lc'=>'Sainte Lucie',
-'sb'=>'Salomon (îles)',
-'sv'=>'Salvador',
-'st'=>'Sao Tome et Principe',
-'sw'=>'Serbie',
-'cs'=>'Serbie Montenegro',
-'sc'=>'Seychelles',
-'sl'=>'Sierra Leone',
-'sg'=>'Singapour',
-'sk'=>'Slovaquie',
-'si'=>'Slovénie',
-'so'=>'Somalie',
-'sd'=>'Soudan',
-'lk'=>'Sri Lanka',
-'vc'=>'St Vincent et les Grenadines',
-'sh'=>'St. Hélène',
-'pm'=>'St. Pierre et Miquelon',
-'ch'=>'Suisse',
-'sr'=>'Suriname',
-'se'=>'Suède',
-'sj'=>'Svalbard/Jan Mayen (îles)',
-'sz'=>'Swaziland',
-'sy'=>'Syrie',
-'sn'=>'Sénégal',
-'tj'=>'Tadjikistan',
-'tw'=>'Taiwan',
-'tz'=>'Tanzanie',
-'td'=>'Tchad',
-'cz'=>'Tchéquie',
-'io'=>'Ter. Brit. Océan Indien',
-'tf'=>'Territoires Fr du sud',
-'th'=>'Thailande',
-'tp'=>'Timor Oriental',
-'tg'=>'Togo',
-'tk'=>'Tokelau',
-'to'=>'Tonga',
-'tt'=>'Trinité et Tobago',
-'tn'=>'Tunisie',
-'tm'=>'Turkménistan',
-'tc'=>'Turks et Caïques (îles)',
-'tr'=>'Turquie',
-'tv'=>'Tuvalu',
-'um'=>'US Minor Outlying (îles)',
-'ua'=>'Ukraine',
-'uy'=>'Uruguay',
-'vu'=>'Vanuatu',
-'va'=>'Vatican',
-'ve'=>'Venezuela',
-'vg'=>'Vierges Brit. (îles)',
-'vi'=>'Vierges USA (îles)',
-'vn'=>'Viêt Nam',
-'wf'=>'Wallis et Futuna (îles)',
-'ws'=>'Western Samoa',
-'ye'=>'Yemen',
-'yu'=>'Yugoslavie',
-'zm'=>'Zambie',
-'zw'=>'Zimbabwe'
-);
-
-
-$cw_htmlent=array('À'=>'&Agrave;',
-'à'=>'&agrave;',
-'Á'=>'&Aacute;',
-'á'=>'&aacute;',
-'Â'=>'&Acirc;',
-'â'=>'&acirc;',
-'Ã'=>'&Atilde;',
-'ã'=>'&atilde;',
-'Ä'=>'&Auml;',
-'ä'=>'&auml;',
-'Å'=>'&Aring;',
-'å'=>'&aring;',
-'Æ'=>'&AElig;',
-'æ'=>'&aelig;',
-'Ç'=>'&Ccedil;',
-'ç'=>'&ccedil;',
-'Ð'=>'&ETH;',
-'ð'=>'&eth;',
-'È'=>'&Egrave;',
-'è'=>'&egrave;',
-'É'=>'&Eacute;',
-'é'=>'&eacute;',
-'Ê'=>'&Ecirc;',
-'ê'=>'&ecirc;',
-'Ë'=>'&Euml;',
-'ë'=>'&euml;',
-'Ì'=>'&Igrave;',
-'ì'=>'&igrave;',
-'Í'=>'&Iacute;',
-'í'=>'&iacute;',
-'Î'=>'&Icirc;',
-'î'=>'&icirc;',
-'Ï'=>'&Iuml;',
-'ï'=>'&iuml;',
-'Ñ'=>'&Ntilde;',
-'ñ'=>'&ntilde;',
-'Ò'=>'&Ograve;',
-'ò'=>'&ograve;',
-'Ó'=>'&Oacute;',
-'ó'=>'&oacute;',
-'Ô'=>'&Ocirc;',
-'ô'=>'&ocirc;',
-'Õ'=>'&Otilde;',
-'õ'=>'&otilde;',
-'Ö'=>'&Ouml;',
-'ö'=>'&ouml;',
-'Ø'=>'&Oslash;',
-'ø'=>'&oslash;',
-'Œ'=>'&OElig;',
-'œ'=>'&oelig;',
-'ß'=>'&szlig;',
-'š'=>'&#353;', 
-'Š'=>'&#352;', 
-'Þ'=>'&THORN;',
-'þ'=>'&thorn;',
-'Ù'=>'&Ugrave;',
-'ù'=>'&ugrave;',
-'Ú'=>'&Uacute;',
-'ú'=>'&uacute;',
-'Û'=>'&Ucirc;',
-'û'=>'&ucirc;',
-'Ü'=>'&Uuml;',
-'ü'=>'&uuml;',
-'Ý'=>'&Yacute;',
-'ý'=>'&yacute;',
-'Ÿ'=>'&Yuml;',
-'ÿ'=>'&yuml;',
-'ž' => '&#382;', 
-'Ž' => '&#381;'
-);
+$cw_flag = array('af'=>'Afghanistan','za'=>'Afrique du Sud','al'=>'Albanie','dz'=>'Algérie','de'=>'Allemagne','as'=>'American Samoa','ad'=>'Andorre','ao'=>'Angola','ai'=>'Anguilla','aq'=>'Antarctique','ag'=>'Antigua et Barbuda','an'=>'Antilles Neerlandaises','sa'=>'Arabie Saoudite','ar'=>'Argentine','am'=>'Arménie','aw'=>'Aruba','ac'=>'Ascension (île)','au'=>'Australie','at'=>'Autriche','az'=>'Azerbaidjan','bs'=>'Bahamas','bh'=>'Bahrein','bd'=>'Bangladesh','bb'=>'Barbade','be'=>'Belgique','bm'=>'Bermudes','bt'=>'Bhoutan','by'=>'Biélorussie','bo'=>'Bolivie','ba'=>'Bosnie Herzégovine','bw'=>'Botswana','bv'=>'Bouvet (île)','bn'=>'Brunei','br'=>'Brésil','bg'=>'Bulgarie','bf'=>'Burkina Faso','bi'=>'Burundi','bz'=>'Bélize','bj'=>'Bénin','kh'=>'Cambodge','cm'=>'Cameroun','ca'=>'Canada','cv'=>'Cap Vert','ky'=>'Caïmanes (îles)','cl'=>'Chili','cn'=>'Chine','cx'=>'Christmas (île)','cy'=>'Chypre','cc'=>'Cocos (Keeling) îles','co'=>'Colombie','km'=>'Comores','ck'=>'Cook (îles)','kp'=>'Corée du nord','kr'=>'Corée du sud','cr'=>'Costa Rica','hr'=>'Croatie','cu'=>'Cuba','ci'=>'Côte d\'Ivoire','dk'=>'Danemark','dj'=>'Djibouti','dm'=>'Dominique','eg'=>'Egypte','ae'=>'Emirats Arabes Unis','ec'=>'Equateur','er'=>'Erythrée','es'=>'Espagne','ee'=>'Estonie','us'=>'Etats-Unis','et'=>'Ethiopie','su'=>'Ex U.R.S.S.','fk'=>'Falkland (Malouines) îles','fo'=>'Faroe (îles)','fj'=>'Fidji','fi'=>'Finlande','fr'=>'France','ga'=>'Gabon','gm'=>'Gambie','gh'=>'Ghana','gi'=>'Gibraltar','gb'=>'Grande Bretagne','gd'=>'Grenade','gl'=>'Groenland','gr'=>'Grèce','gp'=>'Guadeloupe','gu'=>'Guam','gt'=>'Guatemala','gg'=>'Guernsey','gn'=>'Guinée','gq'=>'Guinée Equatoriale','gw'=>'Guinée-Bissau','gy'=>'Guyana','gf'=>'Guyane Française','ge'=>'Géorgie','gs'=>'Géorgie du sud','ht'=>'Haiti','hm'=>'Heard et McDonald (îles)','hn'=>'Honduras','hk'=>'Hong Kong','hu'=>'Hongrie','im'=>'Ile de Man','in'=>'Inde','id'=>'Indonésie','ir'=>'Iran','iq'=>'Iraq','ie'=>'Irlande','is'=>'Islande','il'=>'Israël','it'=>'Italie','jm'=>'Jamaïque','jp'=>'Japon','je'=>'Jersey','jo'=>'Jordanie','kz'=>'Kazakhstan','ke'=>'Kenya','kg'=>'Kirghizistan','ki'=>'Kiribati','kw'=>'Koweït','la'=>'Laos','ls'=>'Lesotho','lv'=>'Lettonie','lb'=>'Liban','lr'=>'Liberia','ly'=>'Libye','li'=>'Liechtenstein','lt'=>'Lituanie','lu'=>'Luxembourg','mo'=>'Macao','mk'=>'Macédoine','mg'=>'Madagascar','my'=>'Malaisie','mw'=>'Malawi','mv'=>'Maldives','ml'=>'Mali','mt'=>'Malte','mp'=>'Mariannes du nord (îles)','ma'=>'Maroc','mh'=>'Marshall (îles)','mq'=>'Martinique','mu'=>'Maurice (île)','mr'=>'Mauritanie','yt'=>'Mayotte','mx'=>'Mexique','fm'=>'Micronésie','md'=>'Moldavie','mc'=>'Monaco','mn'=>'Mongolie','ms'=>'Montserrat','mz'=>'Mozambique','mm'=>'Myanmar','na'=>'Namibie','nr'=>'Nauru','ni'=>'Nicaragua','ne'=>'Niger','ng'=>'Nigéria','nu'=>'Niue','nf'=>'Norfolk (île)','no'=>'Norvège','nc'=>'Nouvelle Calédonie','nz'=>'Nouvelle Zélande','np'=>'Népal','om'=>'Oman','ug'=>'Ouganda','uz'=>'Ouzbékistan','pk'=>'Pakistan','pw'=>'Palau','pa'=>'Panama','pg'=>'Papouasie Nvelle Guinée','py'=>'Paraguay','nl'=>'Pays Bas','ph'=>'Philippines','pn'=>'Pitcairn (île)','pl'=>'Pologne','pf'=>'Polynésie Française','pr'=>'Porto Rico','pt'=>'Portugal','pe'=>'Pérou','qa'=>'Qatar','ro'=>'Roumanie','uk'=>'Royaume Uni','ru'=>'Russie','rw'=>'Rwanda','cf'=>'Rép Centrafricaine','do'=>'Rép Dominicaine','zr'=>'Rép. Dém. du Congo (ex Zaïre)','cd'=>'Rép. du Congo','re'=>'Réunion (île de la)','eh'=>'Sahara Occidental','kn'=>'Saint Kitts et Nevis','sm'=>'Saint-Marin','lc'=>'Sainte Lucie','sb'=>'Salomon (îles)','sv'=>'Salvador','st'=>'Sao Tome et Principe','sw'=>'Serbie','cs'=>'Serbie Montenegro','sc'=>'Seychelles','sl'=>'Sierra Leone','sg'=>'Singapour','sk'=>'Slovaquie','si'=>'Slovénie','so'=>'Somalie','sd'=>'Soudan','lk'=>'Sri Lanka','vc'=>'St Vincent et les Grenadines','sh'=>'St. Hélène','pm'=>'St. Pierre et Miquelon','ch'=>'Suisse','sr'=>'Suriname','se'=>'Suède','sj'=>'Svalbard/Jan Mayen (îles)','sz'=>'Swaziland','sy'=>'Syrie','sn'=>'Sénégal','tj'=>'Tadjikistan','tw'=>'Taiwan','tz'=>'Tanzanie','td'=>'Tchad','cz'=>'Tchéquie','io'=>'Ter. Brit. Océan Indien','tf'=>'Territoires Fr du sud','th'=>'Thailande','tp'=>'Timor Oriental','tg'=>'Togo','tk'=>'Tokelau','to'=>'Tonga','tt'=>'Trinité et Tobago','tn'=>'Tunisie','tm'=>'Turkménistan','tc'=>'Turks et Caïques (îles)','tr'=>'Turquie','tv'=>'Tuvalu','um'=>'US Minor Outlying (îles)','ua'=>'Ukraine','uy'=>'Uruguay','vu'=>'Vanuatu','va'=>'Vatican','ve'=>'Venezuela','vg'=>'Vierges Brit. (îles)','vi'=>'Vierges USA (îles)','vn'=>'Viêt Nam','wf'=>'Wallis et Futuna (îles)','ws'=>'Western Samoa','ye'=>'Yemen','yu'=>'Yugoslavie','zm'=>'Zambie','zw'=>'Zimbabwe');
+$cw_htmlent=array('À'=>'&Agrave;','à'=>'&agrave;','Á'=>'&Aacute;','á'=>'&aacute;','Â'=>'&Acirc;','â'=>'&acirc;','Ã'=>'&Atilde;','ã'=>'&atilde;','Ä'=>'&Auml;','ä'=>'&auml;','Å'=>'&Aring;','å'=>'&aring;','Æ'=>'&AElig;','æ'=>'&aelig;','Ç'=>'&Ccedil;','ç'=>'&ccedil;','Ð'=>'&ETH;','ð'=>'&eth;','È'=>'&Egrave;','è'=>'&egrave;','É'=>'&Eacute;','é'=>'&eacute;','Ê'=>'&Ecirc;','ê'=>'&ecirc;','Ë'=>'&Euml;','ë'=>'&euml;','Ì'=>'&Igrave;','ì'=>'&igrave;','Í'=>'&Iacute;','í'=>'&iacute;','Î'=>'&Icirc;','î'=>'&icirc;','Ï'=>'&Iuml;','ï'=>'&iuml;','Ñ'=>'&Ntilde;','ñ'=>'&ntilde;','Ò'=>'&Ograve;','ò'=>'&ograve;','Ó'=>'&Oacute;','ó'=>'&oacute;','Ô'=>'&Ocirc;','ô'=>'&ocirc;','Õ'=>'&Otilde;','õ'=>'&otilde;','Ö'=>'&Ouml;','ö'=>'&ouml;','Ø'=>'&Oslash;','ø'=>'&oslash;','Œ'=>'&OElig;','œ'=>'&oelig;','ß'=>'&szlig;','š'=>'&#353;', 'Š'=>'&#352;', 'Þ'=>'&THORN;','þ'=>'&thorn;','Ù'=>'&Ugrave;','ù'=>'&ugrave;','Ú'=>'&Uacute;','ú'=>'&uacute;','Û'=>'&Ucirc;','û'=>'&ucirc;','Ü'=>'&Uuml;','ü'=>'&uuml;','Ý'=>'&Yacute;','ý'=>'&yacute;','Ÿ'=>'&Yuml;','ÿ'=>'&yuml;','ž' => '&#382;', 'Ž' => '&#381;');
 ?>
