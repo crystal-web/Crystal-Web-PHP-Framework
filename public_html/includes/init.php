@@ -22,9 +22,9 @@ define ('__CW_PATH', 'http://www.imagineyourcraft.com/~minecraft'); // Site url/
 define ('DB_host', 'localhost'); // le chemin vers le serveur
 define ('DB_type', 'mysql'); // Choix entre mysql, pgsql, OCI et sqlite
 define ('DB_port', '3306'); // Port si nécessaire mysql 3306/3305 pgsql 4444
-define ('DB_name', 'manager'); // le nom de votre base de données
-define ('DB_user', 'devphp'); // nom d'utilisateur pour se connecter
-define ('DB_password', 'tAnr632qnwBVzc5t'); // mot de passe de l'utilisateur pour se connecter
+define ('DB_name', 'general'); // le nom de votre base de données
+define ('DB_user', 'root'); // nom d'utilisateur pour se connecter
+define ('DB_password', ''); // mot de passe de l'utilisateur pour se connecter
 define ('__SQL', 'iyc_'); // Prefixe Au choix [A-Z_]
 
 /***  ***/
@@ -44,7 +44,7 @@ define ('AVATAR_OCTAL_SIZE', 0.5 * 1048576);
 /*** ^_^ Google friendly ;-) ***/
 define ('REWIRTE_URL', false);
   
-define ('magicword', '005deeacbe9be383bd92d7d29727dcd5');
+define ('magicword', "hash, mettez ici n'importe quoi, ni trop court n'y trop long");
 define ('__VER', 12.02);
 // Variable header
 header('Server: Crystal-Web');
