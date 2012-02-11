@@ -16,7 +16,7 @@ define ('__TEMPLATE', $_SESSION['theme']); // Theme a appliquer
 define ('__TEMPLATE_ADMIN', 'admin'); // Theme a appliquer
 
 define ('__PAGE', $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']); // Page actuel
-define ('__CW_PATH', 'http://www.imagineyourcraft.com/~minecraft'); // Site url/~hurricane
+define ('__CW_PATH', 'http://exemple.com'); // Site url/~devphp sans / final
 
 /*** DB Configuration ***/
 define ('DB_host', 'localhost'); // le chemin vers le serveur
@@ -25,7 +25,7 @@ define ('DB_port', '3306'); // Port si nécessaire mysql 3306/3305 pgsql 4444
 define ('DB_name', 'general'); // le nom de votre base de données
 define ('DB_user', 'root'); // nom d'utilisateur pour se connecter
 define ('DB_password', ''); // mot de passe de l'utilisateur pour se connecter
-define ('__SQL', 'iyc_'); // Prefixe Au choix [A-Z_]
+define ('__SQL', 'cw_'); // Prefixe Au choix [A-Z_]
 
 /***  ***/
 define ('ADMIN_TEAM', 'Beta site'); // Adresse expéditeur
