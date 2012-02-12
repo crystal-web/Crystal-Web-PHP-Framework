@@ -262,7 +262,7 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	public function subscribe()
 	{
 	// Include captcha
-	include 'captcha.php';
+	//include 'captcha.php';
 	$this->setInfo('sitemap', true);
 	$this->setInfo('page_title', 'Cr&eacute;ation d\'un compte');
 	

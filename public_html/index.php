@@ -18,5 +18,4 @@ $temps = getmicrotime(); //temps au debut du chargemennt
 /*** Dev mode is enabled ? ***/
 $err = (__DEV_MODE===true) ? error_reporting(-1) : error_reporting(0);
 
-    var_dump(getmicrotime());
 ?>

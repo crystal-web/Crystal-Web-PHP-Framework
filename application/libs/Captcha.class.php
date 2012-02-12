@@ -1,14 +1,13 @@
 <?php 
 /**
 * captcha : simple php captcha system * 
-* @author Jean-Pierre Morfin 
+* @author Jean-Pierre Morfin
+* @forkby Christophe BUFFET
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by/3.0/
 */  
   
-/* Choose length (max 32) */ 
-define("CAPTCHA_LENGTH",5);
-define("ROBOT",'frag-for-fun-blackshot');
+
 $_SESSION["captcha_akey"] = md5(uniqid(rand(), true));
 
 /** 
@@ -20,7 +19,7 @@ class Captcha {
     * @param string $baseuri : relative or absolute path to folder containing this file on web 
     * @return IMG Tag */
     static function generateImgTags() {
-    return "<a href=\"#\"><img alt=\"Clique pour chang&eacute; les couleurs\" title=\"Clique pour chang&eacute; les couleurs\"". " src=\"" . __CW_PATH . "/captcha.php?pck=".$_SESSION['captcha_akey']."\"". " id=\"captcha\"". " onclick=\"javascript:this.src='" . __CW_PATH . "/captcha.php?pck=". $_SESSION['captcha_akey']. "&z='+Math.random();return false;\" /></a>\n";
+    return "<a href=\"#\"><img alt=\"Clique pour chang&eacute; les couleurs\" title=\"Clique pour chang&eacute; les couleurs\"". " src=\"" . __CW_PATH . "/ajax.php?module=captcha&action=ajax&pck=".$_SESSION['captcha_akey']."\"". " id=\"captcha\"". " onclick=\"javascript:this.src='" . __CW_PATH . "/ajax.php?module=captcha&action=ajax&pck=". $_SESSION['captcha_akey']. "&z='+Math.random();return false;\" /></a>\n";
     }
 
     /**
@@ -66,6 +65,8 @@ class Captcha {
     }
 }
 
+
+/*
 // If script called directly : generate image 
 if(basename($_SERVER["SCRIPT_NAME"])=="captcha.php" && isset($_GET["pck"])){
 $width = CAPTCHA_LENGTH*10+10;
@@ -97,5 +98,5 @@ $txt = $Captcha->_getDisplayText($_GET["pck"]);
 header("Content-type: image/png");
 imagepng($image);
 imagedestroy($image);
-}
+}//*/
 ?>

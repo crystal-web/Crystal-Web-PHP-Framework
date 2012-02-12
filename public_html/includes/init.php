@@ -36,7 +36,9 @@ define ('AVATAR_HEIGHT', 100);
 define ('SITE_TEAM', 'Team Crystal-web');
 define ('SITE_NAME', 'Crystal-Web CMS');
 
-
+/* Choose length (max 32) */ 
+define("CAPTCHA_LENGTH",5);
+define("ROBOT",'frag-for-fun-blackshot');
 
 /******************
  x * 1024 = x KB 
