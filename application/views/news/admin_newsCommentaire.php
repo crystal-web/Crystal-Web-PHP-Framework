@@ -35,7 +35,7 @@
 
 
 <?php
-include_once __APP.'/function/bbcode.php'; 
+include_once __APP_PATH.'/function/bbcode.php'; 
 
 foreach($commentaire as $key => $data)
 {

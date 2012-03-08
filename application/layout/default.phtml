@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<!--
+/************************************************/
+/*	  	.:: Par Buffet Christophe ::.	  		*/
+/*			.:: 0032(0)/474/171.255 ::.  		*/
+/*	.:: Copyright  www.tinyurl.com/copy4u ::.	*/
+/*	     .:: http://crystal-web.org ::.         */
+/************************************************/
+-->
+<head>
+	<title><?php echo $mvc->Page->getPageTitle() . ' | ' . $mvc->Page->getSiteTitle(); ?></title>
+ 
+	<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	<meta http-equiv="content-language" content="" />
+	<meta name="dc.title" content="<?php echo $mvc->Page->getPageTitle() . ' | ' . $mvc->Page->getSiteTitle(); ?>" />
+	<meta name="language" content="fr">
+	<link rel="icon" type="image/x-icon" href="<?php echo __CW_PATH; ?>/favicon.ico">
+	<link rel="icon" type="image/png" href="<?php echo __CW_PATH; ?>/favicon.png">
+	
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+	<link rel="stylesheet" href="http://cdn.crystal-web.org/files/css/bootstrap/1.4.0/bootstrap.min.css">
+	<?php echo $mvc->Page->getHeader(); ?>
+
+<link rel=stylesheet type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
+		<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-dropdown.js">$('#topbar').dropdown();</script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-tabs.js">$('.tabs').tabs();</script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-alerts.js">$(".alert-message").alert();</script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/tablesorter.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-twipsy.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-modal.js"></script>	
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-popover.js"></script>
+	<script>
+	$(function () {
+		  $("a[rel=popover]")
+			.popover({
+			  offset: 10
+			})
+		})
+	</script>
+	<script  type="text/javascript" src="http://cdn.crystal-web.org/files/js/common.js"></script>
+<style type="text/css">
+body{
+background-color: whiteSmoke;
+}
+</style>
+
+</head>
+<body id="top" <?php echo $mvc->Page->getBody(); ?>>
+	<div class="topbar">
+		<div class="fill">
+			<div class="container">
+				<h3><a data-placement="below" rel="popover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="<?php echo $mvc->Page->getSiteTitle(); ?>"><?php echo $mvc->Page->getSiteTitle(); ?></a></h3>
+				<ul>
+					<li><a href="<?php echo Router::url('article'); ?>">Article</a></li>
+					<li><a href="<?php echo Router::url('calendar'); ?>">Calendrier</a></li>
+					<li><a href="<?php echo Router::url('forum'); ?>">Forum</a></li>
+				</ul>
+				<?php
+				if (!$mvc->Session->isLogged())
+				{
+				?>
+				<form action="<?php echo Router::url('auth'); ?>" method="post" class="pull-right">
+				<span style="color:#fff;">Connection auto :</span> <input type="checkbox" name="connection_auto">
+				<input class="input-small" type="text" name="loginmember" placeholder="Pseudo">
+				<input class="input-small" type="password" name="passmember" placeholder="Password">
+				<button class="btn" type="submit">Sign in</button>
+				<a href="<?php echo Router::url('auth/subscribe'); ?>" class="btn primary">Subscribe Now</a>
+				</form>
+				<?php
+				}
+				else
+				{
+				?>
+				<ul class="nav secondary-nav">
+					<li class="dropdown" data-dropdown="dropdown"><a href="http://www.imagineyourcraft.com/~minecraft/index.php?module=news" class="dropdown-toggle">User Panel</a>
+					<ul class="menu-dropdown">
+						<li><a href="http://www.imagineyourcraft.com/~minecraft/index.php?module=admin">Tableau de bord</a></li>
+						<li><a href="<?php echo Router::url('auth/logout'); ?>">Déconnection</a></li>
+					</ul>
+					</li>
+				</ul>
+				<?php
+				}
+				?>
+			</div>
+		</div>
+	</div>
+<?php if ($mvc->Acl->isGrant())
+{
+	$adminSiderbar = array();
+	$adminSiderbar[] = array(
+					'title' => 'Dashbord',
+					'data' => array(
+						'Configuration'						=> Router::url('admin/conf'),
+						'Alerte'							=> Router::url('alert'),
+						'Plugin'							=> Router::url('plugin'),
+						'Controle systeme'					=> Router::url('admin/control'), 
+						'Serveur Healt'						=> Router::url('admin/heal')
+					));
+	$adminSiderbar[] = array(
+					'title' => 'Articles',
+					'data' => array(
+						'Configuration'						=> Router::url('article/admin_config'),
+						'Commentaires'			=> Router::url('article/admin_comment'),
+						'R&eacute;daction d\'un article'	=> Router::url('article/admin_addpost'), 
+						'Ajouter une cat&eacute;gorie'		=> Router::url('article/admin_addcat')
+					));
+
+	$adminSiderbar[] = array(
+					'title' => 'Gestion des forums',
+					'data' => array(
+						'Ajout d\'une catégorie'			=> Router::url('forum/admin_category'),
+						'Ajouter d\'un sujet'		=> Router::url('forum/admin_sujet')
+					));
+					
+getOperatorSidebar($adminSiderbar);
+}
+?>
+
+
+	<div class="container">
+		<div class="content" id="swithcontenu">
+	
+
+	
+			<div class="row"  style="margin-top:60px;">
+				<div class="span16">
+					<ul class="breadcrumb">
+						<li><a href="<?php echo __CW_PATH; ?>" title="Page d'accueil">Accueil</a> <span class="divider">/</span></li>
+<?php 
+	if (count($fil = $mvc->Page->getBreadcrumb()))
+	{
+		foreach($fil AS $url => $name)
+		{
+			echo '<li><a href="' . Router::url($url) . '" title="' . $name .'">' . $name .'</a> <span class="divider">/</span></li>';
+		}
+	}
+	
+	echo '<li>'.$mvc->Page->getPageTitle().'</li>';
+?>
+						
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<?php
+				$col = 16;
+				$menu = NULL;
+				if (count($mvc->Page->getMenu())>0)
+				{
+				$col = 12;
+				$menu = '<div class="span4"><div class="sidebar">'.PHP_EOL.'<div class="well">';
+	
+					$menu .= '
+					<audio style="hidden" id="pl">
+						<source src="http://beta.crystal-web.org/media/audio/mp3/dyraz.mp3"></source>
+						<source src="http://beta.crystal-web.org/media/audio/ogg/dyraz.ogg"></source>
+					</audio>
+					<div onmouseover="audioElement.play();">
+						<a href="http://dyraz.com">
+							<img src="http://beta.crystal-web.org/media/image/png/logo.81.png" alt="" />
+						</a>
+					</div><script type="text/javascript">var audioElement = document.getElementById(\'pl\');
+					</script>';				
+				
+					foreach ($mvc->Page->getMenu() AS $name => $listUrl)
+					{
+					$menu .= '<h5>'.$name.'</h5><ul>';
+						foreach ($listUrl AS $data)
+						{
+						$menu .= '<li><a href="'.$data[0].'">'.$data[1].'</a></li>';
+						}
+					$menu .= '</ul>';
+
+					}
+				$menu .= '	</div>'.PHP_EOL.'</div></div>';
+				}
+				?>
+				<!-- Page content -->
+				<div class="span<?php echo $col; ?>">
+					<div class="page-header">
+						<h1><?php echo $mvc->Page->getSiteTitle(); ?><small>, <?php echo $mvc->Page->getPageTitle(); ?></small></h1>
+					</div>
+				<?php				
+				echo $mvc->Session->flash();
+				echo $mvc->contenu;
+				?>
+				</div>
+				<?php 
+				echo $menu;
+				?>
+			</div>
+
+			
+				
+			<div class="row">
+				<div class="span-one-third">
+				<h2>Services</h2>
+				<ul class="nostyle">
+					<li><a href="">Création de sites</a></li>
+					<li><a href="">Hébergement</a></li>
+					<li><a href="">WebDesign</a></li>
+					<li><a href="">Développement d'application</a></li>
+				</ul>
+				</div>
+			<div class="span-one-third">
+			<h2>Partenaires</h2>
+				<ul class="nostyle">
+					<li><a href="http://dyraz.com/">Dyraz.com</a><br>Partenaire et prestataire de services en ingénierie informatique (SSII), hébérgeur et fournisseur de solution IRCd, PsyBNC, Bouncer, etc.</li>
+					<li><a href="http://www.imagineyourcraft.com/">Imagine Your Craft</a><br>Serveur MineCraft hautement modé</li>
+				</ul>
+			</div>
+				<div class="span-one-third">
+				<h2>Créations</h2>
+				<ul class="nostyle">
+					<li><a href="http://fragforfun.tk/">Clan Frag For Fun</a><br>Site complête, signature dynamique</li>
+					<li><a href="http://www.imagineyourcraft.com/~minecraft">Imagine Your Craft</a><br>News & serveur manager</li>
+				</ul>
+				<p><a class="btn" href="#">View details »</a></p>
+				</div>
+			</div>			
+			
+			
+		</div>
+
+		<div class="row">
+			<div class="span4 offset6" style="margin-top:18px;margin-bottom:35px;">
+			<div id="shadowing"></div>
+				<div id="box">
+					<div id="boxheader">
+					Crystal-web.org : Conception et r&eacute;alisation de site web
+						<span id="boxclose" onclick="document.getElementById('box').style.display='none';
+					document.getElementById('shadowing').style.display='none'"> </span>
+					</div>
+
+					<div id="boxcontent">
+						<iframe frameborder="0" scrolling="auto" background="transparent" src="http://beta.crystal-web.org/about/" style="border-style: initial; border-color: initial; border-image: initial;height: 100%; width: 100%; "></iframe>
+					</div>
+				</div>
+				<p><a data-placement="above" data-original-title="A propos de Crystal-web.org" data-content="Conception et r&eacute;alisation de site web" rel="popover" href="#" onclick="document.getElementById('shadowing').style.display='block';document.getElementById('box').style.display='block';">Powered by Crystal-Web Solution</a><?php  if (__DEV_MODE) { echo '<br>Page générée en '. round(microtime(true) - $debut,5).' secondes '; } ?></p>
+			</div>
+			
+		</div>
+
+	</div>
+	
+	
+	
+	
+	
+	
+	
+<div id="helper-bar" class="fixed-position">
+<div id="helper-bar-frame">
+<div id="helper-bar-content">
+	<a href="#top" class="help-bar-top"><img src="<?php echo __CDN; ?>/files/images/icons/arrow-skip-090.png" alt="">&nbsp;Back to Top</a>
+<?php	
+if ($mvc->Acl->isGrant())
+{
+echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/icons/folder-horizontal.png" alt="">&nbsp;M&eacute;diath&egrave;que</a><div id="ss" style="float:right;display:inline-block"></div>';
+}
+?>
+</div>
+</div>
+</div>
+
+</body>
+</html>
+

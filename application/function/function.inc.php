@@ -10,14 +10,111 @@
 function __autoload($class_name)
 {
 $filename = $class_name . '.class.php';
-$filePath = __APP . '/libs/' . $filename;
-	if (file_exists($filePath) == false)
+$filePath = __APP_PATH . DS . 'libs' . DS . $filename;
+	if (file_exists($filePath))
 	{
-	exit('Class '.$class_name.' not found in '.$filePath);
+	include_once ($filePath);
 	}
-include_once ($filePath);
+	elseif(__DEV_MODE)
+	{
+	die('Class file not exists '.$filePath);
+	}
 }
 
+function loadSystem()
+{
+	// Make me protect
+	if(!__DEV_MODE)
+	{
+	/**
+	* Anti-ClickJacking
+	* Pas de iFrame du site
+	*/
+	header('X-Frame-Options: DENY');
+	}
+require_once __APP_PATH . DS . 'framework' . DS . 'mvc.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Model.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Dispatcher.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Request.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Router.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Controller.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Page.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Template.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Session.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Form.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'AccessControlList.php';
+// Zone de stockage des données recurentes
+require_once __APP_PATH . DS . 'framework' . DS . 'Register.php';
+}
+loadSystem();
+
+function loadFunction($function)
+{
+$file = __APP_PATH . DS . 'function' . DS . $function;
+$file .= '.php';
+	if (file_exists($file))
+	{
+	require_once $file;
+	}
+	elseif (__DEV_MODE === true)
+	{
+	debug('File not loaded '.$file);
+	}
+}
+
+
+/**
+* Permet de transformer une chaine de caractères en sont équivalent "slug"
+* @author Typhon
+* @param $str: Chaine à transformer
+* @return Slug de la chaine
+**/
+function str2slug($str) {
+    $str = htmlentities($str, ENT_NOQUOTES, 'utf-8');
+    $str = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $str);
+    $str = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $str);
+    $str = str_replace("'", '-', $str);
+    $str = str_replace(' ', '-', $str);
+    $str = preg_replace('#[^A-Za-z0-9-]#', '', $str);
+    $str = str_replace('--', '-', $str);
+    $str = strtolower($str);
+    $str = trim($str, '-');
+    return $str;
+}
+
+
+function getOperatorSidebar($adminSiderbar)
+{
+echo '<div class="opSiderbar" id="opSiderbar"><ul id="opMenu">';
+
+	foreach ($adminSiderbar AS $k=>$d) 
+	{
+	echo '<li class="toggleSubMenu"><span>'.$d['title'].'</span><ul class="subMenu">';
+		foreach ($d['data'] AS $url => $data)
+		{
+		echo '<li><a href="'.$data.'">'.$url.'</a></li>';
+		
+		}
+	echo '</ul></li>';
+	}
+echo '</ul><a class="settingbutton" href="#">	</a></div>';//*/
+/*
+echo '<div class="opSiderbar" id="opSiderbar"><ul id="opMenu">';
+	foreach ($adminSiderbar AS $k=>$d) 
+	{
+	echo '<li class="opMenu">
+		<a href="#">'.$d['title'].'</a>
+		<ul id="m'.$k.'">';
+		foreach ($d['data'] AS $url => $data)
+		{
+		echo '<li><a href="'.$data.'">'.$url.'</a></li>';
+		
+		}
+	echo '</ul></li>';
+	}
+
+	echo '</ul><a class="settingbutton" href="#">	</a></div>';//*/
+}
 
 /**
 * Retourne le timestamp,milleseconde
@@ -56,6 +153,70 @@ function convert($size, $precision = 2)
 }
 
 
+function pagination($nb_page)
+{
+$page = (int) (isset($_GET['page'])) ? $_GET['page'] : 1;
+/***************************************
+*	Pagination
+***************************************/
+$html = NULL;
+if ($nb_page > 1)
+{
+$html	=	'<div class="pagination">';
+$html	.=	'<ul>';
+	// Si la page - une est suppérieur a 0
+	// Il y a une page
+	if ($page-1 > 0)
+	{
+		$html	.=	'<li class="prev"><a href="?page='.($page-1).'">Precedent</a></li>';
+	}
+	// Sinon, il n'y en a pas
+	else
+	{
+		$html	.=	'<li class="prev disabled"><a href="#">Precedent</a></li>';	
+	}
+	
+/***************************************
+*	Bloucle simple multi info
+***************************************/
+		
+			for($i=$page-5; $i<$page+5; $i++)
+			{
+				if ($i<=$nb_page && $i>0)
+				{
+					if ($page == $i)
+					{
+					$html	.=	'<li><a href="#" class="disabled">'.$i.'</a></li>';
+					}
+					else
+					{
+					$html	.=	'<li><a href="?page='.$i.'">'.$i.'</a></li>';
+					}
+				}
+			}		
+		
+/***************************************
+*	END Bloucle simple multi info
+***************************************/
+		
+	// Si la page + une est inférieur ou egal au nombre de page
+	if ($page+1 <= $nb_page)
+	{
+		$html	.=	'<li class="next"><a href="?page='.($page+1).'">Suivant</a></li>';
+	}
+	// Sinon, il n'y en a pas
+	else
+	{
+		$html	.=	'<li class="next disabled"><a href="#">Suivant</a></li>';	
+	}
+
+	
+$html	.=	'</ul>';
+$html	.=	'</div>';
+}
+
+return $html;
+}
 /**
 * Retourne une alerte "alerte"
 *
@@ -210,9 +371,8 @@ function scanfolder($folder) {
 * @param bool $return|Ecris ou renvois
 * @return string
 */
-function debug ($arg=null, $return=false)
+function cwDebug ($arg=null, $return=false)
 {
-
 $var = '<p><strong>Crystal-Web Debug Tools:</strong><pre class="code">';
     if (is_array($arg) || is_object($arg))
     {
@@ -236,71 +396,25 @@ $var .= '</pre></p>';
 }
 
 
-/**
-* Méthode de protection des variables automatique
-*
-* @author Christophe BUFFET
-* @link http://crystal-web.org
-* @param array $data|Tableau de variables
-* @return array
-*/
-function protectMethod($data)
-{
+function debug($var){
 
-    if (is_array($data))
-    {
-        foreach ($data AS $cle => $valeur)
-        {
-            if (is_array($data))
-            {
-            $data[$cle] = protectMethod($data[$cle]);
-            }
-            else
-            {
-                if (is_numeric($valeur))
-                {
-                //cast pour les nombres
-                $data[$cle] = intval($valeur);
-                }
-                else
-                {
-                //protection des chaines
-                $data[$cle] = htmlentities($valeur);
-                }
-            }
-        }
-
-        if (isSet($_SERVER['HTTP_REFERER']))
-        {
-            if (!preg_match('#'.$_SERVER['SERVER_NAME'].'#', $_SERVER['HTTP_REFERER']))
-            {
-            $data['__internal'] = false;
-            $data['__external'] = true;
-            }
-            else
-            {
-            $data['__internal'] = true;
-            $data['__external'] = false;
-            }
-        }
-        else
-        {
-            $data['__direct'] = true;
-        }
-
-    }
-    else
-    {
-    $data = htmlentities($data);
-    }
-
-return $data;
+	if(__DEV_MODE){
+		$debug = debug_backtrace(); 
+		echo '<p>&nbsp;</p><p><a href="#" onclick="$(this).parent().next(\'ol\').slideToggle(); return false;"><strong>'.$debug[0]['file'].' </strong> l.'.$debug[0]['line'].'</a></p>'; 
+		echo '<ol style="display:none;">';
+		$lastFile = $lastLine = false;
+		foreach($debug as $k=>$v){ if($k>0){
+		$lastFile = isSet($v['file']) ? $v['file'] : $lastFile;
+		$lastLine = isSet($v['line']) ? $v['line'] : $lastLine;
+			echo '<li><strong>'.$lastFile.' </strong> l.'.$lastLine.'</li>'; 
+		}}
+		echo '</ol>'; 
+		echo '<pre class="code">';
+		var_dump($var);
+		echo '</pre>'; 
+	}
+	
 }
-if (!empty($_GET))	$_GET = protectMethod($_GET);
-if (!empty($_POST))	$_POST = protectMethod($_POST);
-if (!empty($_COOKIE))	$_COOKIE = protectMethod($_COOKIE);
-
-
 
 /**
 * Enregistrement des erreurs dans un fichier cache
@@ -547,15 +661,25 @@ function getModuleSetting($pModuleName,$pSetting) {
 */
 function ecartdate($fin)
 {
-	$debut = date("d/m/y");
-	list($jourDebut, $moisDebut, $anneeDebut) = explode('/', $debut); 
-	list($jourFin, $moisFin, $anneeFin) = explode('/', $fin);
-	$timestampDebut = mktime(0,0,0,$moisDebut,$jourDebut,$anneeDebut); 
-	$timestampFin = mktime(0,0,0,$moisFin,$jourFin,$anneeFin);
-	$ecart = abs($timestampFin - $timestampDebut)/86400;
-	/*$s = ($ecart>1) ? 's' : '';
-	$annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
-	return $ecart; // $annonce;
+	if (!is_int($fin))
+	{
+		$debut = date("d/m/y");
+		list($jourDebut, $moisDebut, $anneeDebut) = explode('/', $debut); 
+		list($jourFin, $moisFin, $anneeFin) = explode('/', $fin);
+		$timestampDebut = mktime(0,0,0,$moisDebut,$jourDebut,$anneeDebut); 
+		$timestampFin = mktime(0,0,0,$moisFin,$jourFin,$anneeFin);
+		$ecart = abs($timestampFin - $timestampDebut)/86400;
+		/*$s = ($ecart>1) ? 's' : '';
+		$annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
+		return $ecart; // $annonce;
+	}
+	else
+	{
+		$ecart = abs($fin - time())/86400;
+		/*$s = ($ecart>1) ? 's' : '';
+		$annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
+		return $ecart; // $annonce;
+	}
 }
 
 
@@ -696,67 +820,6 @@ $cleaner = strtr($url,
 return preg_replace('/([^.a-z0-9]+)/i', '-', $cleaner);
 }
 
-function url($url=null){
-
-if (empty($url) or $url=='index.php')
-{
-return __CW_PATH;
-}
-$url = stripAccents(html_entity_decode($url));
-	if (REWIRTE_URL==false)
-	{
-	$url = preg_replace('/ /','-',$url);
-	return __CW_PATH.'/'.$url;
-	}
-	elseif (REWIRTE_URL==true)
-	{
-	$patterns = array();		/* to */	$replacements = array();
-	$patterns[0] = '/&amp;/';	/* to */	$replacements[0] = '&';
-	$patterns[1] = '/index\.php/';	/* to */	$replacements[1] = '';
-	$patterns[2] = '/\?/';	/* to */	$replacements[2] = '';
-	$patterns[3] = '/ /';	/* to */	$replacements[3] = '-';
-	$patterns[4] = '/_/';	/* to */	$replacements[4] = '-';
-	$patterns[5] = '/=/';	/* to */	$replacements[5] = '_';
-	$prepare=preg_replace($patterns,$replacements,$url);
-	// On obtiens module_forum&action_lire&page_2&titre_un-super-coup
-	$explode_me=explode("&", $prepare);
-	// Array ( [0] => module_forum [1] => action_lire [2] => page_2 [3] => titre_un-super-coup)
-
-	// Initialise
-	$module=null;
-	$action=null;
-	$get=null;
-	$nb_act=0;
-	foreach ($explode_me as $key => $value){
-	$next=explode("_", $value);
-		if ($next[0] == 'module'){
-		$module=$next[1].'/';
-		$nb_act++;
-		}
-		elseif ($next[0] == 'action'){
-		$action=$next[1].'/';
-		$nb_act++;
-		}
-		elseif ($next[0] != 'action' and $next[0] != 'module' and array_key_exists(1, $next)){
-		$get.=$next[0].'_'.cleanerUrl($next[1]).'/';
-		//$get.=$next[0].'_'.$next[1].'/';
-		$nb_act++;
-		}
-		elseif ($next[0] != 'action' and $next[0] != 'module' and !array_key_exists(1, $next)){
-		$get.=$next[0].'/';
-		}
-	}
-	$rewirte_url=$module.$action.$get;
-
-	
-		/*if ($nb_act>3){
-		$rewirte_url=substr_replace($rewirte_url,"",-1).'.htm';
-		}*/
-	}
-
-return __CW_PATH.'/'.$rewirte_url;
-}
-
 
 
 /**
@@ -849,11 +912,18 @@ return $random_name;
 * @link http://crystal-web.org
 * @author Christophe BUFFET
 * @param string $string
-* @return string
+* @return str
 */
-function stripAccents($string){
-    return strtr($string,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ',
-    'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+function stripAccents($str)
+{
+$str = htmlentities($str, ENT_NOQUOTES, "UTF-8");
+$str = htmlspecialchars_decode($str);
+// &eolig;
+$str = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $str);
+// &aelig;  &AElig; &oelig; &OElig; vers ae  AE oe OE
+$str = preg_replace('#\&([A-Za-z])(?:(.*))\;#', '\1', $str);
+
+return $str;
 }
 
 
@@ -943,7 +1013,7 @@ return $url;
 * @param string $lib|country:flag:htmlentitie:fr_regions:fr_departements
 * @return array
 */
-function library($lib)
+function library($lib=NULL)
 {
 $libraryList = array();
 $libraryList['country'] = array('Afghanistan', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua And Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia', 'Bosnia And Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Columbia', 'Comoros', 'Congo', 'Cook Islands', 'Costa Rica', 'Cote D\'Ivorie (Ivory Coast)', 'Croatia (Hrvatska)', 'Cuba', 'Cyprus', 'Czech Republic', 'Democratic Republic Of Congo (Zaire)', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'France, Metropolitan', 'French Guinea', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard And McDonald Islands', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macau', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar (Burma)', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'North Korea', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Reunion', 'Romania', 'Russia', 'Rwanda', 'Saint Helena', 'Saint Kitts And Nevis', 'Saint Lucia', 'Saint Pierre And Miquelon', 'Saint Vincent And The Grenadines', 'San Marino', 'Sao Tome And Principe', 'Saudi Arabia', 'Senegal', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovak Republic', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia And South Sandwich Islands', 'South Korea', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Svalbard And Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tokelau', 'Tonga', 'Trinidad And Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks And Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City (Holy See)', 'Venezuela', 'Vietnam', 'Virgin Islands (British)', 'Virgin Islands (US)', 'Wallis And Futuna Islands', 'Western Sahara', 'Western Samoa', 'Yemen', 'Yugoslavia', 'Zambia', 'Zimbabwe'
@@ -953,7 +1023,7 @@ $libraryList['htmlentitie'] = array('À'=>'&Agrave;','à'=>'&agrave;','Á'=>'&Aa
 $libraryList['fr_regions'] = array("Alsace","Aquitaine","Auvergne","Bourgogne","Bretagne","Centre","Champagne-Ardenne","Corse","Franche-Comté","Île-de-France","Languedoc-Roussillon","Limousin","Lorraine","Midi-Pyrénées","Nord-Pas-de-Calais","Basse-Normandie","Haute-Normandie","Pays de la Loire","Picardie","Poitou-Charentes","Provence-Alpes-Côte d'Azur","Rhône-Alpes","Guyane","Guadeloupe","Martinique","Réunion");
 $libraryList['fr_departements'] = array("01"=>"Ain", "02"=>"Aisne", "03"=>"Allier", "04"=>"Alpes-de-Haute-Provence", "05"=>"Hautes-Alpes", "06"=>"Alpes-Maritimes", "07"=>"Ardèche", "08"=>"Ardennes", "09"=>"Ariège", "10"=>"Aube", "11"=>"Aude", "12"=>"Aveyron", "13"=>"Bouches-du-Rhône", "14"=>"Calvados", "15"=>"Cantal", "16"=>"Charente", "17"=>"Charente-Maritime", "18"=>"Cher", "19"=>"Corrèze", "2A" => "Corse-du-Sud", "2B" => "Haute-Corse", "21"=>"Côte-d'Or", "22"=>"Côtes-d'Armor", "23"=>"Creuse", "24"=>"Dordogne", "25"=>"Doubs", "26"=>"Drôme", "27"=>"Eure", "28"=>"Eure-et-Loir", "29"=>"Finistère", "30"=>"Gard", "31"=>"Haute-Garonne", "32"=>"Gers", "33"=>"Gironde", "34"=>"Hérault", "35"=>"Ille-et-Vilaine", "36"=>"Indre", "37"=>"Indre-et-Loire", "38"=>"Isère", "39"=>"Jura", "40"=>"Landes", "41"=>"Loir-et-Cher", "42"=>"Loire", "43"=>"Haute-Loire", "44"=>"Loire-Atlantique", "45"=>"Loiret", "46"=>"Lot", "47"=>"Lot-et-Garonne", "48"=>"Lozère", "49"=>"Maine-et-Loire", "50"=>"Manche", "51"=>"Marne", "52"=>"Haute-Marne", "53"=>"Mayenne", "54"=>"Meurthe-et-Moselle", "55"=>"Meuse", "56"=>"Morbihan", "57"=>"Moselle", "58"=>"Nièvre", "59"=>"Nord", "60"=>"Oise", "61"=>"Orne", "62"=>"Pas-de-Calais", "63"=>"Puy-de-Dôme", "64"=>"Pyrénées-Atlantiques", "65"=>"Hautes-Pyrénées", "66"=>"Pyrénées-Orientales", "67"=>"Bas-Rhin", "68"=>"Haut-Rhin", "69"=>"Rhône", "70"=>"Haute-Saône", "71"=>"Saône-et-Loire", "72"=>"Sarthe", "73"=>"Savoie", "74"=>"Haute-Savoie", "75"=>"Paris", "76"=>"Seine-Maritime", "77"=>"Seine-et-Marne", "78"=>"Yvelines", "79"=>"Deux-Sèvres", "80"=>"Somme", "81"=>"Tarn", "82"=>"Tarn-et-Garonne", "83"=>"Var", "84"=>"Vaucluse", "85"=>"Vendée", "86"=>"Vienne", "87"=>"Haute-Vienne", "88"=>"Vosges", "89"=>"Yonne", "90"=>"Territoire de Belfort", "91"=>"Essonne", "92"=>"Hauts-de-Seine", "93"=>"Seine-Saint-Denis", "94"=>"Val-de-Marne", "95"=>"Val-d'Oise");
 
-return isSet($libraryList[$lib]) ? $libraryList[$lib] : false;
+return isSet($libraryList[$lib]) ? $libraryList[$lib] : $libraryList;
 }
 
 

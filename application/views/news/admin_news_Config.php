@@ -68,7 +68,7 @@ echo '<ul class="inputs-list">
 
 
 <div class="clearfix">
-	<label>Activer l'&eacute;ditoriel</label>
+	<label>Activer l'&eacute;ditot</label>
 	<div class="input">
 <?php 
 if ($edito_actif) 

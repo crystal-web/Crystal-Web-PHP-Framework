@@ -38,22 +38,21 @@ class DB extends PDO {
 					break;
 				}			
 
-				self::$_instance = new PDO($DB_connect, DB_user, DB_password);
+				self::$_instance = new PDO($DB_connect, DB_user, DB_password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 				self::$_instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				//self::$_instance->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_WARNING);	
 				
-			} catch (PDOException $e) {
 			
-			  $debug = $e->getMessage();
-			  $debug.= '<br/>';
-			  $debug = $e->getCode();
-			  $debug.= '<br/>';
-			  $debug = $e->getFile();
-			  $debug.= '<br/>';
-			  $debug = $e->getLine();
-			  $debug.= '<br/>';
-			  $debug.= $e->getTraceAsString();
-			die($debug);
+						
+				
+			} catch(PDOException $e){
+				if(__DEV_MODE){
+				die($e->getMessage()); 
+				}else{
+				die('Impossible de se connecter à la base de donnée'); 
+				}
 			}
+		
 		} 
 		return self::$_instance; 
 	}

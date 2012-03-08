@@ -25,7 +25,7 @@
 $CKEditorConfig=array();
 $CKEditorConfig['extraPlugins'] = 'bbcode';
 $CKEditorConfig['toolbar'] = array(
-			array( 'Source', 'Undo', 'Redo', '-', 'Bold', 'Italic', 'Underline', 'Strike','FontSize' ),
+			array( 'Undo', 'Redo', '-', 'Bold', 'Italic', 'Underline', 'Strike','FontSize' ),
 			array( 'Image', 'Link', 'Unlink'),
 			array( 'Find','Replace','-','SelectAll','RemoveFormat','/',
 			'BulletedList','-','Blockquote',

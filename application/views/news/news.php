@@ -8,7 +8,7 @@ $showDate = true;
 $(window).scroll(function(){
 	if($(window).scrollTop() == $(document).height() - $(window).height()){
 		$.ajax({
-			url : "ajax.php?module=news&lastid=" + $(".item:last").attr("id"),
+			url : "/news/ajax/?<?php echo ($isCategory) ? 'cat='.$isCategory.'&' : NULL; ?>lastid=" + $(".item:last").attr("id"),
 			success: function(html){
 				if(html){
 					$(".mNews").append(html);
@@ -22,6 +22,7 @@ $(window).scroll(function(){
 <?php
 }
 
+
 if ($edito_actif == true)
 {
 echo '<h2>' . $edito_title . '</h2>' . $edito_content;
@@ -30,22 +31,22 @@ echo '<h2>' . $edito_title . '</h2>' . $edito_content;
 echo '<div class="mNews">';
 
 
-
-foreach ($news as $data)
+loadFunction('TronqueHtml');
+foreach ($news as $data) 
 {
-echo '<div style="padding-bottom:15px;" class="item" id="'.$data['id'].'">
-<h2><a href="' . url('index.php?module=news&action=post&p=' . $data['id'] . '&' . $data['titre']) . '">' . $data['titre'] . '</a>';
+echo '<div style="padding-bottom:15px;" class="item" id="'.$data->id.'">
+<h2><a href="' . Router::url('news/post/slug:' . $data->titre . '/id:' . $data->id) . '">' . $data->titre . '</a>';
 
-	if ($showDate)
+
+	if ($showDate) 
 	{
-	echo '<span class="right" style="color:red;font-size:12px;padding-top:3px;">R&eacute;dig&eacute; le '.dates($data['date'], 'fr_date').'</span>';
-	echo '</h2>'.TronqueHtml($data['content'], 280, ' ', ' ...');
-	echo '<span class="text-right"><a href="' . url('index.php?module=news&action=post&p=' . $data['id'] . '&' . $data['titre']) . '"  style="color: #3485CC;font-weight:bold;">Lire la suite ...</a></span>';
-		
+	echo '<span class="right" style="color:red;font-size:12px;padding-top:3px;">R&eacute;dig&eacute; le '.dates($data->date, 'fr_date').'</span>';
+	echo '</h2>'.TronqueHtml($data->content, 280, ' ', ' ...');
+	echo '<span class="text-right"><a href="' . Router::url('news/post/slug:' . $data->titre . '/id:' . $data->id) . '"  style="color: #3485CC;font-weight:bold;">Xd Lire la suite ...</a></span>';	
 	}
 	else
 	{
-	echo '</h2>'.$data['content']; 
+	echo '</h2>'.$data->content; 
 	}
 
 
@@ -53,15 +54,15 @@ echo '<div style="padding-bottom:15px;" class="item" id="'.$data['id'].'">
 	
 	if ($com_actif == true)
 	{
-	$plurial = ($data['count'] > 1) ? 's' : '';
+	$plurial = ($data->count > 1) ? 's' : '';
 	?>
 	<p><?php
 
-	if ($data['count'] > 0){
+	if ($data->count > 0){
 	echo '<hr width="90%" />
 	<div class="clearfix comment">
-	<a href="' . url('index.php?module=news&action=post&p=' . $data['id'] . '&' . $data['titre']) . '#com">
-	<span class="commentview">Voir le' . $plurial . ' commentaire' . $plurial . ' (' . $data['count'] . ')</span>
+	<a href="' .Router::url('news/post/slug:' . $data->titre . '/id:' . $data->id) . '/#com">
+	<span class="commentview">Voir le' . $plurial . ' commentaire' . $plurial . ' (' . $data->count . ')</span>
 	</a></div>';}
 
 	 ?></p>

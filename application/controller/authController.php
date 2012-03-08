@@ -5,7 +5,7 @@
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
 */
-Class authController Extends baseController {
+Class authController Extends Controller {
 
 private $module=array(
 	/* BOOL */
@@ -31,13 +31,77 @@ private $module=array(
 /*********************************************/
 public function index()
 {
+$this->mvc->Page->setPageTitle('Connection au site');
+
+$auth = $this->loadModel('Member');
+
+	// On a reçu des donnees ?
+	if ($this->mvc->Request->data)
+	{
+		// Elles sont valide ?
+		if ($auth->validates($this->mvc->Request->data))
+		{
+		// Nettoyage...
+		$this->mvc->Request->data->loginmember = $auth->clean($this->mvc->Request->data->loginmember);
+			
+			// Ca correspond a un membre ?
+			if ($user = $auth->checkLogin($this->mvc->Request->data))
+			{
+			// ok, on ecris dans la session
+			$this->mvc->Session->write('user',$user);
+			// Met a jour la dernière activité
+			$auth->lastActivity($user->idmember);
+				
+				// Doit-on mettre le cookie de cnnection automatique ?
+				if (isSet($this->mvc->Request->data->connect) && $this->mvc->Request->data->connect == '1')
+				{
+					$hash_cookie = sha1(Securite::Hcrypt($this->mvc->Request->data->loginmember.magicword));
+					setcookie( 'id', $user->idmember, ( time() + 60*60*24*30), '/');
+					setcookie('connection_auto', $hash_cookie, ( time() + 60*60*24*30), '/');
+					unset($hash_cookie);
+				}
+			
+			$this->mvc->Session->setFlash('<strong>'.$this->mvc->Session->user('loginmember').'</strong>, vous &ecirc;tes maintenant connect&eacute;', 'success');
+			Router::redirect('article');
+			}
+			else
+			{
+			$this->mvc->Session->setFlash('Votre login et mot de passe semble incorrect.<br><a href="'.Router::url('auth/forgotpassword').'" class="btn info">Récupérer mon mot de passe</a> <a href="'.Router::url('auth/subscribe').'" class="btn info">S\'inscrire</a>', 'error');
+			}
+			
+		}
+		else
+		{
+		$this->mvc->Session->setFlash('Il y a une ou plusieurs erreurs se sont produites', 'error');
+		}
+
+	}
+
+	$this->mvc->Form->setErrors($auth->errors);
+	$form = $this->mvc->Form->input('loginmember', 'Login:');
+	$form .= $this->mvc->Form->input('passmember', 'Mot de passe', array('type' => 'password'));
+	$form .= $this->mvc->Form->input('connect', 'Connection auto', array('type' => 'checkbox'));
+	$form .= $this->mvc->Form->input('send', 'Connection', array('type' => 'submit', 'class' => 'btn primary'));
+
+
+
+	$this->mvc->Template->form = $form;
+	$this->mvc->Template->show('auth/login');	
+}
+
+
+
+public function BAKindex()
+{
 $this->setInfo('sitemap', true);
 $this->setInfo('page_title', 'Connection au site');
 
-$this->mvc->template->link_registration = url('index.php?module=registration');
-$this->mvc->template->link_forgotpassword = url('index.php?module=login&action=forgotpassword');
 
-	/* Retour a la page pr�c�dente apr�s connection */
+
+$this->mvc->Template->link_registration = Router::url('registration');
+$this->mvc->Template->link_forgotpassword = Router::url('auth/forgotpassword');
+
+	/* Retour a la page précédente après connection */
 	if (!isSet($_SESSION['pageBeforeConnect']))
 	{
 
@@ -52,10 +116,10 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 		}
 	}
 
-	// Cr�ation d'un tableau des erreurs
+	// Création d'un tableau des erreurs
 	$errors_connection = array();
 
-	// Validation des champs suivant les r�gles
+	// Validation des champs suivant les règles
 	if (isSet($_POST['user']))
 	{
 	$user = $_POST['user']; 
@@ -88,9 +152,9 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 
 			/*** Affichage ***/
 			$url=(isSet($_SESSION['pageBeforeConnect'])) ? $_SESSION['pageBeforeConnect'] : url('index.php?module=news');
-			$this->mvc->template->url=$url;
-			$this->mvc->template->user = $_SESSION['user']['pseudo'];
-			$this->mvc->template->show('auth/login_success');
+			$this->mvc->Template->url=$url;
+			$this->mvc->Template->user = $_SESSION['user']['pseudo'];
+			$this->mvc->Template->show('auth/login_success');
 			header("Refresh: 5;url=".$url);
 			
 			}
@@ -124,8 +188,8 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 			$mail_send = new Mail('Inscribed on <'.$_SERVER['SERVER_NAME'].'>',$message_mail,strtolower($email), ADMIN_MAIL);
 			$mail_send->sendMailHtml() or die('Mail restriction, can not send');
 			
-			$this->mvc->template->user = $infos_user['loginmember'];
-			$this->mvc->template->show('auth/index_noactive');
+			$this->mvc->Template->user = $infos_user['loginmember'];
+			$this->mvc->Template->show('auth/index_noactive');
 			}
 		
 		
@@ -133,23 +197,23 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 
 			$errors_connection[] = "Couple nom d'utilisateur / mot de passe inexistant.";
 
-			// On r�affiche le formulaire de connexion
+			// On réaffiche le formulaire de connexion
 			
 			/*** Variables ***/
-			$this->mvc->template->errors_connection = $errors_connection;
+			$this->mvc->Template->errors_connection = $errors_connection;
 
 			/*** Affichage ***/
-			$this->mvc->template->show('auth/index');
+			$this->mvc->Template->show('auth/index');
 		}
 
 	} else {
 
-		// On r�affiche le formulaire de connexion
+		// On réaffiche le formulaire de connexion
 		/*** Variables ***/
-		$this->mvc->template->errors_connection = $errors_connection;
+		$this->mvc->Template->errors_connection = $errors_connection;
 
 		/*** Affichage ***/
-		$this->mvc->template->show('auth/index');
+		$this->mvc->Template->show('auth/index');
 	}
 			
 }
@@ -158,30 +222,39 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	/*********************************************/
 	/* Forgot password				 			 */
 	/*********************************************/
-	public function forgotpassword(){
-
+	public function forgotpassword()
+	{
 	$this->setInfo('sitemap', true);
-	$this->setInfo('page_title', 'Forgot Password');
-	$this->mvc->template->link_registration = url('index.php?module=auth&action=subscribe');
-	$this->mvc->template->link_forgotpassword = url('index.php?module=auth&action=forgotpassword');
+	$this->mvc->Page->setPageTitle('Mot de passe oublié');
+	$this->mvc->Template->link_registration = Router::url('auth/subscribe');
+	$this->mvc->Template->link_forgotpassword = Router::url('auth/forgotpassword');
 	
-		if ( (isSet($_POST['forgot'])) AND (!empty($_POST['forgot'])) )
+		if ( isSet($this->mvc->Request->data->mailmember) )
 		{
-		
-		$info_user = Auth::searchMemberByMail(trim($_POST['forgot']));
+		$memberModel = $this->loadModel('Member');
+		$sql = array(
+		'conditions' => array( 
+			'mailmember' => strtolower(trim($this->mvc->Request->data->mailmember))
+			)
+			
+			);
+		$info_user = $memberModel->findFirst($sql);
 
-	
 		$errors_forgot=array();
-			if ($info_user != false)
+			if (!empty($info_user))
 			{
-			// G�n�re le nouveau mots de passe
+			// Génére le nouveau mots de passe
 			$pass = NULL;
 			$charlist = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz0123456789';
 			$ps_len = strlen($charlist);
 			mt_srand((double)microtime()*1000000);
+	
 
+				// Formule pour générer un mot de passe
 				for($i = 0; $i < 6; $i++) { $pass .= $charlist[mt_rand(0, $ps_len - 1)]; }
-				if (Auth::updatePassword($info_user['idmember'] , $pass, $info_user['loginmember']))
+				
+				//Auth::updatePassword($info_user->idmember , $pass, $info_user->loginmember)
+				if ($memberModel->changePassword($info_user->idmember, $info_user->loginmember, $pass))
 				{
 				// Preparation du mail
 				$message_mail = '<html><head></head><body>
@@ -189,37 +262,34 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 					Rappel de vos identifiants de connection.
 				</p>
 				<p>
-					Your user name : '.$info_user['loginmember'].'<br />
+					Your user name : '.$info_user->loginmember.'<br />
 					Your password : '.$pass.'
 				</p>
 				<hr>
 				IP demandeur: '.Securite::ipX().'
 				En cas d\'abus ou d\'utilisation par un tiers, n\'h&eacute;sitez; pas &agrave; nous le faire savoir.
 				</body></html>';
-				$mail_send = new Mail('New password <'.$_SERVER['SERVER_NAME'].'>', $message_mail, $info_user['mailmember'], ADMIN_MAIL);
-				$this->mvc->template->mailStatus = $mail_send->sendMailHtml();
-				$this->mvc->template->user = $info_user['loginmember'];
-				$this->mvc->template->show('auth/forgotpassword_success');
+				$mail_send = new Mail('New password <'.__CW_PATH.'>', $message_mail, $info_user->mailmember, ADMIN_MAIL);
+				$this->mvc->Template->mailStatus = $mail_send->sendMailHtml();
+				$this->mvc->Template->user = $info_user->loginmember;
+				$this->mvc->Template->show('auth/forgotpassword_success');
 				}
 				else // Erreur modification password
-				{
-				$errors_forgot[] = "Une erreur c'est produite lors de la modification du mot de passe.<br  />
-				Veuillez contacter l'administrateur du site.";
-				
-				$this->mvc->template->errors_forgotpassword = $errors_forgot;
-				$this->mvc->template->show('auth/forgotpassword');
+				{				
+				$this->mvc->Session->setFlash("Une erreur c'est produite lors de la modification du mot de passe.<br  />
+				Veuillez contacter l'administrateur du site.", 'error');
+				$this->mvc->Template->show('auth/forgotpassword');
 				}
 			}
 			else // Membre introuvable
 			{
-			$errors_forgot[] = "Votre adresse de messagerie est introuvable.";
-			$this->mvc->template->errors_forgotpassword = $errors_forgot;
-			$this->mvc->template->show('auth/forgotpassword');
+			$this->mvc->Session->setFlash("Votre adresse de messagerie est introuvable.", 'error');
+			$this->mvc->Template->show('auth/forgotpassword');
 			}
 		}
 		else
 		{
-		$this->mvc->template->show('auth/forgotpassword');
+		$this->mvc->Template->show('auth/forgotpassword');
 		}
 		
 	
@@ -235,189 +305,165 @@ $this->mvc->template->link_forgotpassword = url('index.php?module=login&action=f
 	/*********************************************/
 	public function logout(){
 	$this->setInfo('sitemap', false);
-	$this->setInfo('page_title', 'Confirmation de d�connexion');
+	$this->mvc->Page->setPageTitle('Confirmation de déconnexion');
 	
-		if (isSet($_SESSION['user']['pseudo']))
-		{
-		$this->mvc->template->user = $_SESSION['user']['pseudo'];
-		Auth::updateLastactivity($_SESSION['user']['id']);
-		}
-		else
-		{
-		header("location: ".__CW_PATH);die();
-		}
+	
 		
-	// Suppression de toutes les variables et destruction de la session
-	$_SESSION = array();
-	
-	$_SESSION['user']['power_level'] = 1;
 	// Suppression des cookies de connexion automatique
 	setcookie('id', '', 0, '/');
 	setcookie('connection_auto', '', 0, '/');
-	header("Refresh: 5;url=".__CW_PATH);
-	$this->mvc->template->show('auth/logout');
+	$this->mvc->Session->setFlash('<strong>'.$this->mvc->Session->user('loginmember').'</strong>, vous &ecirc;tes maintenant d&eacute;connect&eacute;.');
+	
+	$this->mvc->Session->logout();
+	Router::redirect('');
 	}
 	
 	
 	public function subscribe()
 	{
-	// Include captcha
-	//include 'captcha.php';
 	$this->setInfo('sitemap', true);
-	$this->setInfo('page_title', 'Cr&eacute;ation d\'un compte');
-	
-	
-	
+	$this->mvc->Page->setPageTitle('Cr&eacute;ation d\'un compte');
 
+	$Captcha = new Captcha();
+	$errorCount=0;
 	
-	$email = (isSet($_POST['mail'])) ? $_POST['mail'] : NULL;
-		$this->mvc->template->email = $email;
-	$password = (isSet($_POST['password'])) ? $_POST['password'] : NULL;
-		$this->mvc->template->password = $password;
-	$passwordother = (isSet($_POST['otherpassword'])) ? $_POST['otherpassword'] : NULL;
-	$login = (isSet($_POST['user'])) ? $_POST['user'] : NULL;
+	if (isSet($this->mvc->Request->data->loginmember))
+	{
 	
-	$cleaner = strtr($login, 
-	'����������������������������������������������������', 
+	$loginmember = strtr($this->mvc->Request->data->loginmember, 
+	'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ', 
 	'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy');
-	$login = preg_replace('/([^.a-z0-9]+)/i', '-', $cleaner);
-		$this->mvc->template->login = $login;
+	$loginmember = preg_replace('/([^.a-z0-9]+)/i', '-', $loginmember);
+	$this->mvc->Request->data->loginmember = trim($loginmember, '-');
 	
-		if (isSet($_POST['otherpassword']))
+	
+	$subscribe = $this->loadModel('Member');
+		if ($subscribe->validates($this->mvc->Request->data,$subscribe->subscribe))
 		{
-		$errors_registration = array();
-		$declare_coche = (isSet($_POST['declare_coche'])) ? $_POST['declare_coche'] : NULL;
-		$email = (isSet($_POST['mail'])) ? $_POST['mail'] : NULL;
-		$password = (isSet($_POST['password'])) ? $_POST['password'] : NULL;
-		$passwordother = (isSet($_POST['otherpassword'])) ? $_POST['otherpassword'] : NULL;
-		$login = (isSet($_POST['user'])) ? $_POST['user'] : NULL;
-		
-			if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-			{
-				$errors_registration[] = "Votre email est incorrect!";
-			}
-			
-			if (strlen($password) < 6)
-			{
-				$errors_registration[] = "Votre mot de passe est trop court (min 6 caract&egrave;res) !";
-			}
-			
-			if ($password != $passwordother)
-			{
-				$errors_registration[] = "Votre mot de passe est diff&eacute;rent de la v&eacute;rification !";
-			}
-			
-			if ($declare_coche==null)
-			{
-				$errors_registration[] = "Vous devez lire et accepter les conditions g&eacute;n&eacute;rales d'utilisation";
-			}
-			
-			$Captcha = new Captcha();
+			// Anti robot
 			if ($Captcha->checkCaptcha()==false)
 			{
-			$errors_registration[] = "Le captcha anti-robot est incorrect";
+			$errorCount++;
+			}
+			// Mot de passe
+			if ($this->mvc->Request->data->passmember != $this->mvc->Request->data->otherpassword)
+			{
+			$errorCount++;
+			$subscribe->errors['othermember'] = 'Les mot de passes doivent être identique';
+			}
+			// Pseudo
+			if (strlen($this->mvc->Request->data->loginmember) < 5)
+			{
+			$errorCount++;
+			$subscribe->errors['loginmember'] = 'Votre pseudo est trop court (min: 5 car. alphanumérique)';
+			}
+			if ($subscribe->searchMemberByLogin($this->mvc->Request->data->loginmember))
+			{
+			$errorCount++;
+			$subscribe->errors['loginmember'] = 'Ce pseudo est déjà utilisé';
 			}
 			
+			// Mail
+			$this->mvc->Request->data->mailmember = strtolower($this->mvc->Request->data->mailmember);
+			if ($subscribe->searchMemberByMail($this->mvc->Request->data->mailmember))
+			{
+			$errorCount++;
+			$subscribe->errors['mailmember'] = 'Cette adresse e-mail est déjà utilisé';
+			}
+		
+			// conditions générales d'utilisation
+			if ($this->mvc->Request->data->declare_coche == '0')
+			{
+			$errorCount++;
+			$subscribe->errors['declare_coche'] = 'Vous devez accepter les conditions générales d\'utilisation';
+			}
+			
+			/**
+			*	Si il y a pas d'erreur 
+			*/
+			if ($errorCount == 0)
+			{
 
-			if (Auth::searchMemberByLogin($login) != false)
-			{
-			$errors_registration[] = "Ce nom d'utilisateur est d&eacute;j&agrave; utilis&eacute;.";
-			}
-			elseif (Auth::searchMemberByMail(strtolower($email)) != false)
-			{
-			$errors_registration[] = "Cette adresse e-mail est d&eacute;j&agrave; utilis&eacute;e.";
-			}
-			
-			if (count($errors_registration))
-			{
-			
-				$this->mvc->template->errors_registration=$errors_registration;
-				$this->mvc->template->captcha_img = Captcha::generateImgTags("..");
-				$this->mvc->template->captcha_hidden = Captcha::generateHiddenTags();
-				$this->mvc->template->captcha_input = Captcha::generateInputTags();
-				/*** Affichage ***/
-				$this->mvc->template->show('auth/subscribe');
-			}
-			else
-			{
-			
 
 				$hash_validation = md5(uniqid(rand(), true));
-				// On transforme la chaine en entier
-				$id_user = (int) $id_user;
-				// Preparation du mail
-				
-				$message_mail = '<html>
-				<body>
-				<p>
-				Bonjour '.$login.'.<br />
-				Merci pour votre inscription sur Imagine Your Craft. <br />
-				Voici le lien &agrave; suivre pour valider votre compte :
-				<a href="'.url('index.php?module=auth&action=validate&hash='.$hash_validation).'">'.url('index.php?module=auth&action=validate&hash='.$hash_validation).'</a><br /><br />
-				Merci.
-				</p>
-				
-				<p>
-				Pour rappel :<br />
-				Login: '.$login.'<br />
-				Mot de passe: '.$password.'<br />
-				<br />
-				Les r&ecirc,gles que vous avez accept�:<br />
-				'.__CGU.'
-				
-				</p>
-				
-				</body>
-				</html>';
-				
-				$mail_send = new Mail('['.SITE_NAME.'] Confirmation d\'inscription',$message_mail,strtolower($email), ADMIN_MAIL);
+// Preparation du mail			
+$message_mail = '<html>
+<body>
+<p>
+Bonjour '.$login.'.<br />
+Merci pour votre inscription sur '.$this->mvc->Page->getSiteTitle().'. <br />
+Voici le lien &agrave; suivre pour valider votre compte :
+<a href="'.Router::url('auth/validate/?hash='.$hash_validation).'">'.Router::url('auth/validate/?hash='.$hash_validation).'</a><br /><br />
+Merci.
+</p>
+
+<p>
+Pour rappel :<br />
+Login: '.$this->mvc->Request->data->loginmember.'<br />
+Mot de passe: '.$this->mvc->Request->data->passmember.'<br />
+</p>
+
+</body>
+</html>';
+$mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] Confirmation d\'inscription',$message_mail,$this->mvc->Request->data->mailmember, ADMIN_MAIL);
 				$mail_send->sendMailHtml() or die('Mail restriction, can not send');
-			
-			
-				Auth::addMember($login, $password, $email, $hash_validation);
-				$this->mvc->template->show('auth/subscribe_success');
+// loginmember		mailmember	validemember	levelmember	groupmember	firstactivitymember	lastactivitymember	hash_validation			
+				$data = new stdClass();
+				$data->loginmember = $this->mvc->Request->data->loginmember;
+				$data->passmember = $subscribe->genPass($this->mvc->Request->data->loginmember, $this->mvc->Request->data->passmember);
+				$data->mailmember = $this->mvc->Request->data->mailmember;
+				$data->levelmember = 1;
+				$data->firstactivitymember = time();
+				$data->lastactivitymember = time();
+				$data->hash_validation = $hash_validation;
+				$subscribe->save($data);
+				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.');
+				Router::redirect();
 			}
+			
 		
 		}
-		else
-		{
+		
+		$this->mvc->Form->setErrors($subscribe->errors);
+	}	
+
 	
-	//	$this->mvc->template->flag = $cw_flag;
-		$this->mvc->template->errors_registration=NULL;
-		$this->mvc->template->captcha_img = Captcha::generateImgTags("..");
-		$this->mvc->template->captcha_hidden = Captcha::generateHiddenTags();
-		$this->mvc->template->captcha_input = Captcha::generateInputTags();
+	//	$this->mvc->Template->flag = $cw_flag;
+		$this->mvc->Template->errors_registration=NULL;
+		$this->mvc->Template->captcha_img = Captcha::generateImgTags("..");
+		$this->mvc->Template->captcha_hidden = Captcha::generateHiddenTags();
+		$this->mvc->Template->captcha_input = Captcha::generateInputTags();
 		/*** Affichage ***/
-		$this->mvc->template->show('auth/subscribe');
+		$this->mvc->Template->show('auth/subscribe');
 		
-		}
+
 	}
 
 
 	public function validate()
 	{
-	
-	$this->setInfo('sitemap', false);
-	$this->setInfo('page_title', 'V&eacute;rification du compte');
+	$this->mvc->Page->setPageTitle('V&eacute;rification du compte');
 	$hash = (isSet($_GET['hash'])) ? $_GET['hash'] : null;
-		// On v�rifie qu'un hash est pr�sent
+		// On vérifie qu'un hash est présent
 		if (!empty($hash)) {
+		$validate = $this->loadModel('Member');
 		
-			// valider_compte_avec_hash() est d�finit dans ~/modeles/membres.php
-			if (Auth::checkHash($hash)==true)
+			// valider_compte_avec_hash() est définit dans ~/modeles/membres.php
+			if ($validate->checkHash($hash)==true)
 			{
 				/*** Affichage ***/
-				$this->mvc->template->show('auth/subscribe_verified');
-			// CheckHash return false, request is invalid
+				$this->mvc->Session->setFlash('Votre compte est maintenant validé.<br>Vous pouvez vous connecter.');
+				Router::redirect();
 			} else {
 				/*** Affichage ***/
-				$this->mvc->template->show('auth/subscribe_invalid');
+				$this->mvc->Session->setFlash('Une erreur c\'est produite, peut-être que votre compte est déjà validé.', 'error');
+				Router::redirect();
 			}
 
 		}
 		else
 		{
-		header('location: http://www.crystal-web.org');die();
+		header('location: '.__CW_PATH);die();
 		}
 	}
 	

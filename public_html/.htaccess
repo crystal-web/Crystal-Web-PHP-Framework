@@ -1,5 +1,9 @@
-RewriteEngine OnErrorDocument 404 /index.php?module=error404
-# Compression <filesmatch ".(php|html|css|js)$">SetOutputFilter DEFLATE</filesmatch>
-# Force cache<ifmodule mod_expires.c><filesmatch ".(jpg|jpeg|png|gif|js|css|swf|ico)$">ExpiresActive onExpiresDefault "access plus 1 week"</filesmatch></ifmodule>
-### FILTRE CONTRE XSS, REDIRECTIONS HTTP, base64_encode, VARIABLE PHP GLOBALS VIA URL, MODIFIER VARIABLE _REQUEST VIA URL, TEST DE FAILLE PHP, INJECTION SQL SIMPLE
-RewriteCond %{REQUEST_METHOD} (GET|POST) [NC]RewriteCond %{QUERY_STRING} ^(.*)(%3C|<)/?script(.*)$ [NC,OR]RewriteCond %{QUERY_STRING} ^(.*)(%3D|=)?javascript(%3A|:)(.*)$ [NC,OR]#RewriteCond %{QUERY_STRING} ^(.*)document\.location\.href(.*)$ [OR]RewriteCond %{QUERY_STRING} ^(.*)(%3D|=)http(%3A|:)(/|%2F){2}(.*)$ [NC,OR] ## ATTENTION A CETTE REGLE. ELLE PEUT CASSER CERTAINES REDIRECTIONS RESSEMBLANT A: http://www.truc.fr/?r=http://www.google.fr ##RewriteCond %{QUERY_STRING} ^(.*)base64_encode(.*)$ [OR]RewriteCond %{QUERY_STRING} ^(.*)GLOBALS(=|[|%[0-9A-Z]{0,2})(.*)$ [OR]RewriteCond %{QUERY_STRING} ^(.*)_REQUEST(=|[|%[0-9A-Z]{0,2})(.*)$ [OR]RewriteCond %{QUERY_STRING} ^(.*)(SELECT|INSERT|DELETE|CHAR\(|UPDATE|REPLACE|LIMIT)(.*)$RewriteRule (.*) - [F]
+SetEnv PHP_VER 5
+SetEnv REGISTER_GLOBALS 0
+
+#ErrorLog logs.txt
+AddDefaultCharset utf-8
+RewriteEngine On
+#RewriteCond %{REQUEST_FILENAME} !-d    #provoque un appel au dossier si un dossier nomm comme un controller existe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule (.*) index.php/$1 [L]

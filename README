@@ -8,21 +8,25 @@
 Information:
 -----------
 Open-Source depuis le 11 février 2012
-Version: 12.02		(YY.MM)
+Version: 12.03		(YY.MM)
 Auteur: Christophe BUFFET
 Description: Système MVC permettant au développeurs PHP de réaliser
 	des sites web, rapidement et efficacement.
 
-
+Nécésite: PHP 5, une base de donnée et mod_rewrite on
 
 Installation:
 ------------
 
 Modifier le fichier /includes/init.php
+
 Indiquer les informations pour votre script
 Chmod en 777 est requis pour application/cache
 Chmod en 777 est requis pour public_html/files/tmp
+Chmod en 777 est requis pour public_html/media
+Chmod en 777 est requis pour public_html/plugins
 
+En cas d'erreur, merci de prendre contact
 
 
 Information de license:
