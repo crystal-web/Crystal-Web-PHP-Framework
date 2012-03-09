@@ -719,5 +719,27 @@ public function admin_config(){
 	$this->mvc->Template->show('article/post404');
 	}
 }
+
+
+
+public function rss()
+{
+$this->loadconfig();
+
+// Les article
+$articleModel = $this->loadModel('Article');
+	$articleModel->type = 'article';
+	$articleModel->page = 1;
+	
+	$config['postParPage'] = 30;
+	$articleModel->config = $config;	
+$this->mvc->Template->article = $articleModel->getArticleList();
+
+$this->mvc->Template->show('article/rss');
+$this->mvc->Page->setLayout('empty');
+
+
+}
+
 }
 ?>

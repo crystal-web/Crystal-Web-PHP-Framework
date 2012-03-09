@@ -54,9 +54,14 @@ Router::connect('espace-membre/deconnection',
 /***************************************
 *	Slider
 ***************************************/
-Router::connect('slidepop',
-				'sliderpop/pop');
-
+Router::connect('sliderpop',
+				'sliderpop');
+Router::connect('slidepop/:id-:stat',
+				'sliderpop/id:([0-9]+)/stat:([0-1])');
+Router::connect('sliderpop/efface-:id',
+				'sliderpop/del/id:([0-9]+)');		
+Router::connect('sliderpop/editer-:id',
+				'sliderpop/edit/id:([0-9]+)');	
 				
 /***************************************
 *	Media

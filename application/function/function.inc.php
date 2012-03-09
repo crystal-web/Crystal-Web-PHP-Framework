@@ -511,22 +511,24 @@ else return floatval($reg[1]);
 */
 function truncatestr($string, $lengthMax, $safe_word=true)
 {
-if (strlen($string) < $lengthMax) return $string;
-
-	// Séléction du maximum de caractères
-	$string = substr($string, 0, $lengthMax);
+if (strlen($string) < $lengthMax) { return $string; }
+	
 	if ($safe_word == true)
 	{
 	// Récupération de la position du dernier espace (afin déviter de tronquer un mot)
 	$position_espace = strrpos($string, " ");
-	$string = substr($string, 0, $position_espace);
+		if ($position_espace)
+		{
+		$string = substr($string, 0, $position_espace);
+		}
 	}
 	else
 	{
 	$string = substr($string, 0, $lengthMax);
 	}
 	// Ajout des "..."
-	return $string."...";
+	$string .= '...';
+	return $string;
 }
 
 

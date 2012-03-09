@@ -8,10 +8,10 @@ if ($this->mvc->Session->isLogged())
 	{
 	?><span style="float:right;">
 	<a href="#"  data-controls-modal="delpost" data-backdrop="true" data-keyboard="true" onclick="delPost('<?php echo Router::url('article/admin_delpost/id:'.$output->id); ?>');">
-		<img src="<?php echo __CDN; ?>/files/images/icons/eraser.png" alt="Editon">
+		<img src="<?php echo __CDN; ?>/files/images/icons/eraser.png" alt="Suppression">
 	</a>
 	<a href="<?php echo Router::url('article/admin_addpost/id:'.$output->id); ?>">
-		<img src="<?php echo __CDN; ?>/files/images/icons/newspaper--pencil.png" alt="Suppression">
+		<img src="<?php echo __CDN; ?>/files/images/icons/newspaper--pencil.png" alt="Editon">
 	</a></span>
 	<?php
 	}

@@ -10,37 +10,18 @@
 -->
 <head>
 	<title><?php echo $mvc->Page->getPageTitle() . ' | ' . $mvc->Page->getSiteTitle(); ?></title>
- 
+	<link rel="alternate" type="application/rss+xml" title="Toutes les actus (RSS)" href="<?php echo Router::url('article/rss'); ?>" />
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
-	<meta http-equiv="content-language" content="" />
-	<meta name="dc.title" content="<?php echo $mvc->Page->getPageTitle() . ' | ' . $mvc->Page->getSiteTitle(); ?>" />
-	<meta name="language" content="fr">
+
 	<link rel="icon" type="image/x-icon" href="<?php echo __CW_PATH; ?>/favicon.ico">
 	<link rel="icon" type="image/png" href="<?php echo __CW_PATH; ?>/favicon.png">
 	
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 
 	<link rel="stylesheet" href="http://cdn.crystal-web.org/files/css/bootstrap/1.4.0/bootstrap.min.css">
 	<?php echo $mvc->Page->getHeader(); ?>
+	<link rel="stylesheet" type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
+	
 
-<link rel=stylesheet type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
-		<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-dropdown.js">$('#topbar').dropdown();</script>
-	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-tabs.js">$('.tabs').tabs();</script>
-	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-alerts.js">$(".alert-message").alert();</script>
-	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/tablesorter.js"></script>
-	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-twipsy.js"></script>
-	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-modal.js"></script>	
-	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-popover.js"></script>
-	<script>
-	$(function () {
-		  $("a[rel=popover]")
-			.popover({
-			  offset: 10
-			})
-		})
-	</script>
-	<script  type="text/javascript" src="http://cdn.crystal-web.org/files/js/common.js"></script>
 <style type="text/css">
 body{
 background-color: whiteSmoke;
@@ -52,7 +33,7 @@ background-color: whiteSmoke;
 	<div class="topbar">
 		<div class="fill">
 			<div class="container">
-				<h3><a data-placement="below" rel="popover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="<?php echo $mvc->Page->getSiteTitle(); ?>"><?php echo $mvc->Page->getSiteTitle(); ?></a></h3>
+				<h3><a data-placement="below" class="relpopover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="<?php echo $mvc->Page->getSiteTitle(); ?>"><?php echo $mvc->Page->getSiteTitle(); ?></a></h3>
 				<ul>
 					<li><a href="<?php echo Router::url('article'); ?>">Article</a></li>
 					<li><a href="<?php echo Router::url('calendar'); ?>">Calendrier</a></li>
@@ -94,12 +75,11 @@ background-color: whiteSmoke;
 	$adminSiderbar[] = array(
 					'title' => 'Dashbord',
 					'data' => array(
-						'Configuration'						=> Router::url('admin/conf'),
 						'Alerte'							=> Router::url('alert'),
 						'Plugin'							=> Router::url('plugin'),
-						'Controle systeme'					=> Router::url('admin/control'), 
-						'Serveur Healt'						=> Router::url('admin/heal')
+						'Slider'							=> Router::url('sliderpop'),
 					));
+					
 	$adminSiderbar[] = array(
 					'title' => 'Articles',
 					'data' => array(
@@ -161,7 +141,7 @@ getOperatorSidebar($adminSiderbar);
 					</audio>
 					<div onmouseover="audioElement.play();">
 						<a href="http://dyraz.com">
-							<img src="http://beta.crystal-web.org/media/image/png/logo.81.png" alt="" />
+							<img src="http://beta.crystal-web.org/media/image/png/logo.81.png" alt="Dyraz.com">
 						</a>
 					</div><script type="text/javascript">var audioElement = document.getElementById(\'pl\');
 					</script>';				
@@ -237,10 +217,15 @@ getOperatorSidebar($adminSiderbar);
 					</div>
 
 					<div id="boxcontent">
-						<iframe frameborder="0" scrolling="auto" background="transparent" src="http://beta.crystal-web.org/about/" style="border-style: initial; border-color: initial; border-image: initial;height: 100%; width: 100%; "></iframe>
+						<iframe src="http://beta.crystal-web.org/about/" style="border: 1px dotted whiteSmoke;height: 100%; width: 100%; "></iframe>
 					</div>
 				</div>
-				<p><a data-placement="above" data-original-title="A propos de Crystal-web.org" data-content="Conception et r&eacute;alisation de site web" rel="popover" href="#" onclick="document.getElementById('shadowing').style.display='block';document.getElementById('box').style.display='block';">Powered by Crystal-Web Solution</a><?php  if (__DEV_MODE) { echo '<br>Page générée en '. round(microtime(true) - $debut,5).' secondes '; } ?></p>
+				
+				<p>
+				<a data-placement="above" data-original-title="A propos de Crystal-web.org" data-content="Conception et r&eacute;alisation de site web" class="relpopover" href="#" onclick="document.getElementById('shadowing').style.display='block';document.getElementById('box').style.display='block';">Powered by Crystal-Web Solution</a>
+				
+				<?php  if (__DEV_MODE) { echo '<br>Page générée en '. round(microtime(true) - $debut,5).' secondes '; } ?>
+				</p>
 			</div>
 			
 		</div>
@@ -267,6 +252,31 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 </div>
 </div>
 
+
+
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-dropdown.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-tabs.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-alerts.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/tablesorter.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-twipsy.js"></script>
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-modal.js"></script>	
+	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-popover.js"></script>
+	<script type="text/javascript">
+	<!-- 
+	$(function () {
+		  $(".relpopover")
+			.popover({
+			  offset: 10
+			})
+		})
+	$('.tabs').tabs();
+	$(".alert-message").alert();
+	$('#topbar').dropdown();
+	-->
+	</script>
+	<script  type="text/javascript" src="http://cdn.crystal-web.org/files/js/common.js"></script>
 </body>
 </html>
 

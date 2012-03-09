@@ -7,13 +7,13 @@
 
 Information:
 -----------
-Open-Source depuis le 11 fÃ©vrier 2012
+Open-Source depuis le 11 février 2012
 Version: 12.03		(YY.MM)
 Auteur: Christophe BUFFET
-Description: SystÃ¨me MVC permettant au dÃ©veloppeurs PHP de rÃ©aliser
+Description: Système MVC permettant au développeurs PHP de réaliser
 	des sites web, rapidement et efficacement.
 
-NÃ©cessite: PHP 5, une base de donnÃ©e et mod_rewrite on
+Nécessite: PHP 5, une base de donnée et mod_rewrite on
 
 Installation:
 ------------
@@ -38,12 +38,12 @@ http://creativecommons.org/licenses/by/2.0/fr/
 
 ---------------------------------------------------
 
-Soyer honnÃªte, si vous utilisez le script de quelqu'un, indiquÃ© qui est le propriÃ¨taire.
+Soyer honnête, si vous utilisez le script de quelqu'un, indiqué qui est le propriètaire.
 Dans le cas contraire, vous risquez de tuer le partage et les ressources open-sources, qui font la richesse de l'internet actuelle.
 
 
 Projet soutenu par: 
 ------------------
 
-http://Dyraz.com - L'herbergeur web, mais pas que...
-http://ImagineYourCraft.com - Serveur MineCraft hautement modÃ©.
+Dyraz.com - L'herbergeur web, mais pas que...
+ImagineYourCraft.com - Serveur MineCraft hautement modé.

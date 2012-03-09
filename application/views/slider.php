@@ -5,7 +5,7 @@ $this->mvc->Page->setHeaderJs(__CDN.'/files/js/carousel/carousel.js');
 	if(count($sliderList))
 	{
 	?>
-		<script type="text/javascript" language="javascript">
+		<script type="text/javascript">
 			$(function() {
 				$("#slider").carouFredSel({
 					width: 870,
@@ -44,7 +44,7 @@ $this->mvc->Page->setHeaderJs(__CDN.'/files/js/carousel/carousel.js');
 	foreach($sliderList AS $key => $data){ ?>
 		<div class="slide">
 			<a href="<?php echo $data->link; ?>">
-			<img src="<?php echo $data->image; ?>" width="870" height="400" />
+			<img src="<?php echo $data->image; ?>" width="870" height="400" title="<?php echo $data->title; ?>">
 			</a>
 			<div>
 				<h4><?php echo $data->title; ?></h4>
