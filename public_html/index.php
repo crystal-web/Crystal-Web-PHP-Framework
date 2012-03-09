@@ -53,11 +53,6 @@ $mvc->config = $oCwConfig->getCache();
 $mvc->Template = new Template($mvc);
 $mvc->Template->setPath(__VIEWS);
 
-/*** load html ***/
-$mvc->html = new html($mvc);
-$mvc->html->setSrcCss(__CDN . '/files/css/common.css');
-$mvc->html->setSrcScript(__CDN . '/files/js/common.js');
-
 /*** load page ***/
 $mvc->Page = new Page();
 $mvc->Page->setSiteTitle(isSet($mvc->config['sitename']) ? $mvc->config['sitename'] : 'Crystal-Web');
