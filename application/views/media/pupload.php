@@ -75,7 +75,7 @@ return 'ATTENTION\nSi un upload est en cours, il sera perdu !!';
 	  border: 1px solid #4c8932;
 	  height: 18px;
 	  width: 10%;
-	  background: url(progress.jpg) repeat;
+	  background: url(<?php echo __CDN; ?>/files/images/progress.jpg) repeat;
 	  -webkit-animation: progress 2s linear infinite;
 	  -moz-border-radius: 25px;
 	  -webkit-border-radius: 25px;
@@ -143,4 +143,4 @@ return 'ATTENTION\nSi un upload est en cours, il sera perdu !!';
 
 	<script type="text/javascript" src="<?php echo __CDN; ?>/files/js/plupload/plupload.html5.js"></script>
 
-	<script type="text/javascript" src="<?php echo __CW_PATH; ?>/files/js/pupload.js"></script>
+	<script type="text/javascript" src="<?php echo __CW_PATH; ?>/files/js/man-media.js"></script>

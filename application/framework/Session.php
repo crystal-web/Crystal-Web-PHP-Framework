@@ -107,6 +107,12 @@ class Session{
 			return $_SESSION['user']->idmember;
 			}
 		break;
+		case 'login':
+			if (isset($_SESSION['user']->loginmember))
+			{
+			return $_SESSION['user']->loginmember;
+			}
+		break;
 		case 'level':
 			if (isset($_SESSION['user']->levelmember))
 			{

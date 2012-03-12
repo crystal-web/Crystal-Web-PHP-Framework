@@ -34,8 +34,13 @@ define ('__DEV_MODE', true);
 $err = (__DEV_MODE) ? error_reporting(-1) : error_reporting(0);
 
 $http = (isSet($_SERVER['HTTPS'])) ? 'https' : 'http';
-//$sitePath = $http . '://' . $_SERVER['SERVER_NAME'] . preg_replace('#(index\.php)#i', '', $_SERVER['REQUEST_URI']);
-//$sitePath = trim($sitePath, '/');
+/*
+	/!\ Si différent de racine /!\
+Vous devez aussi modifier le .htaccess
+
+ex: define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME'].'/monsite');
+SANS SLASH FINAL
+*/
 define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME']); // Site url/~hurricane
 
 
@@ -52,6 +57,11 @@ $mvc->config = $oCwConfig->getCache();
 /*** load up the template ***/
 $mvc->Template = new Template($mvc);
 $mvc->Template->setPath(__VIEWS);
+
+/*** load html ***/
+$mvc->html = new html($mvc);
+$mvc->html->setSrcCss(__CDN . '/files/css/common.css');
+$mvc->html->setSrcScript(__CDN . '/files/js/common.js');
 
 /*** load page ***/
 $mvc->Page = new Page();

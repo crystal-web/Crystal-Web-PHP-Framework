@@ -18,7 +18,7 @@ Class Calendar extends Model{
 	
 	public function install()
 	{
-	$this->query("CREATE TABLE IF NOT EXISTS `".__SQL."_Calendar` (
+	$this->query("CREATE TABLE IF NOT EXISTS `iyc__Calendar` (
   `id` int(11) NOT NULL auto_increment,
   `year` int(4) NOT NULL,
   `month` int(2) NOT NULL,
@@ -28,6 +28,7 @@ Class Calendar extends Model{
   `minute` int(2) NOT NULL,
   `label` enum('default','success','warning','important','notice') NOT NULL default 'default',
   `labelword` varchar(11) NOT NULL,
+  `id_member` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;");
 	

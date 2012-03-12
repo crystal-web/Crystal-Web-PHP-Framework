@@ -108,6 +108,7 @@ $req=array(
 				__SQL .'_ForumPost AS ForumPost'		=> 'ForumSujet.last_post_id = ForumPost.id',
 				__SQL .'_ForumTopic AS ForumTopic'		=> 'ForumPost.topic_id = ForumTopic.id',
 				__SQL .'_Member AS Member'				=> 'ForumPost.auteur = Member.idmember'),
+	'order'		=> 'cat_id ASC',
 	);
 
 /***************************************

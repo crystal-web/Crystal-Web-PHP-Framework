@@ -23,15 +23,6 @@ $filePath = __APP_PATH . DS . 'libs' . DS . $filename;
 
 function loadSystem()
 {
-	// Make me protect
-	if(!__DEV_MODE)
-	{
-	/**
-	* Anti-ClickJacking
-	* Pas de iFrame du site
-	*/
-	header('X-Frame-Options: DENY');
-	}
 require_once __APP_PATH . DS . 'framework' . DS . 'mvc.php';
 require_once __APP_PATH . DS . 'framework' . DS . 'Model.php';
 require_once __APP_PATH . DS . 'framework' . DS . 'Dispatcher.php';

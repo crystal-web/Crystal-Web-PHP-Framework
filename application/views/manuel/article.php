@@ -37,7 +37,7 @@ foreach ($article as $data)
 {
 echo '<div class="clearfix">
 <div style="margin-bottom: 18px;" class="item" id="'.$data->id.'">
-<h2><a href="' . Router::url('article/post/slug:' . $data->titre . '/id:' . $data->id) . '">' . stripcslashes($data->titre) . '</a>';
+<h2><a href="' . Router::url('article/post/slug:' . $data->titre . '/id:' . $data->id) . '">' . $data->titre . '</a>';
 
 
 	if ($showDate) 

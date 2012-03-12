@@ -16,11 +16,13 @@ private $controller;
 private $action;
 private $fullPower = false;
 private $request;
-
+public $log=array();
 	public function __construct($request, $group)
 	{
+	$this->log[] = 'Construction...';
 		if (is_int($group))
 		{
+		$this->log[] = 'Has guest';
 		// Has guest 
 		$this->idGroup=0;
 		}
@@ -30,6 +32,7 @@ private $request;
 			// C'est un admin
 			if ($group != '*')
 			{
+			$this->log[] = 'is not a grant' . $group;
 			$this->idGroup = explode('|',trim($group, '|'));
 			}
 			/***************************************
@@ -37,6 +40,7 @@ private $request;
 			***************************************/
 			else
 			{
+			$this->log[] = 'is a grant';
 			$this->fullPower = true;
 			}
 		}

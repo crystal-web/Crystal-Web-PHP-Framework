@@ -49,6 +49,8 @@ Router::connect('espace-membre/enregistrement',
 				'auth/subscribe');
 Router::connect('espace-membre/deconnection',
 				'auth/logout');
+Router::connect('espace-membre/validate/:hash',
+				'auth/validate/hash:([a-z0-9\-]+)');
 
 				
 /***************************************
