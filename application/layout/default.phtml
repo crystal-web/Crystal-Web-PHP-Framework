@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <!--
 /************************************************/
 /*	  	.:: Par Buffet Christophe ::.	  		*/
@@ -9,66 +9,39 @@
 /************************************************/
 -->
 <head>
+	<meta charset="utf-8">
 	<title><?php echo $mvc->Page->getPageTitle() . ' | ' . $mvc->Page->getSiteTitle(); ?></title>
 	<link rel="alternate" type="application/rss+xml" title="Toutes les actus (RSS)" href="<?php echo Router::url('article/rss'); ?>" />
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
-
 	<link rel="icon" type="image/x-icon" href="<?php echo __CW_PATH; ?>/favicon.ico">
 	<link rel="icon" type="image/png" href="<?php echo __CW_PATH; ?>/favicon.png">
 	
 
 	<link rel="stylesheet" href="http://cdn.crystal-web.org/files/css/bootstrap/1.4.0/bootstrap.min.css">
-	<?php echo $mvc->Page->getHeader(); ?>
-	<link rel="stylesheet" type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
-	
 
-<style type="text/css">
-body{
-background-color: whiteSmoke;
+	<link rel="stylesheet" type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
+	<link rel="stylesheet" type="text/css" href="<?php echo __CW_PATH; ?>/files/css/main.css">
+	
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="<?php echo __CW_PATH; ?>/files/js/main.js"></script>
+	<?php 
+	echo $mvc->Page->getHeader();
+echo '<style type="text/css">
+#header{
+width: 980px;
+height:150px;
+margin:auto;
+background: url("'.__CW_PATH.'/files/images/minecraft-'.rand(1,3).'.png") repeat 0 0;
 }
-</style>
+</style>';
+	?>
 
 </head>
 <body id="top" <?php echo $mvc->Page->getBody(); ?>>
-	<div class="topbar">
-		<div class="fill">
-			<div class="container">
-				<h3><a data-placement="below" class="relpopover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="<?php echo $mvc->Page->getSiteTitle(); ?>"><?php echo $mvc->Page->getSiteTitle(); ?></a></h3>
-				<ul>
-					<li><a href="<?php echo Router::url('article'); ?>">Article</a></li>
-					<li><a href="<?php echo Router::url('calendar'); ?>">Calendrier</a></li>
-					<li><a href="<?php echo Router::url('forum'); ?>">Forum</a></li>
-				</ul>
-				<?php
-				if (!$mvc->Session->isLogged())
-				{
-				?>
-				<form action="<?php echo Router::url('auth'); ?>" method="post" class="pull-right">
-				<span style="color:#fff;">Connection auto :</span> <input type="checkbox" name="connection_auto">
-				<input class="input-small" type="text" name="loginmember" placeholder="Pseudo">
-				<input class="input-small" type="password" name="passmember" placeholder="Password">
-				<button class="btn" type="submit">Sign in</button>
-				<a href="<?php echo Router::url('auth/subscribe'); ?>" class="btn primary">Subscribe Now</a>
-				</form>
-				<?php
-				}
-				else
-				{
-				?>
-				<ul class="nav secondary-nav">
-					<li class="dropdown" data-dropdown="dropdown"><a href="http://www.imagineyourcraft.com/~minecraft/index.php?module=news" class="dropdown-toggle">User Panel</a>
-					<ul class="menu-dropdown">
-						<li><a href="http://www.imagineyourcraft.com/~minecraft/index.php?module=admin">Tableau de bord</a></li>
-						<li><a href="<?php echo Router::url('auth/logout'); ?>">Déconnection</a></li>
-					</ul>
-					</li>
-				</ul>
-				<?php
-				}
-				?>
-			</div>
-		</div>
-	</div>
+
+
+
 <?php if ($mvc->Acl->isGrant())
 {
 	$adminSiderbar = array();
@@ -94,54 +67,86 @@ background-color: whiteSmoke;
 					'data' => array(
 						'Ajout d\'une catégorie'			=> Router::url('forum/admin_category'),
 						'Ajouter d\'un sujet'		=> Router::url('forum/admin_sujet')
-					));
-					
-getOperatorSidebar($adminSiderbar);
+					));			
+echo getOperatorSidebar($adminSiderbar);
 }
 ?>
 
+<div id="header"></div>
+<!-- go menu -->
+<div class="topbar">
+	<div class="fill">
+	<div class="container">
+	<h3><a data-placement="below" class="relpopover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="SocialCoding">P4F-Craft<small>.fr</small></a></h3>
+	<ul>
+		<li><a href="<?php echo Router::url('article'); ?>">Article</a></li>
+		<li><a href="<?php echo Router::url('calendar'); ?>">Calendrier</a></li>
+		<li><a href="<?php echo Router::url('forum'); ?>">Forum</a></li>
+	</ul>
+	<?php
+	if (!$mvc->Session->isLogged())
+	{
+	?>
+	<ul class="nav">
+		<li class="dropdown" data-dropdown="dropdown"><a href="#" class="dropdown-toggle">Menu</a>
+			<ul class="menu-dropdown">
+				<li><a href="<?php echo Router::url('auth'); ?>">Connection</a></li>
+				<li><a href="<?php echo Router::url('auth/subscribe'); ?>">Inscription</a></li>
+			</ul>
+		</li>
+	</ul>
+	<?php
+	}
+	else
+	{
+	?>
+	<ul class="nav">
+		<li class="dropdown" data-dropdown="dropdown"><a href="#" class="dropdown-toggle"><?php echo $mvc->Session->user('login'); ?></a>
+			<ul class="menu-dropdown">
+				<li><a href="<?php echo Router::url('auth/logout'); ?>">Déconnection</a></li>
+			</ul>
+		</li>
+	</ul>
+	<?php
+	}
+	?>
+<div class="flippit">
+	<a href="https://github.com/crystal-web/CMS-for-Developer-PHP" title="Fork me on gitHub"><img src="http://crystal-web.org/media/image/png/github.png" alt="" style="float: right;
+	position: absolute;right: 80px;padding-top: 5px;width: 32px;margin-bottom: auto;" class="flippthis"></a>
+	<a href="http://www.facebook.com/pages/Crystal-Web/245977352158634" title="Follow me on Facebook"><img src="http://crystal-web.org/media/image/png/facebook-32.png" alt="" style="float: right;
+	position: absolute;right: 45px;padding-top: 5px;width: 32px;margin-bottom: auto;" class="flippthis"></a>
+	<a href="https://twitter.com/@crystalPHP" title="Follow me on Twitter"><img src="http://crystal-web.org/media/image/png/twitter-32.png" alt="" style="float: right;
+	position: absolute;right: 10px;padding-top: 5px;width: 32px;margin-bottom: auto;" class="flippthis"></a>
+</div>
+	
+	
+	</div>
+	</div>
+</div>
+<!-- Stop Menu -->
 
 	<div class="container">
 		<div class="content" id="swithcontenu">
-	
 
-	
-			<div class="row"  style="margin-top:60px;">
-				<div class="span16">
-					<ul class="breadcrumb">
-						<li><a href="<?php echo __CW_PATH; ?>" title="Page d'accueil">Accueil</a> <span class="divider">/</span></li>
-<?php 
-	if (count($fil = $mvc->Page->getBreadcrumb()))
-	{
-		foreach($fil AS $url => $name)
-		{
-			echo '<li><a href="' . Router::url($url) . '" title="' . $name .'">' . $name .'</a> <span class="divider">/</span></li>';
-		}
-	}
-	
-	echo '<li>'.$mvc->Page->getPageTitle().'</li>';
-?>
-						
-					</ul>
-				</div>
-			</div>
-			<div class="row">
+			<div class="row" style="margin-top:30px;">
+			
+			
 				<?php
 				$col = 16;
 				$menu = NULL;
-				if (count($mvc->Page->getMenu())>0)
-				{
+				/*if (count($mvc->Page->getMenu())>0)
+				{//*/
 				$col = 12;
 				$menu = '<div class="span4"><div class="sidebar">'.PHP_EOL.'<div class="well">';
 	
 					$menu .= '
 					<audio style="hidden" id="pl">
-						<source src="http://beta.crystal-web.org/media/audio/mp3/dyraz.mp3"></source>
-						<source src="http://beta.crystal-web.org/media/audio/ogg/dyraz.ogg"></source>
+						<source src="http://www.crystal-web.org/media/audio/mp3/dyraz.mp3"></source>
+						<source src="http://www.crystal-web.org/media/audio/ogg/dyraz.ogg"></source>
 					</audio>
 					<div onmouseover="audioElement.play();">
 						<a href="http://dyraz.com">
-							<img src="http://beta.crystal-web.org/media/image/png/logo.81.png" alt="Dyraz.com">
+							<img src="http://www.crystal-web.org/media/image/png/logo.81.png" alt="Dyraz.com">
 						</a>
 					</div><script type="text/javascript">var audioElement = document.getElementById(\'pl\');
 					</script>';				
@@ -156,14 +161,52 @@ getOperatorSidebar($adminSiderbar);
 					$menu .= '</ul>';
 
 					}
-				$menu .= '	</div>'.PHP_EOL.'</div></div>';
-				}
+				$menu .= '<h5><img src="http://crystal-web.org/media/image/png/twitter-32.png" alt="" style="float: left;" class="flippthis">&nbsp;&nbsp;Twitter news</h5><div id="twitterStatus" class="twitter_status"></div>
+				
+				<h5><img src="http://crystal-web.org/media/image/png/github.png" alt="" style="float: left;" class="flippthis">&nbsp;&nbsp;SocialCoding</h5>
+				<ul>
+					<li><a href="https://github.com/crystal-web/CMS-for-Developer-PHP">CMS-for-Developer-PHP</a></li>
+				</ul>			
+				
+				</div>'.PHP_EOL.'</div>
+				
+						</div>';
+				// }
 				?>
 				<!-- Page content -->
 				<div class="span<?php echo $col; ?>">
+				
+<?php 
+/***************************************
+*	Fil arian
+***************************************/			
+?>			
+<ul class="breadcrumb">
+	<li><a href="<?php echo __CW_PATH; ?>" title="Page d'accueil">Accueil</a> <span class="divider">/</span></li>
+<?php 
+if (count($fil = $mvc->Page->getBreadcrumb()))
+{
+foreach($fil AS $url => $name)
+{
+echo '<li><a href="' . Router::url($url) . '" title="' . $name .'">' . $name .'</a> <span class="divider">/</span></li>';
+}
+}
+
+echo '<li>'.$mvc->Page->getPageTitle().'</li>';
+?>
+	
+</ul>
+<?php 
+/***************************************
+*	END Fil arian
+***************************************/			
+?>
+					
+					
 					<div class="page-header">
-						<h1><?php echo $mvc->Page->getSiteTitle(); ?><small>, <?php echo $mvc->Page->getPageTitle(); ?></small></h1>
+						<h1><?php echo $mvc->Page->getPageTitle(); ?></h1>
 					</div>
+					<div class="space"></div>
 				<?php				
 				echo $mvc->Session->flash();
 				echo $mvc->contenu;
@@ -199,7 +242,6 @@ getOperatorSidebar($adminSiderbar);
 					<li><a href="http://fragforfun.tk/">Clan Frag For Fun</a><br>Site complête, signature dynamique</li>
 					<li><a href="http://www.imagineyourcraft.com/~minecraft">Imagine Your Craft</a><br>News & serveur manager</li>
 				</ul>
-				<p><a class="btn" href="#">View details »</a></p>
 				</div>
 			</div>			
 			
@@ -217,7 +259,7 @@ getOperatorSidebar($adminSiderbar);
 					</div>
 
 					<div id="boxcontent">
-						<iframe src="http://beta.crystal-web.org/about/" style="border: 1px dotted whiteSmoke;height: 100%; width: 100%; "></iframe>
+						<iframe src="http://crystal-web.org/about/" style="border: 1px dotted whiteSmoke;height: 100%; width: 100%; "></iframe>
 					</div>
 				</div>
 				
@@ -254,8 +296,7 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 
 
 
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
 	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-dropdown.js"></script>
 	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-tabs.js"></script>
 	<script type="text/javascript" src="http://cdn.crystal-web.org/files/js/bootstrap/1.4.0/bootstrap-alerts.js"></script>
@@ -277,6 +318,7 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 	-->
 	</script>
 	<script  type="text/javascript" src="http://cdn.crystal-web.org/files/js/common.js"></script>
+	<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/CrystalPHP.json?callback=twitterCallback2&amp;count=5"></script>	
 </body>
 </html>
 

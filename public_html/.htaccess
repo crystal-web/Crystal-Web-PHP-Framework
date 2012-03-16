@@ -1,7 +1,6 @@
+#ErrorLog logs.txt
 AddDefaultCharset utf-8
 RewriteEngine On
-# Base path, si suppérieur a la racine rajouté le dossier
-# exemple.ext/monsite/ RewriteBase /monsite/
 RewriteBase /
 #RewriteCond %{REQUEST_FILENAME} !-d    #provoque un appel au dossier si un dossier nomm comme un controller existe
 RewriteCond %{REQUEST_FILENAME} !-f

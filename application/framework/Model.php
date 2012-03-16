@@ -19,7 +19,8 @@ Class Model {
 		
 		// Nom de la table
 		if($this->table === false){
-			$this->table = __SQL.'_'.get_class($this); 
+			$this->tableAs = preg_replace('#Model#', '', get_class($this));
+			$this->table = __SQL.'_'.$this->tableAs; 
 		}
 		$this->errors = array();
 		
@@ -104,7 +105,7 @@ Class Model {
 				$sql.='*';
 			}
 
-			$sql .= ' FROM '.$this->table.' as '.get_class($this).' ';
+			$sql .= ' FROM '.$this->table.' as '.$this->tableAs.' ';
 
 			// Liaison
 			if(isset($req['join'])){
@@ -180,6 +181,7 @@ Class Model {
 			'fields' => 'COUNT('.$this->primaryKey.') as count',
 			'conditions' => $conditions
 			));
+		
 		return $res->count;  
 	}
 

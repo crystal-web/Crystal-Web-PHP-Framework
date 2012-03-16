@@ -1,5 +1,8 @@
 <?php
-echo '<section id="article">';
+echo '<section id="article"><span class="cal m'.date('n', $output->date).' d'.date('j', $output->date).'">
+<span class="m">'.date('M', $output->date).'</span>
+<span class="d">'.date('j', $output->date).'</span>
+</span>';
 
 if ($this->mvc->Session->isLogged())
 {
@@ -19,8 +22,7 @@ if ($this->mvc->Session->isLogged())
 
 // Article
 
-echo '<p><span class="text-right" style="color:red;font-size:12px;">R&eacute;dig&eacute; le '. dates($output->date, 'fr_date') . '</span></p>
-	' . stripcslashes($output->content) . '
+echo stripcslashes($output->content) . '
 </section>';
  
  

@@ -58,7 +58,7 @@ public $log=array();
 	/***************************************
 	*	Demande si l'utilisateur a le droit
 	***************************************/
-	public function isAllowed($allowedParams=NULL)
+	public function isAllowed($controler=NULL, $action='*')
 	{
 
 		/***************************************
@@ -68,6 +68,12 @@ public $log=array();
 		{
 		return true;
 		}
+		
+		if(!empty($controler))
+		{
+			$searchThisAcl = $controler.'.'.$action;
+		}
+		
 
 		/***************************************
 		*	On charge le model
@@ -105,23 +111,14 @@ public $log=array();
 									or
 							$v->controller == $this->controlCodeGrant)
 						{
-
-							/***************************************
-							*	Si on demande un paramettre particulier
-							*	EN TEST
-							***************************************/
-							if (!is_null($allowedParams))
+							return true;
+						}
+						elseif(isSet($searchThisAcl))
+						{
+							if ($v->controller == $searchThisAcl)
 							{
-								if (preg_match('#'.$allowedParams.'#Ui', $v->params))
-								{
-								return true;
-								}
+							return true;						
 							}
-							else
-							{
-								return true;
-							}
-
 						}
 					}
 				}
@@ -146,9 +143,10 @@ public $log=array();
 	*	Methode privé
 	***************************************/
 	private function loadModel($name)
-	{		
+	{
+	$name = $name.'Model';
 	// L'endroit ou le model est chargé
-	$file = __APP_PATH . DS . 'model' . DS . $name . '.model.php';
+	$file = __APP_PATH . DS . 'model' . DS . $name . '.php';
 		if (file_exists($file))
 		{
 		require_once $file;

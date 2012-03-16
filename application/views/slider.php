@@ -1,5 +1,6 @@
 <?php
-$this->mvc->Page->setHeaderCss(__CDN.'/files/css/carousel/carousel.css');
+//$this->mvc->Page->setHeaderCss(__CDN.'/files/css/carousel/carousel.css');
+$this->mvc->Page->setHeaderCss(__CW_PATH.'/files/css/carousel.css');
 $this->mvc->Page->setHeaderJs(__CDN.'/files/js/carousel/carousel.js');
 
 	if(count($sliderList))
@@ -8,7 +9,7 @@ $this->mvc->Page->setHeaderJs(__CDN.'/files/js/carousel/carousel.js');
 		<script type="text/javascript">
 			$(function() {
 				$("#slider").carouFredSel({
-					width: 870,
+					width: 620,
 					items 		: 1,
 					direction	: "up",
 					auto : {
@@ -44,7 +45,7 @@ $this->mvc->Page->setHeaderJs(__CDN.'/files/js/carousel/carousel.js');
 	foreach($sliderList AS $key => $data){ ?>
 		<div class="slide">
 			<a href="<?php echo $data->link; ?>">
-			<img src="<?php echo $data->image; ?>" width="870" height="400" title="<?php echo $data->title; ?>">
+			<img src="<?php echo $data->image; ?>" width="620" height="400" title="<?php echo $data->title; ?>">
 			</a>
 			<div>
 				<h4><?php echo $data->title; ?></h4>

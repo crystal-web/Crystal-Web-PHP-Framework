@@ -102,4 +102,7 @@ Router::connect('etok/historique',
 ***************************************/
 Router::connect('shop/:slug-:id',
 				'shop/slug:([a-z0-9\-]+)/id:([0-9]+)');	
+				
+Router::connect('click/:url',
+				'click/url:(.*+)');	
 ?>

@@ -35,15 +35,6 @@ private $config;
 /*** Methode ***/
 
 
-	public function getInfo(){
-	
-	return $this->module;
-	}
-
-	public function setInfo($name, $is){
-	$this->module[$name]=$is;
-	return $this->module;
-	}
 	
 /*** Methode ***/
 // Chargement de la configuration
@@ -108,7 +99,6 @@ private function loadconfig()
 */
 public function index() 
 {
-$this->setInfo('sitemap', true);
 $this->loadconfig();
 
 $this->mvc->Page->setBreadcrumb('article','Article')
@@ -129,8 +119,11 @@ $articleModel = $this->loadModel('Article');
 	$articleModel->config = $this->config;
 	$articleModel->page = $this->mvc->Request->page;
 	
-$article = $articleModel->getArticleList();
+$nb_article= 0;
+if ( $article = $articleModel->getArticleList() )
+{
 $nb_article = $articleModel->findCount(array('online' =>  'y'));
+}
 
 $this->mvc->Template->article = $article;
 // END Les article
@@ -155,17 +148,11 @@ $this->mvc->Template->show('article/article');
 */
 public function cat()
 {
+$this->loadconfig();
 $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id'] : 0;
 $this->mvc->Template->isCategory=$id;
-$this->setInfo('sitemap', true);
-$this->loadconfig();
-
-$this->mvc->Page->setBreadcrumb('article','Article');
-
-// Variables
-$this->mvc->Template->pagi_actif = $this->config['pagi_actif'];
-$this->mvc->Template->nombreDePages = $this->config['postParPage'];
-
+$this->mvc->Page->setBreadcrumb('article','Article')
+				->setPageTitle($this->config['titre_article']);
 
 // Edito et config
 $this->mvc->Template->com_actif = $this->config['com_actif'];
@@ -178,31 +165,29 @@ $this->mvc->Template->edito_content = $this->config['edito_content'];
 
 // Les article
 $articleModel = $this->loadModel('Article');
-$articleModel->type = 'article';
-$articleModel->config = $this->config;
-$articleModel->page = $this->mvc->Request->page;
+	$articleModel->type = 'article';
+	$articleModel->config = $this->config;
+	$articleModel->page = $this->mvc->Request->page;
+	
+$article = $articleModel->getArticleList($id);
+$nb_article = $articleModel->findCount(array('online' =>  'y', 'categorieid' => $id));
 
-
-$data = $articleModel->getArticleList($id);
-$this->mvc->Template->article = $data;
+$this->mvc->Template->article = $article;
 // END Les article
 
+	/***************************************
+	*	Combien de page ?
+	***************************************/
+	$nb_page = ceil( $nb_article / $this->config['postParPage'] );
+	$this->mvc->Template->nb_page	= $nb_page;
 
 
-
-	// Si on a des article dans la categorie
-	if (count($data))
-	{
-		$this->mvc->Page->setPageTitle($data[0]->categorie);
-		$this->mvc->Template->show('article/article');
-	}
-	else
-	{
-		Router::error(404);
-		$this->setInfo('sitemap', false);
-		$this->mvc->Page->setPageTitle('Page not found');
-		$this->mvc->Template->show('article/post404');
-	}
+$this->mvc->Template->nb_article = $nb_article;;
+$this->mvc->Template->pagi_actif = $this->config['pagi_actif'];
+$this->mvc->Template->nombreDePages = $this->config['postParPage'];
+$this->mvc->Template->isCategory=false;
+$this->mvc->Template->show('article/article');
+	
 }
 
 /*
@@ -237,12 +222,12 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 	
 		if (!empty($uniqueData->id))
 		{
+		$articleModel->hit($uniqueData->id);
 			// Information sur la page
-			$this->setInfo('sitemap', true);
 
 			$this->mvc->Page->setBreadcrumb('article','Article');
 			$this->mvc->Page->setBreadcrumb('article/cat/slug:'.$uniqueData->categorie.'/id:'.$uniqueData->categorieid,$uniqueData->categorie);
-			$this->mvc->Page->setPageTitle($uniqueData->titre);
+			$this->mvc->Page->setPageTitle(stripcslashes($uniqueData->titre));
 
 			// Template 
 			$this->mvc->Template->com_actif = $this->config['com_actif'];
@@ -254,7 +239,6 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 		else
 		{
 			Router::error(404);
-			$this->setInfo('sitemap', false);
 			$this->mvc->Page->setPageTitle('Page not found');
 			$this->mvc->Template->show('article/post404');
 		}
@@ -266,7 +250,6 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 // Ajout d'un commentaire
 public function commentpost()
 {
-$this->setInfo('sitemap', false);
 $this->loadconfig();
 
 	if ($this->config['com_actif'] && $this->mvc->Session->token())
@@ -298,7 +281,6 @@ $this->loadconfig();
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -405,7 +387,6 @@ public function admin_addcat()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -429,12 +410,20 @@ $this->loadconfig();
 	$this->mvc->Page->setPageTitle('R&eacute;daction d\'un article');
 	$articlecat = $this->loadModel('ArticleCat');
 	$articlecat->type = 'article';
-
+	
+	$categorieid=array();
 
 		foreach ($articlecat->getCategorie('?') AS $k => $v)
 		{
 		$categorieid[$v->idcategorie] = $v->categorie . ' ('.$v->nb.')'; 
 		}
+	
+	if (!count($categorieid))
+	{
+	$this->mvc->Session->setFlash('Vous n\'avez aucune catégorie');
+	Router::redirect('article/admin_addcat');
+	
+	}
 	
 	$id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id'] : 0;
 
@@ -510,7 +499,6 @@ $this->loadconfig();
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -543,7 +531,6 @@ public function admin_delpost()
 			else
 			{
 			Router::error(404);
-			$this->setInfo('sitemap', false);
 			$this->mvc->Page->setPageTitle('Page not found');
 			$this->mvc->Template->show('article/post404');
 			}
@@ -551,7 +538,6 @@ public function admin_delpost()
 		else
 		{
 		Router::error(404);
-		$this->setInfo('sitemap', false);
 		$this->mvc->Page->setPageTitle('Page not found');
 		$this->mvc->Template->show('article/post404');
 		}
@@ -559,7 +545,6 @@ public function admin_delpost()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -593,7 +578,6 @@ public function getlist()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -638,7 +622,6 @@ public function admin_comment()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -714,7 +697,6 @@ public function admin_config(){
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}

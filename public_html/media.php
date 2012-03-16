@@ -10,7 +10,6 @@ $url = preg_replace('#'.$_SERVER['SCRIPT_URL'].'#','', $_SERVER['SCRIPT_URI']).'
 return get_headers($url, 1);
 }
 
-
 if (isSet($_GET['thumb']) && !empty($_GET['thumb']))
 {
 
@@ -28,8 +27,6 @@ if (isSet($_GET['thumb']) && !empty($_GET['thumb']))
 	$img = imagecreatefrompng($file);
 	$save='imagepng';
 	}
-	
-
 	
 	$x = imagesx($img);
 	$y = imagesy($img);
@@ -92,6 +89,7 @@ imagefilledrectangle($image,0,0,$width,$height,$bgCol);
 header("Content-type: image/png");
 imagepng($image);
 imagedestroy($image);
+
 }
 else
 {

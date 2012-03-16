@@ -42,7 +42,7 @@ $listCat = $forum->getCategorie($userLevel, false, $groupList);
 	/***************************************
 	*	Test si la catégorie existe 
 	***************************************/
-	if (isSet($listCat[0]))
+	if (isSet($listCat[0]) && !empty($listCat[0]->cat_id))
 	{
 	$this->mvc->Template->listCat = $listCat;
 	$this->mvc->Template->show('forum/categorie');
@@ -503,6 +503,131 @@ $this->e404('no_sujet');
 *
 ***************************************/
 
+public function move_it()
+{
+if (!$this->mvc->Acl->isAllowed())
+{
+return $this->e404();
+}
+
+/***************************************
+*	Si moveto exist on demande un deplacement
+***************************************/
+if (isSet($this->mvc->Request->data->moveto) && isSet($this->mvc->Request->data->topic_id))
+{
+/***************************************
+*	Charge les infos du topic a deplacer
+***************************************/
+$topic = $this->loadModel('ForumTopic');
+$findTopic = array(
+	'conditions' => array('id' => $this->mvc->Request->data->topic_id)
+	);
+$topicinfo = $topic->findFirst($findTopic);
+
+	/***************************************
+	*	Si topicinfo retourne false, le topic n'existe pas
+	***************************************/
+	if ($topicinfo)
+	{
+	/***************************************
+	*	On doit modifier, le nb_post, nb_topic
+	*	savoir si le derniere post du sujet de notre topic est le dernier post
+	***************************************/
+
+	
+	
+		
+		/***************************************
+		*	On charge les infos du sujet du topic a deplacer
+		***************************************/
+		$sujet = $this->loadModel('ForumSujet');
+		$findSujet = array(
+			'conditions' => array(
+				'id'			=> $topicinfo->sujet_id
+				)
+			);
+		$sujetBeforeMove = $sujet->findFirst($findSujet);
+
+		
+		/***************************************
+		*	On charge les infos du sujet dans lequel on déplace
+		***************************************/
+		$findSujetToMove = array(
+			'conditions' => array(
+				'id'			=> $this->mvc->Request->data->moveto
+				)
+			);
+		$sujetToMove = $sujet->findFirst($findSujetToMove);
+
+
+
+		
+		/***************************************
+		*	Si le last_post_id est different de celui de topicinfo
+		*	alors ce n'est pas le derniere
+		***************************************/
+
+		// Attribue les nouvelles valeurs a l'ancien sujet
+		$changeSujetBefore			= new stdClass();
+		$changeSujetBefore->id		= $topicinfo->sujet_id;
+		$changeSujetBefore->nb_topic= $sujetBeforeMove->nb_topic - 1;
+		$changeSujetBefore->nb_post	= $sujetBeforeMove->nb_post - $topicinfo->nb_post;
+		
+		
+		$changeSujetMove			= new stdClass();
+		$changeSujetMove->id		= $sujetToMove->id;
+		$changeSujetMove->nb_topic	= $sujetToMove->nb_topic + 1;
+		$changeSujetMove->nb_post	= $sujetToMove->nb_post + $topicinfo->nb_post;
+		
+		// Enregistre les modifications
+		if ($sujet->save($changeSujetBefore) && $sujet->save($changeSujetMove))
+		{
+		
+			/***************************************
+			*	On modifie le topic et lui donne la nouvelle adresse
+			***************************************/
+			$changeTopic			= new stdClass();
+			$changeTopic->id		= $this->mvc->Request->data->topic_id;
+			$changeTopic->sujet_id	= $this->mvc->Request->data->moveto;
+
+			if ($topic->save($changeTopic))
+			{
+			// On attribue les nouvelles valeurs au sujet 
+			// dans lequel on deplace
+
+			
+			/*
+			$updSujet = new stdClass();
+			$updSujet->id			= $this->mvc->Request->data->moveto;
+			$updSujet->nb_topic		= +1
+			$updSujet->nb_post		= $topicinfo->nb_post//*/
+			
+			
+			//debug($topic->sql);
+			$this->mvc->Session->setFlash('Topic déplacé');
+			//Router::redirect('forum/topic/slug:'.$topicinfo->titre.'/id:'.$this->mvc->Request->data->topic_id);
+			}
+			
+		}
+
+
+	}
+	else
+	{
+	$this->mvc->Session->setFlash('Erreur, topic introuvable','warning');
+	Router::redirect('forum');
+	}
+
+
+}
+else
+{
+$this->mvc->Session->setFlash('Impossible de déplacer, le topic n\'a pas été choisi','warning');
+Router::redirect('forum');
+}
+
+
+}
 
 /***************************************
 *	
@@ -531,7 +656,7 @@ $catgorie = $this->loadModel('ForumCat');
 	$this->mvc->Form->setErrors($catgorie->errors);
 	}
 }
-$this->mvc->Page->setPageTitle('Création d\'une catégorie');
+$this->mvc->Page->setPageTitle('Création d\'une catégorie')->setBreadcrumb('forum', 'Forum');
 
 echo '<form method="post">'.
 	$this->mvc->Form->input('name', 'Titre de la catégorie: ').
@@ -539,6 +664,8 @@ echo '<form method="post">'.
 	$this->mvc->Form->input('submit', 'Enregistrer', array('type'=> 'submit')).
 	'</form>';
 }
+
+
 
 public function admin_sujet()
 {
@@ -556,9 +683,10 @@ $catList = $cat->getCategory();
 ***************************************/
 if (!count($catList))
 {
-$this->mvc->Session->setFlash('Créé d\'abord une catégorie');
+$this->mvc->Session->setFlash('Créé d\'abord une catégorie', 'warning');
 Router::redirect('forum/admin_category');
 }
+$this->mvc->Page->setPageTitle('Création d\'un sujet')->setBreadcrumb('forum', 'Forum');
 
 $memberGroup = $this->loadModel('MemberGroup');
 $groupList = $memberGroup->find(array('order'=>'MemberGroup.id ASC'));
@@ -641,7 +769,7 @@ if ($this->mvc->Request->data)
 	}
 }
 
-echo '<div style="float:right;width:400px;">
+echo '<div style="float:right;width:300px;">
 Information:<br>
 <ul>
 <li>Lorsque vous définissez un groupe, celui-ci est maître.</li>

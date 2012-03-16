@@ -42,7 +42,10 @@ echo '<div class="clearfix">
 
 	if ($showDate) 
 	{
-	echo '<span class="right" style="color:red;font-size:12px;padding-top:3px;">R&eacute;dig&eacute; le '.dates($data->date, 'fr_date').'</span>';
+	echo '<span class="cal m'.date('n', $data->date).' d'.date('j', $data->date).'">
+<span class="m">'.date('M', $data->date).'</span>
+<span class="d">'.date('j', $data->date).'</span>
+</span>';
 	echo '</h2>'.TronqueHtml(stripcslashes($data->content), 280, ' ', ' ...');
 	echo '<span class="text-right"><a href="' . Router::url('article/post/slug:' . $data->titre . '/id:' . $data->id) . '"  style="color: #3485CC;font-weight:bold;">Lire la suite ...</a></span>';	
 	}

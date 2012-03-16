@@ -91,9 +91,33 @@ $groupList = explode('|', $this->mvc->Session->user('group'));
 	***************************************/
 	if ($listTopic[0]->auth_post <= $this->mvc->Session->user('level')  OR in_array($listTopic[0]->groupid, $groupList) OR $groupList[0] == '*')
 	{
+	
+	/***************************************
+	*	Si l'utilisateur a le droit de déplacer le topic
+	***************************************/
+	if ($this->mvc->Acl->isAllowed('forum','move_it'))
+	{
+?>
+<form method="post" action="<?php echo Router::url('forum/move_it'); ?>">
+<div>
+<input type="hidden" name="topic_id" value="<?php echo $listTopic[0]->topicId; ?>">
+<select name="moveto" id="moveto">
+	<option value="2">J'aimerai deplacer</option>
+</select>
+<input type="submit" value="Déplacer" class="btn primary">
+</div>
+</form>
+<?php
+	}	
+	
 	echo '<form action="' . Router::url('forum/respon/slug:'.$listTopic[0]->titre.'/id:'.$listTopic[0]->topicId) . '?token=' . $this->mvc->Session->getToken() . '" method="post">
 '.  $this->mvc->Form->input('message', '', array('type'=>'textarea','editor'=>''));
 
+
+	/***************************************
+	*	Si il n'est pas connecté
+	*	Mais qu'il peut répondre on affiche le captcha
+	***************************************/
 	if (!$this->mvc->Session->isLogged())
 	{
 	echo '<div class="clearfix">
@@ -108,11 +132,6 @@ $groupList = explode('|', $this->mvc->Session->user('group'));
 echo $this->mvc->Form->input('submit', 'Répondre', array('type' => 'submit', 'class'=>'btn success'));
 echo '</form>';
 	}
+
+
 ?>
-
-
-
-
-
-
-

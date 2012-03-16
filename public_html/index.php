@@ -34,13 +34,8 @@ define ('__DEV_MODE', true);
 $err = (__DEV_MODE) ? error_reporting(-1) : error_reporting(0);
 
 $http = (isSet($_SERVER['HTTPS'])) ? 'https' : 'http';
-/*
-	/!\ Si différent de racine /!\
-Vous devez aussi modifier le .htaccess
-
-ex: define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME'].'/monsite');
-SANS SLASH FINAL
-*/
+//$sitePath = $http . '://' . $_SERVER['SERVER_NAME'] . preg_replace('#(index\.php)#i', '', $_SERVER['REQUEST_URI']);
+//$sitePath = trim($sitePath, '/');
 define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME']); // Site url/~hurricane
 
 
@@ -58,14 +53,11 @@ $mvc->config = $oCwConfig->getCache();
 $mvc->Template = new Template($mvc);
 $mvc->Template->setPath(__VIEWS);
 
-/*** load html ***/
-$mvc->html = new html($mvc);
-$mvc->html->setSrcCss(__CDN . '/files/css/common.css');
-$mvc->html->setSrcScript(__CDN . '/files/js/common.js');
+
 
 /*** load page ***/
 $mvc->Page = new Page();
-$mvc->Page->setSiteTitle(isSet($mvc->config['sitename']) ? $mvc->config['sitename'] : 'Crystal-Web');
+$mvc->Page->setSiteTitle(isSet($mvc->config['sitename']) ? $mvc->config['sitename'] : 'P4F Craft');
 
 
 $mvc->Dispatcher = new Dispatcher($mvc);

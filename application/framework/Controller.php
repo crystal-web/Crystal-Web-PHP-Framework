@@ -8,41 +8,19 @@
 class Controller{
 
 protected $mvc;
-private $module=array(
-	'sitemap' => false,	// Doit être dans le sitemap ?
-	'title' => NULL,	// Titre du module
-	'page_title' => NULL,	// Titre page courante
-	'breadcrumb' => array('news' => 'News'),	// breadcrumb hierarchy $url => $title
-	'isAdmin' => false,		// C'est une page admin ?
-	'aside' => array(),	// Aside, est majoritairement utilisé poour l'admin
-	);
 
 	/*** Cree un nouveau controleur ***/
-	function __construct($mvc) {
+	function __construct($mvc)
+	{
 		$this->mvc = $mvc;
-
-		if ( $this->mvc->Request->action == 'setinfo' or $this->mvc->Request->action == 'getinfo')
-		{
-		die('<html><head><title>403 Forbidden access</title></head><body><h1>Forbidden access</h1><p>You don\'t have permission to access this page.</p><a href="http://www.crystal-web.org">http://www.crystal-web.org</a></body></html>');
-		}
 	}
 
-	public function getInfo(){
-	return $this->module;
-	}
-
-	public function setInfo($name, $is){
-	$this->module[$name]=$is;
-	return $this->module;
-	}
 	
-	/*** tous les controleurs doivent contenir une methode d'indexation ***/
+	/*** tous les controleurs doivent contenir une methode index ***/
 	public function index()
 	{
-	$this->setInfo('title', 'Systeme');
-	$this->setInfo('page_title', 'Method index notfound');
-	$this->setInfo('sitemap', false);
-	echo '<div class="MSGbox MSGalerte"><p>Chaque controller doit avoir une m&eacute;thode index</p></div>';
+	$this->mvc->Page->setPageTitle('Method index notfound');
+	$this->mvc->Session->setFlash('Chaque controller doit avoir une m&eacute;thode index', 'error');
 	}
 	
 	/**
@@ -50,8 +28,9 @@ private $module=array(
 	*/
 	public function loadModel($name)
 	{		
+	$name = $name.'Model';
 	// L'endroit ou le model est chargé
-	$file = __APP_PATH . DS . 'model' . DS . $name . '.model.php';
+	$file = __APP_PATH . DS . 'model' . DS . $name . '.php';
 		if (file_exists($file))
 		{
 		require_once $file;

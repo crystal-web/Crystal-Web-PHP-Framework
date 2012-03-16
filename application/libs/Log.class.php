@@ -35,9 +35,15 @@ private $logDate;
 	}
 
 
-	public function log($module, $action)
+	public function error($msg, $module, $action, $level='notice')
 	{
-	$this->arrCache[] = $module .' ' . Securite::ipX().' '.$action;
+	$this->arrCache[] = array(
+			'msg'		=> $msg,				// Information 
+			'module'	=> $module,				// Module / Controller
+			'action'	=> $action,				// Action / methode
+			'ip'		=> Securite::ipX(),		// IP client
+			'level' 	=> $level				// niveau d'erreur
+			);
 	}
 	
 	public function getLog()
