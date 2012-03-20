@@ -58,7 +58,7 @@ public $log=array();
 	/***************************************
 	*	Demande si l'utilisateur a le droit
 	***************************************/
-	public function isAllowed($controler=NULL, $action='*')
+	public function isAllowed($allowedParams=NULL)
 	{
 
 		/***************************************
@@ -68,12 +68,6 @@ public $log=array();
 		{
 		return true;
 		}
-		
-		if(!empty($controler))
-		{
-			$searchThisAcl = $controler.'.'.$action;
-		}
-		
 
 		/***************************************
 		*	On charge le model
@@ -111,14 +105,23 @@ public $log=array();
 									or
 							$v->controller == $this->controlCodeGrant)
 						{
-							return true;
-						}
-						elseif(isSet($searchThisAcl))
-						{
-							if ($v->controller == $searchThisAcl)
+
+							/***************************************
+							*	Si on demande un paramettre particulier
+							*	EN TEST
+							***************************************/
+							if (!is_null($allowedParams))
 							{
-							return true;						
+								if (preg_match('#'.$allowedParams.'#Ui', $v->params))
+								{
+								return true;
+								}
 							}
+							else
+							{
+								return true;
+							}
+
 						}
 					}
 				}

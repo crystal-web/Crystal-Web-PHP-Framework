@@ -69,40 +69,5 @@ Router::connect('sliderpop/editer-:id',
 *	Media
 ***************************************/
 Router::connect('media/del/:id',
-				'media/delete/id:([0-9]+)');				
-
-				
-/***************************************
-*	Forum
-***************************************/
-Router::connect('forum/categorie-:slug-:id',
-				'forum/cat/slug:([a-z0-9\-]+)/id:([0-9]+)');
-Router::connect('forum/sujet-:slug-:id',
-				'forum/sujet/slug:([a-z0-9\-]+)/id:([0-9]+)');
-Router::connect('forum/topic-:slug-:id',
-				'forum/topic/slug:([a-z0-9\-]+)/id:([0-9]+)');
-Router::connect('forum/repondre-:slug-:id',
-				'forum/respon/slug:([a-z0-9\-]+)/id:([0-9]+)');
-Router::connect('forum/nouveau-:slug-:id',
-				'forum/addpost/slug:([a-z0-9\-]+)/id:([0-9]+)');
-
-				
-/***************************************
-*	Token
-***************************************/
-Router::connect('etok',
-				'token');
-Router::connect('etok/ajax/:id',
-				'token/ajax/id:([0-9]+)');			
-Router::connect('etok/historique',
-				'token/history');
-				
-/***************************************
-*	Shop
-***************************************/
-Router::connect('shop/:slug-:id',
-				'shop/slug:([a-z0-9\-]+)/id:([0-9]+)');	
-				
-Router::connect('click/:url',
-				'click/url:(.*+)');	
+				'media/delete/id:([0-9]+)');
 ?>

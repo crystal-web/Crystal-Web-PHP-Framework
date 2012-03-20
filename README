@@ -18,6 +18,10 @@ Nécessite: PHP 5, une base de donnée et mod_rewrite on
 Installation:
 ------------
 
+ATTENTION public_html/ correspond à la racine du site, le dossier peut être renommé si nécéssaire
+Si vous ne disposez pas d'un dossier public_html ou www. Renommé application/ et indiqué le nouveau nom dans index.php ligne 19 define ('__APP_PATH', dirname(__SITE_PATH) . DS . 'application');
+
+
 Modifier le fichier /includes/init.php
 
 Indiquer les informations pour votre script
@@ -25,6 +29,9 @@ Chmod en 777 est requis pour application/cache
 Chmod en 777 est requis pour public_html/files/tmp
 Chmod en 777 est requis pour public_html/media
 Chmod en 777 est requis pour public_html/plugins
+
+
+Le script doit générer les tables SQL automatiquement.
 
 En cas d'erreur, merci de prendre contact
 

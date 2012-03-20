@@ -217,6 +217,7 @@ Class Model {
 	* @param $data Données à enregistrer
 	**/
 	public function save($data){
+	$this->install();
 		$key = $this->primaryKey;
 		$fields =  array();
 		$d = array(); 
@@ -254,6 +255,7 @@ Class Model {
 		if($action == 'insert'){
 			$this->id = $this->pdo->lastInsertId(); 
 		}
+		
 		return ($bool);
 	}
 	

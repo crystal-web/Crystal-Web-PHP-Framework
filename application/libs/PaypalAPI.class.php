@@ -12,11 +12,11 @@ Class PaypalAPI {
 // Version de l'API
 private $version = 56.0;
 // Utilisateur API
-private $user = 'email@biz.com';
+private $user = 'pro_1330047737_biz_api1.crystal-web.org';
 // Mot de passe API
-private $pass = 'apipass';
+private $pass = '1330047769';
 // Signature de l'API
-private $signature = 'apikey';
+private $signature = 'AVRDdk9c6LgG1dJutZew0Up3ESgaAbcAzy01IYcFW7vTq3qPkvSaCGnC';
 // Site de l'API PayPal. On ajoute déjà le ? afin de concaténer directement les paramètres.
 private $api_paypal = 'https://api-3t.sandbox.paypal.com/nvp?';
 

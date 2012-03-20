@@ -15,13 +15,13 @@
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 	<link rel="icon" type="image/x-icon" href="<?php echo __CW_PATH; ?>/favicon.ico">
 	<link rel="icon" type="image/png" href="<?php echo __CW_PATH; ?>/favicon.png">
-	
+
 
 	<link rel="stylesheet" href="http://cdn.crystal-web.org/files/css/bootstrap/1.4.0/bootstrap.min.css">
 
 	<link rel="stylesheet" type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
 	<link rel="stylesheet" type="text/css" href="<?php echo __CW_PATH; ?>/files/css/main.css">
-	
+
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="<?php echo __CW_PATH; ?>/files/js/main.js"></script>
@@ -48,11 +48,10 @@ background: url("'.__CW_PATH.'/files/images/minecraft-'.rand(1,3).'.png") repeat
 	$adminSiderbar[] = array(
 					'title' => 'Dashbord',
 					'data' => array(
-						'Alerte'							=> Router::url('alert'),
 						'Plugin'							=> Router::url('plugin'),
 						'Slider'							=> Router::url('sliderpop'),
 					));
-					
+
 	$adminSiderbar[] = array(
 					'title' => 'Articles',
 					'data' => array(
@@ -118,8 +117,8 @@ echo getOperatorSidebar($adminSiderbar);
 	<a href="https://twitter.com/@crystalPHP" title="Follow me on Twitter"><img src="http://crystal-web.org/media/image/png/twitter-32.png" alt="" style="float: right;
 	position: absolute;right: 10px;padding-top: 5px;width: 32px;margin-bottom: auto;" class="flippthis"></a>
 </div>
-	
-	
+
+
 	</div>
 	</div>
 </div>
@@ -129,8 +128,8 @@ echo getOperatorSidebar($adminSiderbar);
 		<div class="content" id="swithcontenu">
 
 			<div class="row" style="margin-top:30px;">
-			
-			
+
+
 				<?php
 				$col = 16;
 				$menu = NULL;
@@ -138,7 +137,7 @@ echo getOperatorSidebar($adminSiderbar);
 				{//*/
 				$col = 12;
 				$menu = '<div class="span4"><div class="sidebar">'.PHP_EOL.'<div class="well">';
-	
+
 					$menu .= '
 					<audio style="hidden" id="pl">
 						<source src="http://www.crystal-web.org/media/audio/mp3/dyraz.mp3"></source>
@@ -150,7 +149,7 @@ echo getOperatorSidebar($adminSiderbar);
 						</a>
 					</div><script type="text/javascript">var audioElement = document.getElementById(\'pl\');
 					</script>';				
-				
+
 					foreach ($mvc->Page->getMenu() AS $name => $listUrl)
 					{
 					$menu .= '<h5>'.$name.'</h5><ul>';
@@ -175,7 +174,7 @@ echo getOperatorSidebar($adminSiderbar);
 				?>
 				<!-- Page content -->
 				<div class="span<?php echo $col; ?>">
-				
+
 <?php 
 /***************************************
 *	Fil arian
@@ -194,15 +193,15 @@ echo '<li><a href="' . Router::url($url) . '" title="' . $name .'">' . $name .'<
 
 echo '<li>'.$mvc->Page->getPageTitle().'</li>';
 ?>
-	
+
 </ul>
 <?php 
 /***************************************
 *	END Fil arian
 ***************************************/			
 ?>
-					
-					
+
+
 					<div class="page-header">
 						<h1><?php echo $mvc->Page->getPageTitle(); ?></h1>
 					</div>
@@ -217,8 +216,8 @@ echo '<li>'.$mvc->Page->getPageTitle().'</li>';
 				?>
 			</div>
 
-			
-				
+
+
 			<div class="row">
 				<div class="span-one-third">
 				<h2>Services</h2>
@@ -244,8 +243,8 @@ echo '<li>'.$mvc->Page->getPageTitle().'</li>';
 				</ul>
 				</div>
 			</div>			
-			
-			
+
+
 		</div>
 
 		<div class="row">
@@ -262,24 +261,24 @@ echo '<li>'.$mvc->Page->getPageTitle().'</li>';
 						<iframe src="http://crystal-web.org/about/" style="border: 1px dotted whiteSmoke;height: 100%; width: 100%; "></iframe>
 					</div>
 				</div>
-				
+
 				<p>
 				<a data-placement="above" data-original-title="A propos de Crystal-web.org" data-content="Conception et r&eacute;alisation de site web" class="relpopover" href="#" onclick="document.getElementById('shadowing').style.display='block';document.getElementById('box').style.display='block';">Powered by Crystal-Web Solution</a>
-				
+
 				<?php  if (__DEV_MODE) { echo '<br>Page générée en '. round(microtime(true) - $debut,5).' secondes '; } ?>
 				</p>
 			</div>
-			
+
 		</div>
 
 	</div>
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 <div id="helper-bar" class="fixed-position">
 <div id="helper-bar-frame">
 <div id="helper-bar-content">
@@ -321,4 +320,3 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 	<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/CrystalPHP.json?callback=twitterCallback2&amp;count=5"></script>	
 </body>
 </html>
-

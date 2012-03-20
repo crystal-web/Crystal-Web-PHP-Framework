@@ -18,7 +18,7 @@ Class CalendarModel extends Model{
 	
 	public function install()
 	{
-	$this->query("CREATE TABLE IF NOT EXISTS `iyc__Calendar` (
+	$this->query("CREATE TABLE IF NOT EXISTS `".__SQL."_Calendar` (
   `id` int(11) NOT NULL auto_increment,
   `year` int(4) NOT NULL,
   `month` int(2) NOT NULL,

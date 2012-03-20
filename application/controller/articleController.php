@@ -35,6 +35,15 @@ private $config;
 /*** Methode ***/
 
 
+	public function getInfo(){
+	
+	return $this->module;
+	}
+
+	public function setInfo($name, $is){
+	$this->module[$name]=$is;
+	return $this->module;
+	}
 	
 /*** Methode ***/
 // Chargement de la configuration
@@ -99,6 +108,7 @@ private function loadconfig()
 */
 public function index() 
 {
+$this->setInfo('sitemap', true);
 $this->loadconfig();
 
 $this->mvc->Page->setBreadcrumb('article','Article')
@@ -224,6 +234,7 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 		{
 		$articleModel->hit($uniqueData->id);
 			// Information sur la page
+			$this->setInfo('sitemap', true);
 
 			$this->mvc->Page->setBreadcrumb('article','Article');
 			$this->mvc->Page->setBreadcrumb('article/cat/slug:'.$uniqueData->categorie.'/id:'.$uniqueData->categorieid,$uniqueData->categorie);
@@ -239,6 +250,7 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 		else
 		{
 			Router::error(404);
+			$this->setInfo('sitemap', false);
 			$this->mvc->Page->setPageTitle('Page not found');
 			$this->mvc->Template->show('article/post404');
 		}
@@ -250,6 +262,7 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 // Ajout d'un commentaire
 public function commentpost()
 {
+$this->setInfo('sitemap', false);
 $this->loadconfig();
 
 	if ($this->config['com_actif'] && $this->mvc->Session->token())
@@ -281,6 +294,7 @@ $this->loadconfig();
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -387,6 +401,7 @@ public function admin_addcat()
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -410,20 +425,12 @@ $this->loadconfig();
 	$this->mvc->Page->setPageTitle('R&eacute;daction d\'un article');
 	$articlecat = $this->loadModel('ArticleCat');
 	$articlecat->type = 'article';
-	
-	$categorieid=array();
+
 
 		foreach ($articlecat->getCategorie('?') AS $k => $v)
 		{
 		$categorieid[$v->idcategorie] = $v->categorie . ' ('.$v->nb.')'; 
 		}
-	
-	if (!count($categorieid))
-	{
-	$this->mvc->Session->setFlash('Vous n\'avez aucune catégorie');
-	Router::redirect('article/admin_addcat');
-	
-	}
 	
 	$id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id'] : 0;
 
@@ -499,6 +506,7 @@ $this->loadconfig();
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -531,6 +539,7 @@ public function admin_delpost()
 			else
 			{
 			Router::error(404);
+			$this->setInfo('sitemap', false);
 			$this->mvc->Page->setPageTitle('Page not found');
 			$this->mvc->Template->show('article/post404');
 			}
@@ -538,6 +547,7 @@ public function admin_delpost()
 		else
 		{
 		Router::error(404);
+		$this->setInfo('sitemap', false);
 		$this->mvc->Page->setPageTitle('Page not found');
 		$this->mvc->Template->show('article/post404');
 		}
@@ -545,6 +555,7 @@ public function admin_delpost()
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -578,6 +589,7 @@ public function getlist()
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -622,6 +634,7 @@ public function admin_comment()
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -649,7 +662,7 @@ public function admin_config(){
 	
 	//Editoriel
 	$this->config['edito_actif']	= ($this->mvc->Request->data->edito == 'y') ? 'y' : 'n';	
-	$this->config['edito_title']	= (!empty($this->mvc->Request->data->edito_title)) ? $this->mvc->Request->data->edito_title : $this->config['edito_title'];
+	$this->config['edito_title']	= (!empty($this->mvc->Request->data->edito_titre)) ? $this->mvc->Request->data->edito_titre : $this->config['edito_title'];
 	$this->config['edito_content']	= (!empty($this->mvc->Request->data->content)) ? $this->mvc->Request->data->content : $this->config['edito_content'];
 	
 	$config_cache = new Cache('article');
@@ -697,6 +710,7 @@ public function admin_config(){
 	else
 	{
 	Router::error(404);
+	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}

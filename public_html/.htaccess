@@ -1,5 +1,25 @@
-#ErrorLog logs.txt
 AddDefaultCharset utf-8
+#######################################################################################################
+#	Ligne par ligne quelques explications importantes
+#	
+#	RewriteEngine On
+#	*	demande l'activation de la réécriture de l'url
+#
+#	RewriteBase	/
+#	*	indique la racine du site site.tld/~MonSite deviendra donc RewriteBase	/~MonSite
+#	*	Si votre site, n'est pas la racine, modifier la ligne 39 de index.php
+#	*	define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME'].'/~MonSite');
+#	
+#	RewriteCond %{REQUEST_FILENAME} !-d
+#	*	provoque un appel au dossier si un dossier nommé comme un controller existe (desactivé)
+#	
+#	RewriteCond %{REQUEST_FILENAME} !-f 
+#	*	Si la requete n'est pas un fichier
+#
+#	RewriteRule (.*) index.php/$1 [L]
+#	*	Retourne l'url réécrite comme ceci index.php/article/action/params
+#######################################################################################################
+
 RewriteEngine On
 RewriteBase /
 #RewriteCond %{REQUEST_FILENAME} !-d    #provoque un appel au dossier si un dossier nomm comme un controller existe
