@@ -30,7 +30,8 @@ Class CalendarModel extends Model{
   `labelword` varchar(11) NOT NULL,
   `id_member` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+");
 	
 	}
 	

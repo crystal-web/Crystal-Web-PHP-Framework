@@ -8,13 +8,13 @@
 		<generator>Crystal-Web Solution <?php echo __VER; ?></generator>
 		<?php foreach($article AS $k=>$v): ?>
         <item>
-            <title><?php echo stripcslashes($v->titre); ?></title>
-			<guid isPermaLink="true"><?php echo Router::url('article/post/slug:'.$v->titre.'/id:'.$v->id); ?></guid>
+            <title><?php echo clean($v->titre,  'str'); ?></title>
+			<guid isPermaLink="true"><?php echo Router::url('article/post/slug:'.clean($v->titre, 'slug').'/id:'.$v->id); ?></guid>
             <description><![CDATA[
-			<?php echo TronqueHtml(stripcslashes($v->content), 280, ' ', ' ...'); ?>
+			<?php echo TronqueHtml(clean($v->content, 'html'), 280, ' ', ' ...'); ?>
 			]]></description>
             <pubDate><?php echo date('r', $v->date); ?></pubDate>
-            <link><?php echo Router::url('article/post/slug:'.$v->titre.'/id:'.$v->id); ?></link>
+            <link><?php echo Router::url('article/post/slug:'.clean($v->titre, 'slug').'/id:'.$v->id); ?></link>
         </item>
 		<?php endforeach; ?>
     </channel>

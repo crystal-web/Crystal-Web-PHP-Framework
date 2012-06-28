@@ -8,7 +8,7 @@
 Information:
 -----------
 Open-Source depuis le 11 février 2012
-Version: 12.03		(YY.MM)
+Version: 12.04		(YY.MM)
 Auteur: Christophe BUFFET
 Description: Système MVC permettant au développeurs PHP de réaliser
 	des sites web, rapidement et efficacement.
@@ -28,12 +28,17 @@ Indiquer les informations pour votre script
 Chmod en 777 est requis pour application/cache
 Chmod en 777 est requis pour public_html/files/tmp
 Chmod en 777 est requis pour public_html/media
-Chmod en 777 est requis pour public_html/plugins
 
 
 Le script doit générer les tables SQL automatiquement.
 
 En cas d'erreur, merci de prendre contact
+
+Note:
+-----
+
+Certaine partie du code sont encore en développement, notament /application/libs/Config.class.php,
+qui permettra de faire un systeme de configuration basique via la base de donnée et un tableau sérializé
 
 
 Information de license:
@@ -52,5 +57,4 @@ Dans le cas contraire, vous risquez de tuer le partage et les ressources open-so
 Projet soutenu par: 
 ------------------
 
-Dyraz.com - L'herbergeur web, mais pas que...
 ImagineYourCraft.com - Serveur MineCraft hautement modé.

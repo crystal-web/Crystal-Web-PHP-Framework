@@ -43,11 +43,13 @@ body {overflow:hidden;/*Needed to eliminate scrollbars*/ background:#E5690B;}
 
 				<p style="text-align: center; "><?php				
 				echo $mvc->Session->flash();
-				echo $mvc->contenu;
 				?></p>
-				
+
 		</div>
-	</div> 
+						
+					
+			
+	</div> <?php echo $mvc->contenu; ?>
 </div>
 
 

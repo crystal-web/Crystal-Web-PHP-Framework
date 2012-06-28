@@ -4,33 +4,48 @@ class Session{
 	public function __construct(){
 		if(!isset($_SESSION))
 		{
-		session_start();
+			Log::setLog('Start session', 'Session');
+			session_start();
 		}
-		elseif ($this->isLogged())
+		
+		if ($this->isLogged())
 		{
 			if (!isSet($_SESSION['user']->time))
 			{
-			$_SESSION['user']->time = time();
-			$_SESSION['user']->ip = Securite::ipX();
+				$_SESSION['user']->time = time();
+				$_SESSION['user']->ip = Securite::ipX();
+			//	setcookie('sess', $_SESSION['user']->idmember, (time() + (86400 * 30)));
 			}
-			elseif ($_SESSION['user']->time+1800 < time())
-			{
-			$this->logout();
-			$this->setFlash('Session expirer', 'warning');
-			Router::redirect();
-			return;
+			elseif ($_SESSION['user']->time+3600 < time())
+			{		
+				$this->logout();
+				$this->setFlash('Session expirer', 'warning');
+				Router::redirect();
+				return;
 			}
 			elseif ($_SESSION['user']->ip != Securite::ipX())
 			{
-			$this->logout();
-			$this->setFlash('Votre adresse IP à changé, par mesure de sécurite nous avons fermer la connection.', 'warning');
-			Router::redirect();
-			return;
+				$this->logout();
+				$this->setFlash('Votre adresse IP à changé, par mesure de sécurite nous avons fermer la connection.', 'warning');
+				Router::redirect();
+				return;
 			}
 			
 			$_SESSION['user']->time = time();
+			
+			if (__DEV_MODE)
+			{
+				if (isSet($_GET['unsetsession']))
+				{
+				unset($_SESSION);
+				}
+			}
 		}//*/
-		
+		/*
+		elseif (isSet($_COOKIE['sess']))
+		{
+			$_SESSION['user'] = $_COOKIE['sess'];
+		}*/
 		$this->makeToken();
 	}
 	
@@ -41,7 +56,8 @@ class Session{
 	{
 		if (!isSet($_SESSION['token']))
 		{
-		$_SESSION['token'] = md5(time()*rand()+magicword);
+			Log::setLog('Token assigned', 'Session');
+			$_SESSION['token'] = md5(time()*rand()+magicword);
 		}
 	}
 	
@@ -63,17 +79,20 @@ class Session{
 	*	Flash info
 	***************************************/
 	public function setFlash($message,$type = 'success'){
-		$_SESSION['flash'] = array(
+		$_SESSION['flash'][] = array(
 			'message' => $message,
 			'type'	=> $type
 		); 
 	}
 
 	public function flash(){
-		if(isset($_SESSION['flash']['message'])){
-		
-		
-			$html = '<div class="alert-message '.$_SESSION['flash']['type'].' fade in" data-alert="alert"><a class="close" href="#">&times;</a><p>'.$_SESSION['flash']['message'].'</p></div>'; 
+		if(isset($_SESSION['flash'])){
+			
+			$html = NULL;
+			foreach($_SESSION['flash'] AS $k => $v)://&times;
+			$html .= '<div class="alert-message '.$v['type'].' fade in" data-alert="alert"><a class="close" href="#"></a><p>'.$v['message'].'</p></div>'; 
+			endforeach;
+				
 			$_SESSION['flash'] = array(); 
 			return $html; 
 		}

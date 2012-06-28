@@ -14,8 +14,8 @@ class Router{
 
 	/**
 	* Permet de parser une url
-	* @param $url Url à parser
-	* @return tableau contenant les paramètres
+	* @param $url Url ï¿½ parser
+	* @return tableau contenant les paramï¿½tres
 	**/
 	static function parse($url,$request){
 		$url = trim($url,'/'); 
@@ -56,7 +56,7 @@ class Router{
 
 
 	/**
-	* Permet de connecter une url à une action particulière
+	* Permet de connecter une url ï¿½ une action particuliï¿½re
 	**/
 	static function connect($redir,$url){
 		$r = array();
@@ -92,7 +92,7 @@ class Router{
 	}
 
 	/**
-	* Permet de générer une url à partir d'une url originale
+	* Permet de gï¿½nï¿½rer une url ï¿½ partir d'une url originale
 	* controller/action(/:param/:param/:param...)
 	**/
 	static function url($url=null){
@@ -150,6 +150,20 @@ class Router{
 		return __CW_PATH.'/'.$url; 
 	}
 	
+	static function referer()
+	{
+		if (isSet($_SERVER['REFERER']))
+		{
+		header('Location: '.$_SERVER['REFERER']);
+		}
+		else
+		{
+		header('Location: '.__CW_PATH);
+		}
+		
+		die();
+	}
+	
 	static function error($type)
 	{
 		switch ((int) $type)
@@ -161,6 +175,36 @@ class Router{
 			break;
 		}
 
+	}
+	
+	
+	static function selfURL($full=true){
+		if(!isset($_SERVER['REQUEST_URI']))
+		{
+			$serverrequri = $_SERVER['PHP_SELF'];
+		}
+		else
+		{
+			$serverrequri =    $_SERVER['REQUEST_URI'];
+		}
+		
+		$s = empty($_SERVER["HTTPS"]) ? '' : ($_SERVER["HTTPS"] == "on") ? "s" : "";
+		$protocol = self::strleft(strtolower($_SERVER["SERVER_PROTOCOL"]), "/").$s;
+		$port = ($_SERVER["SERVER_PORT"] == "80") ? "" : (":".$_SERVER["SERVER_PORT"]);
+		
+		return ($full) ? $protocol."://".$_SERVER['SERVER_NAME'].$port.$serverrequri : $port.$serverrequri;   
+	}
+	
+	static function strleft($s1, $s2) {
+		return substr($s1, 0, strpos($s1, $s2));
+	}
+	
+	
+	static function refresh($sec = 0)
+	{
+		$sec = (int) $sec;
+		header('Refresh: ' . $sec . ';url=' . Router::selfURL());
+		if ($sec == 0) { die; }
 	}
 }
 

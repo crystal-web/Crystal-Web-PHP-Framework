@@ -22,7 +22,14 @@ class Request{
 		if(!empty($_POST)){
 			$this->data = new stdClass(); 
 			foreach($_POST as $k=>$v){
-				$this->data->$k=$v;
+			
+				if (get_magic_quotes_gpc()) {
+				$this->data->$k=htmlentities($v, ENT_NOQUOTES, 'utf-8');
+				}
+				else {
+				$this->data->$k=htmlentities(addslashes($v), ENT_NOQUOTES, 'utf-8');
+				}			
+				
 			}
 		}
 	}

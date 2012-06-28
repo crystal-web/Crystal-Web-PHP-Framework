@@ -12,23 +12,25 @@ Class indexController extends Controller{
 
 	public function index()
 	{
-	/*$ssh = new Ssh2();
-	$ssh->setServer('88.191.101.35');
-	$ssh->setLogin('dyraz','toudou');
-	if ($ssh->startIt())
-	{
-	echo 'Enjoy';	
+		$this->mvc->Page->setPageTitle('Hello world !!');
+		$this->mvc->Template->bonjour = 'Bonjour ami développeur';
+		$this->mvc->Template->paragraphe = 'Vous voici enfin sur la page d\'accueil de votre futur site ^^<br>
+			Je me suis permis de vous laissez quelques sources comme démonstration. Mais avant de commencer à réaliser votre projet, qui j\'en suis persuadé en vaut la peine (surtout si vous le faite par vous-même).<br>
+			Il vous faut, modifier le fichier <strong>/public_html/includes/init.php</strong> qui contient les paramettres de connexion à la base de donnée.<br>
+			D\'ici peu, vous aurez une documentation en ligne. J\'y travail afin que cela soit le plus documenté possible et le plus agréable possible à lire (cette page n\'est pas vraiment un bonne exemple xD)
+			';
+		$this->mvc->Template->show('index/index');
+
 	}
-	else
-	{
-	echo 'ok, no more';
-	}//*/
+
 	
-	$slider = $this->loadModel('Slider');
-	$this->mvc->Page->setPageTitle('Bienvenue ');
-	$this->mvc->Template->sliderList = $slider->find(array('conditions' => array('active'=>'y')));
-
-	$this->mvc->Template->show('slider');
+	public function log()
+	{
+	$log = new Cache('log');
+	$data = $log->getCache();
+	debug($data);
 	}
 
+
+						
 }

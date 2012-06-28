@@ -61,8 +61,7 @@ function show($name) {
 
 	if (file_exists($path) == false)
 	{
-		echo 'Template not found in '. $path;
-		//throw new Exception('Template not found in '. $path);
+		throw new Exception('Template not found in '. $path);
 		return false;
 	}
 
@@ -84,7 +83,7 @@ function show($name) {
 		}
 	}
 
-	include ($path);               
+	include ($path);
 }
 
 public function getVars()

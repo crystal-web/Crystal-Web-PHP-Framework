@@ -18,7 +18,7 @@
 
 	<?php echo $this->mvc->Form->input('declare_coche', '', array(
 		'type' => 'checkbox',
-		'help' => 'J\'ai lu et j\'accepte les conditions générales d\'utilisation')); ?>
+		'help' => '<a href="'.Router::url('auth/cgu').'">J\'ai lu et j\'accepte le réglement</a>')); ?>
 	<div class="clearfix">
 		<div class="input">
 			<input type="submit" name="submit" value="Connection" class="btn success">

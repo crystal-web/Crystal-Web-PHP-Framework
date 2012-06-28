@@ -7,7 +7,7 @@ private $menu=array();
 private $head;
 private $breadcrumb;
 private $body;
-public $layout = 'default';
+public $layout;
 
 	public function setLayout($layout)
 	{

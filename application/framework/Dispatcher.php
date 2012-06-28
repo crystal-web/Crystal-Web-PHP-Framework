@@ -1,4 +1,5 @@
 <?php
+define ('__VER', 12.04);
 class Dispatcher {
 
 protected $mvc;
@@ -16,6 +17,7 @@ $this->mvc->layout = 'default';
 */
 $this->mvc->Request = new Request();
 
+
 /*
 * Construction de la requete
 */
@@ -28,30 +30,39 @@ Router::parse($this->mvc->Request->url,$this->mvc->Request);
 		$action = $this->mvc->Request->prefix.'_'.$action;
 	}
 		
-		/*** Determine si l'argument peut etre appele comme fonction ***/
-		if (is_callable(array($controller, $action)) == false)
-		{
-		$action = 'index';
-		}
+	/*** Determine si l'argument peut etre appele comme fonction ***/
+	if (is_callable(array($controller, $action)) == false)
+	{
+	$action = 'index';
+	}
+
+
 	
-		$this->loadPlugin();
-		
-		$mvc->Form = new Form($mvc);	
-		$mvc->Session = new Session();
-		$mvc->Acl = new AccessControlList($this->mvc->Request, $mvc->Session->user('group'));
-		
-		ob_start();
-		call_user_func_array(array($controller,$action),array($this->mvc)); 
-		$mvc->contenu = ob_get_clean();
-		
-		
-		// Pub
-		$mvc->contenu = preg_replace('#<!--PUB-([0-9]*)x([0-9]*)-->#', '<div class="center"><img src="http://placehold.it/$1x$2" alt=""></div>', $mvc->contenu);
+	$this->mvc->Form = new Form($this->mvc);	
+	$this->mvc->Session = new Session();
+	$this->mvc->Acl = new AccessControlList($this->mvc->Request, $mvc->Session->user('group'));
+	$this->mvc->Plugin	= new Plugin($this->mvc);
+
+	$this->mvc->Plugin->triggerEvents('onEnabled');
+	
+	ob_start();
+	try
+	{
+	call_user_func_array(array($controller,$action),array($this->mvc));
+	}catch(Exception $e){
+	$this->error($e->getMessage());
+	}
+	$this->mvc->contenu = ob_get_clean();
+	
+	
+	// Pub
+	// $this->mvc->contenu = preg_replace('#<!--PUB-([0-9]*)x([0-9]*)-->#', '<div class="center"><img src="http://placehold.it/$1x$2" alt=""></div>', $mvc->contenu);
 
 	if ($this->mvc->Request->action == 'ajax')
 	{
-	die($mvc->contenu);
+	die($this->mvc->contenu);
 	}
+	
 }
 
 
@@ -63,45 +74,23 @@ function loadController()
 	$name = $this->mvc->Request->controller.'Controller'; 
 	$file = __APP_PATH . DS . 'controller' . DS . $name . '.php';
 	if(!file_exists($file)){
-		$this->error('Le controller '.$this->mvc->Request->controller.' n\'existe pas dans '.$file); 
-	} 
+		$name = 'errorController';
+		$this->mvc->Request->action = 'e404';
+		$file = __APP_PATH . DS . 'controller' . DS . $name . '.php';
+		//$this->error('Le controller '.$this->mvc->Request->controller.' n\'existe pas dans '.$file);
+	}
 	require $file; 
 	$controller = new $name($this->mvc); 
 	return $controller;  
 }
 
 
-function loadPlugin()
-{
-$plugin = new Cache(__SQL);
-$pluginArray = $plugin->getCache();
-	
-	if (count($pluginArray))
-	{
-	
-		foreach($pluginArray['plugin'] AS $k=>$v)
-		{
-			if ($v['activer'])
-			{
-			
-				if (file_exists('plugins'.DS.$k.DS.$v['include']))
-				{
-					include_once('plugins'.DS.$k.DS.$v['include']);
-					
-				}
-			}
-		}
-	}
-
-}
 
 /**
 * Permet de générer une page d'erreur en cas de problème au niveau du routing (page inexistante)
 **/
-function error($message){
-die($message.' die');
-	$controller = new Controller($this->request);
-	$controller->e404($message); 
+function error($message, $type='error'){
+$this->mvc->Session->setFlash($message, $type);
 }
 
 }

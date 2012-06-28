@@ -24,7 +24,7 @@ loadFunction('bbcode');
 		<p style="color: #B99316;
 	margin-top: 10px;
 	padding: 0px;
-	float: left;">Commentaire de <span style="color:#000;font-weight:bold;">' . $data->pseudo . '</span> le ' . dates($data->Cdate, 'fr_date') . '</p>';
+	float: left;">Commentaire de <span style="color:#000;font-weight:bold;">' . clean($data->pseudo, 'slug') . '</span> le ' . dates($data->Cdate, 'fr_date') . '</p>';
 	?><span style="float:right;">
 	<a href="#"  data-controls-modal="delpost" data-backdrop="true" data-keyboard="true" onclick="delPost('<?php echo Router::url('article/admin_comment/slug:s/id:'.$data->id); ?>?token=<?php echo $this->mvc->Session->getToken(); ?>');">
 		<img src="<?php echo __CDN; ?>/files/images/icons/cross-white.png" alt="Ind&eacute;sirable" title="Ind&eacute;sirable">
@@ -43,7 +43,7 @@ loadFunction('bbcode');
 	border-top: 1px dotted #B99316;
 	padding-top: 10px;
 	margin-bottom: 15px;">
-		<p>' .stripcslashes(bbcode_format($data->content)) . '</p>
+		<p>' .clean($data->content, 'bbcode') . '</p>
 		</div>
 		
 		</li>';

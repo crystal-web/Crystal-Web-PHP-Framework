@@ -1,23 +1,13 @@
 <?php
 /**
-* @title Simple MVC systeme 
+* @title Article / News
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
-
-* Simple Blog / Article systeme
-
 */
-//include __APP_PATH . '/function/tronquehtml.php';
+
 Class articleController Extends Controller {
 
-private $module=array(
-	/* BOOL */
-	'sitemap' => false,
-	'title' => 'Article', // Titre du module
-	'page_title' => NULL, // Titre page courante
-	'breadcrumb' => false, // breadcrumb hierarchy $url => $title
-	);
 // Configuration par défaut
 private $preconfig = array(
 	'postParPage' => 5,
@@ -33,17 +23,8 @@ private $preconfig = array(
 	);	
 private $config;
 /*** Methode ***/
+private $module = 'Article';
 
-
-	public function getInfo(){
-	
-	return $this->module;
-	}
-
-	public function setInfo($name, $is){
-	$this->module[$name]=$is;
-	return $this->module;
-	}
 	
 /*** Methode ***/
 // Chargement de la configuration
@@ -59,33 +40,7 @@ private function loadconfig()
 		$config_cache->setCache();
 		$this->config = $this->preconfig;
 		}
-/* END PRELOAD */	
-
-
-	if ($this->mvc->Acl->isAllowed())
-	{
-		if ($this->config['com_actif'])
-		{
-		$this->mvc->Page->setMenu(
-				'Gestion des articles',
-				'Validation des comentaires',
-				Router::url('article/admin_comment')
-			);
-		}
-	$this->mvc->Page->setMenu(
-			'Gestion des articles',
-			'R&eacute;daction d\'un article',
-			Router::url('article/admin_addpost')
-		);
-	$this->mvc->Page->setMenu(
-			'Gestion des articles',
-			'Ajouter une cat&eacute;gorie',
-			Router::url('article/admin_addcat')
-		);
-	}
-	
-	
-
+/* END PRELOAD */
 
 	// Les catégories
 	$articleCategorieModel = $this->loadModel('ArticleCat');
@@ -95,8 +50,8 @@ private function loadconfig()
 		{
 		$this->mvc->Page->setMenu(
 				'Cat&eacute;gories',
-				$v->categorie . ' ('.$v->nb.')',
-				Router::url('article/cat/slug:'.$v->categorie.'/id:'.$v->idcategorie)
+				clean($v->categorie, 'str') . ' ('.$v->nb.')',
+				Router::url('article/cat/slug:'.clean($v->categorie, 'slug').'/id:'.$v->idcategorie)
 			);
 		}
 	// END Les catégories
@@ -108,10 +63,9 @@ private function loadconfig()
 */
 public function index() 
 {
-$this->setInfo('sitemap', true);
 $this->loadconfig();
 
-$this->mvc->Page->setBreadcrumb('article','Article')
+$this->mvc->Page->setBreadcrumb('article',$this->module)
 				->setPageTitle($this->config['titre_article']);
 
 // Edito et config
@@ -130,7 +84,8 @@ $articleModel = $this->loadModel('Article');
 	$articleModel->page = $this->mvc->Request->page;
 	
 $nb_article= 0;
-if ( $article = $articleModel->getArticleList() )
+$article = $articleModel->getArticleList();
+if ( $article )
 {
 $nb_article = $articleModel->findCount(array('online' =>  'y'));
 }
@@ -149,7 +104,7 @@ $this->mvc->Template->nb_article = $nb_article;;
 $this->mvc->Template->pagi_actif = $this->config['pagi_actif'];
 $this->mvc->Template->nombreDePages = $this->config['postParPage'];
 $this->mvc->Template->isCategory=false;
-$this->mvc->Template->show('article/article');
+$this->mvc->Template->show('article/index');
 }
 
 
@@ -161,7 +116,7 @@ public function cat()
 $this->loadconfig();
 $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id'] : 0;
 $this->mvc->Template->isCategory=$id;
-$this->mvc->Page->setBreadcrumb('article','Article')
+$this->mvc->Page->setBreadcrumb('article',$this->module)
 				->setPageTitle($this->config['titre_article']);
 
 // Edito et config
@@ -196,7 +151,7 @@ $this->mvc->Template->nb_article = $nb_article;;
 $this->mvc->Template->pagi_actif = $this->config['pagi_actif'];
 $this->mvc->Template->nombreDePages = $this->config['postParPage'];
 $this->mvc->Template->isCategory=false;
-$this->mvc->Template->show('article/article');
+$this->mvc->Template->show('article/index');
 	
 }
 
@@ -214,8 +169,8 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 	$articleModel->type='article';
 	// Je récupère la article.
 
-
-	if($uniqueData = $articleModel->getArticle($id))
+	$uniqueData = $articleModel->getArticle($id);
+	if( $uniqueData )
 	{
 	$this->loadconfig();
 	$articleComModel = $this->loadModel('ArticleCommentaires');
@@ -234,11 +189,10 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 		{
 		$articleModel->hit($uniqueData->id);
 			// Information sur la page
-			$this->setInfo('sitemap', true);
 
-			$this->mvc->Page->setBreadcrumb('article','Article');
-			$this->mvc->Page->setBreadcrumb('article/cat/slug:'.$uniqueData->categorie.'/id:'.$uniqueData->categorieid,$uniqueData->categorie);
-			$this->mvc->Page->setPageTitle(stripcslashes($uniqueData->titre));
+			$this->mvc->Page->setBreadcrumb('article',$this->module);
+			$this->mvc->Page->setBreadcrumb('article/cat/slug:'.clean($uniqueData->categorie, 'slug').'/id:'.$uniqueData->categorieid,$uniqueData->categorie);
+			$this->mvc->Page->setPageTitle(clean($uniqueData->titre, 'str'));
 
 			// Template 
 			$this->mvc->Template->com_actif = $this->config['com_actif'];
@@ -250,7 +204,6 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 		else
 		{
 			Router::error(404);
-			$this->setInfo('sitemap', false);
 			$this->mvc->Page->setPageTitle('Page not found');
 			$this->mvc->Template->show('article/post404');
 		}
@@ -262,7 +215,6 @@ $id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id
 // Ajout d'un commentaire
 public function commentpost()
 {
-$this->setInfo('sitemap', false);
 $this->loadconfig();
 
 	if ($this->config['com_actif'] && $this->mvc->Session->token())
@@ -294,7 +246,6 @@ $this->loadconfig();
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -374,7 +325,7 @@ public function admin_addcat()
 	$articleCategorieModel = $this->loadModel('ArticleCat');
 	$articleCategorieModel->type = 'article';
 	
-	$this->mvc->Page->setBreadcrumb('article','Article');
+	$this->mvc->Page->setBreadcrumb('article',$this->module);
 	
 	$this->mvc->Page->setPageTitle('Ajout d\'un article');
 
@@ -395,13 +346,12 @@ public function admin_addcat()
 			}
 		}
 	
-	$this->mvc->Template->show('article/admin_news_Cat');
+	$this->mvc->Template->show('article/admin_addcat');
 
 	}
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -420,17 +370,25 @@ $this->loadconfig();
 	if ($this->mvc->Acl->isAllowed())
 	{
 //id_auteur	categorieid	titre	content	date	hit	online	
-	$this->mvc->Page->setBreadcrumb('article','Article');
+	$this->mvc->Page->setBreadcrumb('article',$this->module);
 	
 	$this->mvc->Page->setPageTitle('R&eacute;daction d\'un article');
 	$articlecat = $this->loadModel('ArticleCat');
 	$articlecat->type = 'article';
-
+	
+	$categorieid=array();
 
 		foreach ($articlecat->getCategorie('?') AS $k => $v)
 		{
 		$categorieid[$v->idcategorie] = $v->categorie . ' ('.$v->nb.')'; 
 		}
+	
+	if (!count($categorieid))
+	{
+	$this->mvc->Session->setFlash('Vous n\'avez aucune catégorie');
+	Router::redirect('article/admin_addcat');
+	
+	}
 	
 	$id = isSet($this->mvc->Request->params['id']) ? $this->mvc->Request->params['id'] : 0;
 
@@ -497,16 +455,15 @@ $this->loadconfig();
 	$formContent = $this->mvc->Form->input('content', 'Article: ', 
 		array('type'=>'textarea', 'editor' => 
 			array( 'params' => 
-				array('model' => 'html') ) ) );
+				array('model' => 'htmlfull') ) ) );
 
 	$this->mvc->Template->form = $formCategorie.$formOnline.$formTitre.$formContent;
-	$this->mvc->Template->show('article/admin_news_Post');
+	$this->mvc->Template->show('article/admin_addpost');
 
 	}
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -539,7 +496,6 @@ public function admin_delpost()
 			else
 			{
 			Router::error(404);
-			$this->setInfo('sitemap', false);
 			$this->mvc->Page->setPageTitle('Page not found');
 			$this->mvc->Template->show('article/post404');
 			}
@@ -547,7 +503,6 @@ public function admin_delpost()
 		else
 		{
 		Router::error(404);
-		$this->setInfo('sitemap', false);
 		$this->mvc->Page->setPageTitle('Page not found');
 		$this->mvc->Template->show('article/post404');
 		}
@@ -555,7 +510,6 @@ public function admin_delpost()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -581,7 +535,7 @@ public function getlist()
 	$articleModel->page = $this->mvc->Request->page;
 	$this->mvc->Template->token = $this->mvc->Session->getToken();
 	$this->mvc->Template->articleList = $articleModel->getArticleList();
-	$this->mvc->Template->show('article/liste');
+	$this->mvc->Template->show('article/getlist');
 
 
 // END Les article
@@ -589,7 +543,6 @@ public function getlist()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
@@ -605,7 +558,7 @@ public function admin_comment()
 {
 	if ($this->mvc->Acl->isAllowed())
 	{
-	$this->mvc->Page->setPageTitle('Gestion des commentaires')->setBreadcrumb('article','Article');
+	$this->mvc->Page->setPageTitle('Gestion des commentaires')->setBreadcrumb('article',$this->module);
 	$valide = (isSet($this->mvc->Request->data->valide)) ? $this->mvc->Request->data->valide :'n';
 	$comment = $this->loadModel('ArticleCommentaires');
 
@@ -634,17 +587,17 @@ public function admin_comment()
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}
 }
 
 
-public function admin_config(){
+public function admin_config()
+{
 	if ($this->mvc->Acl->isAllowed())
 	{
-	$this->mvc->Page->setPageTitle('Configuration des articles')->setBreadcrumb('article','Article');
+	$this->mvc->Page->setPageTitle('Configuration des articles')->setBreadcrumb('article',$this->module);
 	$this->loadConfig();
 	
 	
@@ -662,7 +615,7 @@ public function admin_config(){
 	
 	//Editoriel
 	$this->config['edito_actif']	= ($this->mvc->Request->data->edito == 'y') ? 'y' : 'n';	
-	$this->config['edito_title']	= (!empty($this->mvc->Request->data->edito_titre)) ? $this->mvc->Request->data->edito_titre : $this->config['edito_title'];
+	$this->config['edito_title']	= (!empty($this->mvc->Request->data->edito_title)) ? $this->mvc->Request->data->edito_title : $this->config['edito_title'];
 	$this->config['edito_content']	= (!empty($this->mvc->Request->data->content)) ? $this->mvc->Request->data->content : $this->config['edito_content'];
 	
 	$config_cache = new Cache('article');
@@ -705,12 +658,11 @@ public function admin_config(){
 	
 	$this->mvc->Template->form = $form;
 	$this->mvc->Template->editoriel = $editoriel;
-	$this->mvc->Template->show('article/admin_conf');
+	$this->mvc->Template->show('article/admin_config');
 	}
 	else
 	{
 	Router::error(404);
-	$this->setInfo('sitemap', false);
 	$this->mvc->Page->setPageTitle('Page not found');
 	$this->mvc->Template->show('article/post404');
 	}

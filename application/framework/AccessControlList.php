@@ -19,12 +19,12 @@ private $request;
 public $log=array();
 	public function __construct($request, $group)
 	{
-	$this->log[] = 'Construction...';
+	Log::setLog('Construction...', 'AccessControlList');
 		if (is_int($group))
 		{
-		$this->log[] = 'Has guest';
-		// Has guest 
-		$this->idGroup=0;
+			Log::setLog('Has guest', 'AccessControlList');
+			// Has guest 
+			$this->idGroup=0;
 		}
 		else
 		{
@@ -32,16 +32,16 @@ public $log=array();
 			// C'est un admin
 			if ($group != '*')
 			{
-			$this->log[] = 'is not a grant' . $group;
-			$this->idGroup = explode('|',trim($group, '|'));
+				Log::setLog('is not a grant' . $group, 'AccessControlList');
+				$this->idGroup = explode('|',trim($group, '|'));
 			}
 			/***************************************
 			*	C'est un (super)admin
 			***************************************/
 			else
 			{
-			$this->log[] = 'is a grant';
-			$this->fullPower = true;
+				Log::setLog('is a grant', 'AccessControlList');
+				$this->fullPower = true;
 			}
 		}
 		
@@ -58,7 +58,7 @@ public $log=array();
 	/***************************************
 	*	Demande si l'utilisateur a le droit
 	***************************************/
-	public function isAllowed($allowedParams=NULL)
+	public function isAllowed($controler=NULL, $action='*')
 	{
 
 		/***************************************
@@ -66,13 +66,20 @@ public $log=array();
 		***************************************/
 		if ($this->fullPower)
 		{
-		return true;
+			Log::setLog('is SuperUSer', 'AccessControlList');
+			return true;
 		}
+		
+		if(!empty($controler))
+		{
+			$searchThisAcl = $controler.'.'.$action;
+		}
+		
 
 		/***************************************
 		*	On charge le model
 		***************************************/
-		$m = $this->loadModel('Acl');
+		$m = loadModel('Acl');
 
 		/***************************************
 		*	On parcourt le tableau des groupes
@@ -80,7 +87,7 @@ public $log=array();
 		***************************************/
 		if (is_array($this->idGroup))
 		{
-		foreach ($this->idGroup AS $key=>$data)
+			foreach ($this->idGroup AS $key=>$data)
 			{
 				/***************************************
 				*	Prepare la requete en demandant
@@ -90,7 +97,8 @@ public $log=array();
 					'fields' => 'controller, params',
 					'conditions' => "identifiant =".$data." AND controller LIKE  '".$this->controller."%'",
 					);
-				if ($respon = $m->find($query))
+				$respon = $m->find($query);
+				if ($respon)
 				{
 				/***************************************
 				*	Si on obtiens une reponse,
@@ -105,23 +113,14 @@ public $log=array();
 									or
 							$v->controller == $this->controlCodeGrant)
 						{
-
-							/***************************************
-							*	Si on demande un paramettre particulier
-							*	EN TEST
-							***************************************/
-							if (!is_null($allowedParams))
+							return true;
+						}
+						elseif(isSet($searchThisAcl))
+						{
+							if ($v->controller == $searchThisAcl)
 							{
-								if (preg_match('#'.$allowedParams.'#Ui', $v->params))
-								{
-								return true;
-								}
+								return true;						
 							}
-							else
-							{
-								return true;
-							}
-
 						}
 					}
 				}
@@ -137,31 +136,7 @@ public $log=array();
 	
 	public function isGrant()
 	{
-	return $this->fullPower;	
-	}
-	
-	
-	
-	/***************************************
-	*	Methode privé
-	***************************************/
-	private function loadModel($name)
-	{
-	$name = $name.'Model';
-	// L'endroit ou le model est chargé
-	$file = __APP_PATH . DS . 'model' . DS . $name . '.php';
-		if (file_exists($file))
-		{
-		require_once $file;
-			if (!isSet($this->$name))
-			{
-			return new $name();
-			}
-		}
-		elseif (__DEV_MODE)
-		{
-		debug('File model not found '.$file);
-		}
+		return $this->fullPower;	
 	}
 }
 ?>

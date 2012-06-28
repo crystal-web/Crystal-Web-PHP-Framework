@@ -5,7 +5,13 @@
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by/2.0/fr/
 */
-define ('__VER', 12.03);
+
+if (!defined('__APP_PATH'))
+{
+	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
+
+define ('__VER', 12.04);
 
 /*** define the site path  ***/ 
 define ('__CDN', 'http://cdn.crystal-web.org'); // CDN
@@ -15,6 +21,9 @@ define ('magicword', 'passphrase pour garantir un hash des mot de passe');
 
 define ('__PAGE', $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']); // Page actuel
 
+/*** Adresse du site ***/
+$http = (isSet($_SERVER['HTTPS'])) ? 'https' : 'http';
+define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME']); //' . $_SERVER['SERVER_NAME'] Site url/~devphp
 
 /*** DB Configuration ***/
 define ('DB_host', 'localhost'); // le chemin vers le serveur

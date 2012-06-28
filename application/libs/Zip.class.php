@@ -19,31 +19,32 @@ public $file;
 		          $splitter = ($create_zip_name_dir === true) ? "." : "/";
 		          if ($dest_dir === false) $dest_dir = substr($src_file, 0, strrpos($src_file, $splitter))."/";
  
-		          // Créez les répertoires pour le dossier de destination si elles n'existent pas déjà
+		          // Crï¿½ez les rï¿½pertoires pour le dossier de destination si elles n'existent pas dï¿½jï¿½
 		          $this->create_dirs($dest_dir);
  
 		          // Pour chaque fichier dans l'archive de paquet
-		          while ($zip_entry = zip_read($zip))
+		          $zip_entry = zip_read($zip);
+		          while ($zip_entry)
 		          {
 				  
-		            // Maintenant, nous allons créer les répertoires dans les répertoires de destination
+		            // Maintenant, nous allons crï¿½er les rï¿½pertoires dans les rï¿½pertoires de destination
  
-		            // Si le fichier n'est pas dans le répertoire racine
+		            // Si le fichier n'est pas dans le rï¿½pertoire racine
 		            $pos_last_slash = strrpos(zip_entry_name($zip_entry), "/");
 		            if ($pos_last_slash !== false)
 		            {
-		              // Créez le répertoire où le fichier zip d'entrée doivent être enregistrées (avec un "/" à la fin)
+		              // Crï¿½ez le rï¿½pertoire oï¿½ le fichier zip d'entrï¿½e doivent ï¿½tre enregistrï¿½es (avec un "/" ï¿½ la fin)
 		              $this->create_dirs($dest_dir.substr(zip_entry_name($zip_entry), 0, $pos_last_slash+1));
 		            }
  
-		            // Ouvrez l'entrée zip
+		            // Ouvrez l'entrï¿½e zip
 		            if (zip_entry_open($zip,$zip_entry,"r"))
 		            {
  
-		              // Le nom du fichier à enregistrer sur le disque
+		              // Le nom du fichier ï¿½ enregistrer sur le disque
 		              $file_name = $dest_dir.zip_entry_name($zip_entry);
  
-		              // Vérifiez si les fichiers doivent être écrasés ou non
+		              // Vï¿½rifiez si les fichiers doivent ï¿½tre ï¿½crasï¿½s ou non
 		              if ($overwrite === true || $overwrite === false && !is_file($file_name))
 		              {
 		                // Recherche les fichiers dans le zip
@@ -63,7 +64,7 @@ public $file;
 		                }
 		              }
  
-		              // Ferme l'entré zip
+		              // Ferme l'entrï¿½ zip
 		              zip_entry_close($zip_entry);
 		            }      
 		          }
@@ -72,7 +73,7 @@ public $file;
 		      }
 		      else
 		      {
-		        echo $this->error="N'est pas un zip valide";
+		        $this->error="N'est pas un zip valide";
 		        return false;
 		      }
  
@@ -83,7 +84,7 @@ public $file;
 		      if(version_compare(phpversion(), "5.2.0", "<"))
 		      $infoVersion="(utiliser PHP 5.2.0 ou supp&eacute;rieur)";
  
-		      echo $this->error="Vous devez installer/activer l'extension php_zip.dll ".$infoVersion; 
+		      $this->error="Vous devez installer/activer l'extension php_zip.dll ".$infoVersion; 
 		  }
 		}
  
@@ -109,7 +110,7 @@ public $file;
 
 		function error()
 		{
-			return $error;
+			return $this->error;
 		}
 }
 

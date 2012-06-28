@@ -1,7 +1,13 @@
 <?php
 class Securite
 {
-	// Donn�es entrantes
+
+	/**
+	 * 
+	 * Prépare les valeurs pour la base de donnée
+	 * @deprecated
+	 * @param Sting|int $string
+	 */
 	static function bdd($string)
 	{
 	// On regarde si le type de string est un nombre entier (int)
@@ -17,22 +23,38 @@ class Securite
 		}
 	return $string;
 	}
-	// Donn�es sortantes
+
+	
+	/**
+	 * 
+	 * Protége le code
+	 * @deprecated
+	 * @param String $string
+	 */
 	static function html($string)
 	{
-		// S�curisation des variable HTML
+		// S�curisation des variable HTML
 		$string = htmlentities($string, ENT_QUOTES, 'UTF-8');
 		return $string;
 	}
-	// D�prot�ge le code
+	
+	
+	/**
+	 * 
+	 * Déprotége le code
+	 * @deprecated
+	 */
 	static function unhtml($string)
 	{
 	return html_entity_decode($string);
 	}
-	// Cryptage irr�versible
+	
+	// Cryptage irr�versible
 	static function Hcrypt ($str){
 	return str_rot13(base64_encode(md5(magicword.$str)));
 	}
+	
+	
 	// Fonctions de cryptage simple
 	static function crypt ($str){
 	return str_rot13(base64_encode($str));
@@ -41,7 +63,10 @@ class Securite
 	return base64_decode(str_rot13($str));
 	}	
 
-	//Ici on regarde si il existe la variable globale $_SERVEUR 
+	/**
+	 * 
+	 * IRécupération de l'adresse ip
+	 */ 
 	static function ipX() {
 	// On test si $_SERVER exist
 	if (isSet($_SERVER))
@@ -62,7 +87,7 @@ class Securite
 	// Sinon on utilise une ancienne methode
 	else
 		{
-		// getenv � Retourne la valeur d'une variable d'environnement
+		// getenv � Retourne la valeur d'une variable d'environnement
 		if ( getenv( 'HTTP_X_FORWARDED_FOR' ) )
 			{
 			$ipx = getenv( 'HTTP_X_FORWARDED_FOR' );
@@ -79,6 +104,12 @@ class Securite
 	return trim($ipx);
 	}
 
+	
+	/**
+	 * 
+	 * Intérroge le cache pour savoir si une ip est bloqué
+	 * @param String $ip
+	 */
 	static function isLockIp($ip=NULL)
 	{
 	$ip=(empty($ip)) ? Securite::ipX() : $ip;
@@ -96,29 +127,33 @@ class Securite
 		}
 	}
 	
+	
+	/**
+	 * 
+	 * Vérrouille le site, a une ip
+	 * A utilisé avec prudence, si l'IP n'est pas défini, c'est celle du client
+	 * Qui sera utilisé
+	 * @param String $ip
+	 */
 	static function toLockIp($ip=NULL)
 	{
-	$ip=(empty($ip)) ? Securite::ipX() : $ip;
-
-	$oCache = new Cache('iplock');
-	$tableIpLock = $oCache->getCache();
+		$ip=(empty($ip)) ? Securite::ipX() : $ip;
 	
-		if (array_key_exists($ip, $tableIpLock))
-		{
+		$oCache = new Cache('iplock');
+		$tableIpLock = $oCache->getCache();
 		$tableIpLock[$ip]=true;
 		$oCache->setCache($tableIpLock);
 		return true;
-		}
-		else
-		{
-		$tableIpLock[$ip]=true;
-		$oCache->setCache($tableIpLock);
-		return true;
-		}
 	}
+
 	
-	
-	static function referer(){
+	/**
+	 * 
+	 * Retourne un Array contenant les informations du site référent
+	 * Dans le cas ou celui-ci n'hexiste pas, les champ sont NULL
+	 */
+	static function referer()
+	{
 	$part = array(0=>"scheme","host","port","user","pass","path","query","fragment");
 	$result = array_flip($part);
 		if(isset($_SERVER['HTTP_REFERER']))
@@ -128,27 +163,54 @@ class Securite
 			{
 				while(list($key,$val) = each($parse_url))
 				{
-				$result["$key"] = $val;
+					$result["$key"] = $val;
 				}
 			}
 			else
 			{
 				while(list($key,$val) = each($parse_url))
 				{
-				$result["$key"] = addslashes($val);
+					$result["$key"] = addslashes($val);
 				}
 			}
 		}
 	return $result;
 	}
-
-	static function isMail($string){
-	if (preg_match("/^[a-z0-9._-]+@[a-z0-9.-]{2,}[.][a-z]{2,3}$/", $string)) {
-		return true;
-	} else {
-		return false;
-	}
 	
+
+	/**
+	 * 
+	 * Test si une adresse e-mail est correct
+	 * @param string $string
+	 */
+	static function isMail($string)
+	{
+		Log::setLog('Check if @ existe in mail', 'Securite');
+		// Charge la librairie des email jetable
+		$mail = library ( 'mailjetable' );
+		// Explose l'url, pour n'avoir que le serveur mail
+		$explode = explode ( '@', strtolower ( $string) );
+		$serveur = isSet( $explode[1] ) ?  $explode[1] : 'NULL';	
+		
+			/*
+			 * Recherche dans la librairie des mails jetables
+			 */
+			if (( bool ) array_search ( $serveur, $mail ))
+			{
+				Log::setLog('Mail has jetable', 'Securite');
+				return false;
+			}
+			
+			/*
+			 * Demande a filter_var si c'est une adresse mail
+			 */
+			if (! filter_var ( $string, FILTER_VALIDATE_EMAIL ))
+			{
+				Log::setLog('Filter var respon no mail', 'Securite');
+				return false;
+			}
+		Log::setLog('Ok it\'s mail', 'Securite');
+		return true;
 	}
 }
 ?>

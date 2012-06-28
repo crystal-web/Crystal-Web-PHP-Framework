@@ -1,8 +1,8 @@
 <?php
-echo '<section id="article"><span class="cal m'.date('n', $output->date).' d'.date('j', $output->date).'">
+echo '<span class="cal m'.date('n', $output->date).' d'.date('j', $output->date).'" style="top: -35px;">
 <span class="m">'.date('M', $output->date).'</span>
 <span class="d">'.date('j', $output->date).'</span>
-</span>';
+</span><section id="article" class="well">';
 
 if ($this->mvc->Session->isLogged())
 {
@@ -22,7 +22,7 @@ if ($this->mvc->Session->isLogged())
 
 // Article
 
-echo stripcslashes($output->content) . '
+echo clean($output->content, 'html') . '
 </section>';
  
  
@@ -30,7 +30,7 @@ if ($com_actif=='y')
 {
 // Deux colonnes Commentaires
 echo '<section id="commentaires">';
-	loadFunction('bbcode');
+
 	
 	// Le nombre de commentaire
 	if ($nbcom != 0)
@@ -43,7 +43,7 @@ echo '<section id="commentaires">';
 		foreach ($getComm as $data)
 		{
 		
-	echo '<li>
+	echo '<li class="well">
 		
 		<img alt="" src="' . get_gravatar($data->mail) . '" style="float: left;
 	border: 1px solid #ACA288;
@@ -53,13 +53,13 @@ echo '<section id="commentaires">';
 		<p style="color: #B99316;
 	margin-top: 10px;
 	padding: 0px;
-	float: left;">Commentaire de <span style="color:#000;font-weight:bold;">' . $data->pseudo . '</span> le ' . dates($data->Cdate, 'fr_date') . '  </p>
+	float: left;">Commentaire de <span style="color:#000;font-weight:bold;">' . clean($data->pseudo, 'slug') . '</span> le ' . dates($data->Cdate, 'fr_date') . '  </p>
 		<div style="clear: both;
 	width: 100%;
 	color: #333;
 	border-top: 1px dotted #B99316;
 	padding-top: 10px;
-	margin-bottom: 15px;"><p>' .stripcslashes(bbcode_format($data->content)) . '</p></div>
+	margin-bottom: 15px;"><p>' .clean($data->content, 'bbcode') . '</p></div>
 		
 		</li>';
 

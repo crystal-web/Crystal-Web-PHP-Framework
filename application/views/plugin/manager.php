@@ -1,6 +1,6 @@
 <?php 
-echo '<h3>'.$plugin['name'].'</h3><p>
-'.$plugin['description'].'</p>';
+echo '<h3>'.$plugin['info']['name'].'</h3><p>
+'.$plugin['info']['description'].'</p>';
 ?>
 <div style="border:1px solid black;">
 <?php

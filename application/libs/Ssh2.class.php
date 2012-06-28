@@ -7,8 +7,9 @@
 */
 define('CONSOLE_SSH', '<span style="color:blue">[console] </span>');
 define('COMMENT_SSH', '<span style="color:green">[comment] </span>');
+define('ERROR_SSH', '<span style="color:red">[comment] </span>');
 class Ssh2 {
-private $ver=1.3;
+private $ver='1.4.1';
 // Identifiant serveur
 private $server = 'localhost';		// Serveur
 private $port = 22;					// Port
@@ -20,7 +21,7 @@ private $password;					// Password
 private $con = null;				// Flux SSH2
 private $log = array();
 
-private $tampon = array();			// Enregistrement de certainne valeur pour économiser les requêtes
+private $tampon = array();			// Enregistrement de certainne valeur pour ï¿½conomiser les requï¿½tes
 
 
 	/*********************************************************************************
@@ -30,9 +31,12 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	*********************************************************************************/
 	
 	
-	/*
-	*	Set server to connect
-	*/
+	/**
+	 * 
+	 * Set server to connect
+	 * @param string $host
+	 * @param int $port
+	 */
 	public function setServer($host, $port=22)
 	{
 	$this->server = $host;
@@ -40,9 +44,12 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	}	
 	
 	
-	/*
-	*	Set user to connect
-	*/
+	/**
+	 * 
+	 * Set user to connect
+	 * @param string $login
+	 * @param string $password
+	 */
 	public function setLogin($login, $password)
 	{
 	$this->login = $login;
@@ -57,10 +64,12 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	*********************************************************************************/
 	
 
-	/*
-	*	an eye on the script with log
-	*	Return string or array
-	*/
+	/**
+	 * 
+	 * an eye on the script with log
+	 * @param boolean $getArray
+	 * @return array|string
+	 */
 	public function getLog($getArray = true)
 	{
 	$this->log[] = CONSOLE_SSH . "Getting log" . PHP_EOL;
@@ -82,10 +91,11 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	}
 	
 	
-	/*
-	*	Auto Connect and auth
-	*	It's easy to use, auto verification
-	*/
+	/**
+	 * 
+	 * Auto Connect and auth 
+	 * It's easy to use, auto verification
+	 */
 	public function startIt()
 	{
 		if ($this->connect())
@@ -103,40 +113,73 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	return false;
 	}
 	
-	/*
-	*	Run connection to the select server
-	*/
+	/**
+	 * 
+	 * Run connection to the select server
+	 */
 	public function connect()
 	{
 	$this->log[] = CONSOLE_SSH . "Welcome to SSH2 Version ".$this->ver." by Christophe BUFFET (developpeur(AROBASE)crystal-web.org" . PHP_EOL;
-		// Tentative de connection 
-		if( !($this->con = ssh2_connect( $this->server, $this->port /* Default 22 */)) )
+	
+		if (function_exists('ssh2_connect'))
 		{
-			$this->log[] = CONSOLE_SSH . "FAIL: unable to establish connection" . PHP_EOL;
+			// Tentative de connection 
+			if( !($this->con = ssh2_connect( $this->server, $this->port /* Default 22 */)) )
+			{
+				$this->log[] = ERROR_SSH . "FAIL: unable to establish connection" . PHP_EOL;
+				return false;
+			}
+			else
+			{
+			$this->log[] = CONSOLE_SSH . "Okay: Connected to " . $this->server . PHP_EOL;
+			return true;
+			}
+		} else {
+			$this->log[] = ERROR_SSH . "FAIL: unable to establish connection ('function ssh2_connect not implemented')" . PHP_EOL;
 			return false;
-		}
-		else
-		{
-		$this->log[] = CONSOLE_SSH . "Okay: Connected to " . $this->server . PHP_EOL;
-		return true;
 		}
 	}
 	
+	public function __destruct()
+	{
+		if ($this->con)
+		{
+		$this->cmd('exit');
+		}
+	}
 
-	/*
-	*	Run authentification to the select server
-	*/
+	/**
+	 * 
+	 * Close connection
+	 */
+	public function stop()
+	{
+	$this->__destruct();
+	}
+	
+	
+	/**
+	 * 
+	 * Run authentification to the select server
+	 * @return boolean
+	 */
 	public function auth()
 	{
-		if( !ssh2_auth_password($this->con, $this->login, $this->password) )
+		if (function_exists('ssh2_auth_password'))
 		{
-			$this->log[] = CONSOLE_SSH . "FAIL: unable to authenticate" . PHP_EOL;
+			if( !ssh2_auth_password($this->con, $this->login, $this->password) )
+			{
+				$this->log[] = ERROR_SSH . "FAIL: unable to authenticate" . PHP_EOL;
+				return false;
+			}	
+			else
+			{
+				$this->log[] = CONSOLE_SSH .  "Okay: logged in... with user " . $this->login . PHP_EOL;
+				return true;
+			}
+		} else {
+			$this->log[] = ERROR_SSH . "FAIL: ('function ssh2_auth_password not implemented')" . PHP_EOL;
 			return false;
-		}	
-		else
-		{
-			$this->log[] = CONSOLE_SSH .  "Okay: logged in... with user " . $this->login . PHP_EOL;
-			return true;
 		}
 	}
 
@@ -150,45 +193,61 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	*********************************************************************************/
 	
 	
-	/*
-	*	Run command ;-)
-	*/
+	/**
+	 * 
+	 * Run command ;-)
+	 * @param string $cmd
+	 * @param boolean $console
+	 * @return array|boolean
+	 */
 	public function cmd($cmd, $console=true)
 	{
-		if (!($stream = ssh2_exec($this->con, $cmd )))
+		if (function_exists('ssh2_exec'))
 		{
-		$this->log[] = CONSOLE_SSH . "FAIL: unable to execute command" . PHP_EOL;
-		} else {
-		
-		$buffer=NULL;
-			if ($console == true)
+			$stream = ssh2_exec($this->con, $cmd );
+			if (!$stream)
 			{
-			$this->log[] = CONSOLE_SSH . "EXECUTE : command ".$cmd." : " . PHP_EOL;
+			$this->log[] = ERROR_SSH . "FAIL: unable to execute command" . PHP_EOL;
+			} else {
 			
-			// Recuperation des informations recu apres la commande
-			stream_set_blocking($stream, true);
-			// RaZ Log Console
-			$this->tampon['lastLogConsole'] = NULL;
-				while ($buf = fread($stream,4096))
+			$buffer=NULL;
+				if ($console == true)
 				{
-				$buffer.=$buf;
-				$this->tampon['lastLogConsole'] .= $buf;
+				$this->addComment( "EXECUTE : command ".$cmd." : " );
+				
+				// Recuperation des informations recu apres la commande
+				stream_set_blocking($stream, true);
+				// RaZ Log Console
+				$this->tampon['lastLogConsole'] = NULL;
+					while ($buf = fread($stream,4096))
+					{
+					$this->log[] = CONSOLE_SSH . $buf;
+					$buffer.=$buf;
+					$this->tampon['lastLogConsole'] .= $buf;
+					}
+				
+				$this->log[] = $buffer;
+				$this->addComment( "END : command ".$cmd." : " );
 				}
+	
 			
-			$this->log[] = $buffer;
-			$this->log[] = CONSOLE_SSH . "END : command ".$cmd." : " . PHP_EOL;
+			fclose($stream);
+			return $buffer;
 			}
-
-		
-		fclose($stream);
-		return $buffer;
+		} else {
+			$this->log[] = ERROR_SSH . "FAIL: ('function ssh2_exec not implemented')" . PHP_EOL;
+			return false;
 		}
 	}
 	
-
-	/*
-	*	Search in file
-	*/
+	
+	
+	/**
+	 * 
+	 * Search in file
+	 * @param string $fileName
+	 * @param POSIX $rules
+	 */
 	public function catSearch($fileName, $rules)
 	{
 		// if tampon not exist create and stor filename
@@ -214,9 +273,12 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	}
 	
 	
-	/*
-	*	Get PID by var name ex: ircd
-	*/
+
+	/**
+	 * 
+	 * Get PID by var name ex: ircd
+	 * @param string $app
+	 */
 	public function getPid($app)
 	{
 	$this->log[] = CONSOLE_SSH . "Get list of process" . PHP_EOL;
@@ -231,36 +293,39 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 				// Recherche du PID
 				if (preg_match_all('#([0-9]+).*[0-9]{1,2}:[0-9]{1,2}#', $value, $return))
 				{
-				$this->log[] = CONSOLE_SSH . "PID found " . $return[1][0] . PHP_EOL;
+				$this->addComment( "PID found " . $return[1][0] );
 				return (int) $return[1][0];
 				}
 			}
 		}
 
-	$this->log[] = CONSOLE_SSH . "Not found process " . $app . PHP_EOL;
+	$this->log[] = ERROR_SSH . "Not found process " . $app . PHP_EOL;
 	return false;
 	}
 
 
-	/*
-	*	killed in the process type the name or PID
-	*/
+	/**
+	 * 
+	 * killed in the process type the name or PID
+	 * Another use for this $this->cmd('pkill PROCESS');
+	 * @param string $process
+	 */
 	public function kill($process)
 	{
 		if (is_int($process) && $process > 0)
 		{
-			$this->log[] = CONSOLE_SSH . "kill is int, kill process" . PHP_EOL;
+			$this->addComment(CONSOLE_SSH . "kill is int, kill process");
 			$this->cmd('kill -9 '.$process);
 			return true;
 		}
 		else
 		{
-			$this->log[] = CONSOLE_SSH . "kill is var, getting PID" . PHP_EOL;
+			$this->addComment("kill is var, getting PID");
 			$pid = $this->getPid($process);
 			
 			if (is_int($pid) && $pid > 0)
 			{
-				CONSOLE_SSH . $this->log[] = "Kill ".$pid . PHP_EOL;
+				$this->addComment("Kill ".$pid);
 				$this->cmd('kill -9 '.$pid);
 				return true;
 			}
@@ -269,14 +334,43 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	return false;
 	}
 	
-	/*
-	*	Little methode to run a cmd lauch/run app
-	*	If you run any app. With $this->cmd()
-	*	make, sure you use $this->cmd('./meApp', true)
-	*/
+	
+	/**
+	 * 
+	 * Modification des paramettres
+	 * ex: sshObject('/home/webradio/Noozs/10300/sc_trans/sc_trans.conf', 'ServerPort=', '10300', ([0-9]+))
+	 * result: ServerPort=10300 dans /home/webradio/Noozs/10300/sc_trans/sc_trans.conf
+	 * @param string $file
+	 * @param string $stringBase
+	 * @param string $newString
+	 * @param POSIX $rules
+	 */	
+	public function exchange($file, $stringBase, $newString, $rules='([a-zA-Z0-9\-. ]+)')
+	{
+		//Recherche via cat
+		$aCatRespon = $this->catSearch($file, $stringBase.$rules);
+		//Si on trouve pas on retourne false
+		if (!isSet($aCatRespon[1]))
+		{
+		$this->log[] = ERROR_SSH . "exchange: Not found ".$stringBase.$rules . " into ".$file . PHP_EOL;
+		return false;
+		}
+		$this->cmd("sed -i s+'".$stringBase.$aCatRespon[1]."'+'".$stringBase.$newString."'+ ".$file);
+		$this->addComment($stringBase.$newString . ' into ' . $file);
+		return true;
+	}
+	
+	
+	/**
+	 * 
+	 * Little methode to run a cmd lauch/run app
+	 * If you run any app. With $this->cmd()
+	 * make, sure you use $this->cmd('./meApp', true)
+	 * @param string $meapp
+	 */
 	public function run($meapp)
 	{
-		$this->log[] = CONSOLE_SSH . "Run command ".$meapp . PHP_EOL ;
+		$this->log[] = CONSOLE_SSH . "Run command silent ".$meapp . PHP_EOL ;
 		$this->cmd($meapp, false);
 	}
 	
@@ -288,9 +382,12 @@ private $tampon = array();			// Enregistrement de certainne valeur pour économis
 	*********************************************************************************/
 	
 	
-	/*
-	*	for a much cleaner job, commentary used
-	*/
+	
+	/**
+	 * 
+	 * For a much cleaner job, commentary used
+	 * @param string $comment
+	 */
 	public function addComment($comment)
 	{
 	$this->log[] = COMMENT_SSH . $comment . PHP_EOL;

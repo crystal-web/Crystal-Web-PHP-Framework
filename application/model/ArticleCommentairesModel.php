@@ -33,14 +33,14 @@ CREATE TABLE IF NOT EXISTS `".__SQL."_Article` (
   `online` enum('n','y') NOT NULL default 'n',
   `type` varchar(55) NOT NULL default 'article',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 CREATE TABLE IF NOT EXISTS `".__SQL."_ArticleCat` (
   `idcategorie` int(11) NOT NULL auto_increment,
   `categorie` varchar(50) NOT NULL,
   `description` varchar(255) NOT NULL,
   PRIMARY KEY  (`idcategorie`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `".__SQL."_ArticleCommentaires` (
   `website` varchar(255) default NULL,
   `valide` enum('n','y','s') NOT NULL default 'n' COMMENT 'n = non valide, y = valide, s = spam',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 	");
 	}
 	

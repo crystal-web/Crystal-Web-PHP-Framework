@@ -1,5 +1,140 @@
 <?php
 /**
+ * 
+ * @link http://www.askapache.com/security/chmod-stat.html
+ * @param unknown_type $file
+ */
+function alt_stat($file) {
+ 
+ clearstatcache();
+ $ss=@stat($file);
+ if(!$ss) return false; //Couldnt stat file
+ 
+
+ 
+ $ts=array(
+  0140000=>'ssocket',
+  0120000=>'llink',
+  0100000=>'-file',
+  0060000=>'bblock',
+  0040000=>'ddir',
+  0020000=>'cchar',
+  0010000=>'pfifo'
+ );
+ 
+ $p=$ss['mode'];
+ $t=decoct($ss['mode'] & 0170000); // File Encoding Bit
+ 
+ $str =(array_key_exists(octdec($t),$ts))?$ts[octdec($t)]{0}:'u';
+ $str.=(($p&0x0100)?'r':'-').(($p&0x0080)?'w':'-');
+ $str.=(($p&0x0040)?(($p&0x0800)?'s':'x'):(($p&0x0800)?'S':'-'));
+ $str.=(($p&0x0020)?'r':'-').(($p&0x0010)?'w':'-');
+ $str.=(($p&0x0008)?(($p&0x0400)?'s':'x'):(($p&0x0400)?'S':'-'));
+ $str.=(($p&0x0004)?'r':'-').(($p&0x0002)?'w':'-');
+ $str.=(($p&0x0001)?(($p&0x0200)?'t':'x'):(($p&0x0200)?'T':'-'));
+ 
+ $s=array(
+ 'perms'=>array(
+  'umask'=>sprintf("%04o",@umask()),
+  'human'=>$str,
+  'octal1'=>sprintf("%o", ($ss['mode'] & 000777)),
+  'octal2'=>sprintf("0%o", 0777 & $p),
+  'decimal'=>sprintf("%04o", $p),
+  'fileperms'=>@fileperms($file),
+  'mode1'=>$p,
+  'mode2'=>$ss['mode']),
+ 
+ 'owner'=>array(
+  'fileowner'=>$ss['uid'],
+  'filegroup'=>$ss['gid'],
+  'owner'=>
+  (function_exists('posix_getpwuid'))?
+  @posix_getpwuid($ss['uid']):'',
+  'group'=>
+  (function_exists('posix_getgrgid'))?
+  @posix_getgrgid($ss['gid']):''
+  ),
+ 
+ 'file'=>array(
+  'filename'=>$file,
+  'realpath'=>@realpath($file),
+  'dirname'=>@dirname($file),
+  'basename'=>@basename($file)
+  ),
+
+ 'filetype'=>array(
+  'type'=>substr($ts[octdec($t)],1),
+  'type_octal'=>sprintf("%07o", octdec($t)),
+  'is_file'=>@is_file($file),
+  'is_dir'=>@is_dir($file),
+  'is_link'=>@is_link($file),
+  'is_readable'=> @is_readable($file),
+  'is_writable'=> @is_writable($file)
+  ),
+  
+ 'device'=>array(
+  'device'=>$ss['dev'], //Device
+  'device_number'=>$ss['rdev'], //Device number, if device.
+  'inode'=>$ss['ino'], //File serial number
+  'link_count'=>$ss['nlink'], //link count
+  'link_to'=>(filetype($file)=='link') ? @readlink($file) : ''
+  ),
+ 
+ 'size'=>array(
+  'size'=>$ss['size'], //Size of file, in bytes.
+  'blocks'=>$ss['blocks'], //Number 512-byte blocks allocated
+  'block_size'=> $ss['blksize'] //Optimal block size for I/O.
+  ), 
+ 
+ 'time'=>array(
+  'mtime'=>$ss['mtime'], //Time of last modification
+  'atime'=>$ss['atime'], //Time of last access.
+  'ctime'=>$ss['ctime'], //Time of last status change
+  'accessed'=>@date('Y M D H:i:s',$ss['atime']),
+  'modified'=>@date('Y M D H:i:s',$ss['mtime']),
+  'created'=>@date('Y M D H:i:s',$ss['ctime'])
+  ),
+ );
+ 
+ clearstatcache();
+ return $s;
+}
+
+
+
+function minute($time)
+{
+	// Temps en secondes
+	$s = time() - $time;// / 1000;
+	if ($s < 0)
+	{
+		$s = 0;
+	}
+	
+	// Nombre de jour
+	$d = floor($s / 86400);
+	// Soustraite les jours
+	$s -= ($d * 86400);
+	
+	// Nombre d'heure
+	$h = floor($s/3600);
+	$s -= ($h*3600);
+	
+	$m = floor($s/60);
+	$s -= ($m * 60);
+	
+	$s = floor($s);
+	
+
+	
+	//$down = array('hour' => ($h - 24) * -1, 'minute' => ($m - 60) * -1, 'seconde' => ($s - 60) * -1);
+	
+	
+	return array('day' => $d, 'hour' => $h, 'minute' => $m, 'seconde' => $s);
+}
+
+
+/**
 * Chargement automatique des class
 *
 * @author Christophe BUFFET
@@ -11,14 +146,14 @@ function __autoload($class_name)
 {
 $filename = $class_name . '.class.php';
 $filePath = __APP_PATH . DS . 'libs' . DS . $filename;
-	if (file_exists($filePath))
-	{
-	include_once ($filePath);
-	}
-	elseif(__DEV_MODE)
-	{
-	die('Class file not exists '.$filePath);
-	}
+    if (file_exists($filePath))
+    {
+    include_once ($filePath);
+    }
+    elseif(__DEV_MODE)
+    {
+    die('Class file not exists '.$filePath);
+    }
 }
 
 function loadSystem()
@@ -34,6 +169,7 @@ require_once __APP_PATH . DS . 'framework' . DS . 'Template.php';
 require_once __APP_PATH . DS . 'framework' . DS . 'Session.php';
 require_once __APP_PATH . DS . 'framework' . DS . 'Form.php';
 require_once __APP_PATH . DS . 'framework' . DS . 'AccessControlList.php';
+require_once __APP_PATH . DS . 'framework' . DS . 'Plugin.php';
 // Zone de stockage des données recurentes
 require_once __APP_PATH . DS . 'framework' . DS . 'Register.php';
 }
@@ -43,15 +179,33 @@ function loadFunction($function)
 {
 $file = __APP_PATH . DS . 'function' . DS . $function;
 $file .= '.php';
-	if (file_exists($file))
-	{
-	require_once $file;
-	}
-	elseif (__DEV_MODE === true)
-	{
-	debug('File not loaded '.$file);
-	}
+    if (file_exists($file))
+    {
+    require_once $file;
+    }
+    elseif (__DEV_MODE === true)
+    {
+    debug('File not loaded '.$file);
+    }
 }
+
+function loadModel($name)
+    {
+    $name = $name.'Model';
+    // L'endroit ou le model est chargé
+    $file = __APP_PATH . DS . 'model' . DS . $name . '.php';
+        if (file_exists($file))
+        {
+        require_once $file;
+        return new $name();
+        }
+        else
+        {
+        throw new Exception('File not loaded '.$file);
+
+        return false;
+        }
+    }
 
 
 /**
@@ -60,10 +214,12 @@ $file .= '.php';
 * @param $str: Chaine à transformer
 * @return Slug de la chaine
 **/
-function str2slug($str) {
-    $str = htmlentities($str, ENT_NOQUOTES, 'utf-8');
+function str2slug($str)
+{
+//    $str = htmlentities($str, ENT_NOQUOTES, 'utf-8');
     $str = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $str);
     $str = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $str);
+    $str = preg_replace('#\&([A-Za-z])(.*)\;#', '', $str);
     $str = str_replace("'", '-', $str);
     $str = str_replace(' ', '-', $str);
     $str = preg_replace('#[^A-Za-z0-9-]#', '', $str);
@@ -74,37 +230,146 @@ function str2slug($str) {
 }
 
 
+function clean($string, $rules)
+{
+if (is_string($string))
+{
+$string = stripslashes($string);
+
+switch ($rules):
+
+    /***************************************
+    *   Cas commun
+    ***************************************/
+    case 'html':
+    return htmlspecialchars_decode($string);
+    break;
+    case 'str':
+    return $string;
+    break;
+    case 'stripbbcode':
+    loadFunction('bbcode');
+    return stripBBcode($string);
+    break;
+    case 'bbcode':
+    loadFunction('bbcode');
+    return bbcode($string);
+    break;
+	case 'slug':
+    $string = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $string);
+    $string = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $string);
+    $string = preg_replace('#\&([A-Za-z])(.*)\;#', '', $string);
+    $string = str_replace("'", '-', $string);
+    $string = str_replace(' ', '-', $string);
+
+    $string = str_replace('--', '-', $string);
+  //  $string = strtolower($string);
+    $string = trim($string, '-');
+	$string = preg_replace('#[^A-Za-z0-9_\-]#', '', $string);
+	return $string;
+	break;
+    /***************************************
+    *   Cas particulier
+    ***************************************/
+    case 'alphanum':
+    // éèê
+    $string = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $string);
+    // OE oe
+    $string = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $string);
+    $string = preg_replace('#\&([A-Za-z])(.*)\;#', '', $string);
+    // A-Z 0-9 - +
+    return preg_replace('#[^A-Za-z0-9\-\+]#', '', $string);
+    break;
+
+    case 'alpha':
+    return preg_replace('#[^A-Za-z]#', '', $string);
+    break;
+    case 'num':
+    // 0-9
+    return  preg_replace('#[^0-9]#', '', $string);
+    break;
+    case 'alphaNumUnder':
+    // éèê
+    $string = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $string);
+    // OE oe
+    $string = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $string);
+    $string = preg_replace('#\&([A-Za-z])(.*)\;#', '', $string);
+    // A-Z 0-9 - + _
+    return preg_replace('#[^A-Za-z0-9_]#', '', $string);
+    break;
+    case 'extra':
+    // éèê
+    $string = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $string);
+    // OE oe
+    $string = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $string);
+    $string = preg_replace('#\&([A-Za-z])(.*)\;#', '', $string);
+    // A-Z 0-9 - + _
+    return preg_replace('#[^A-Za-z0-9_\-\+]#', '', $string);
+    break;
+    default:
+    return preg_replace('#[^A-Za-z]#', '', $string);
+    break;
+endswitch;
+}
+
+return false; 
+
+}
+
+
+/***************************************
+*   Protection lors de l'ecriture sur le site
+***************************************/
+function hasstr($string, $has = 'bbcode')
+{
+    switch($has)
+    {
+    case 'html':
+    return htmlspecialchars_decode(stripcslashes($string));
+    break;
+    case 'bbcode':
+    loadFunction('bbcode');
+    return bbcode(stripcslashes($string));
+    break;
+    default:
+    return stripcslashes($string);
+    break;
+    }
+
+}
+
+
 function getOperatorSidebar($adminSiderbar)
 {
 echo '<div class="opSiderbar" id="opSiderbar"><ul id="opMenu">';
 
-	foreach ($adminSiderbar AS $k=>$d) 
-	{
-	echo '<li class="toggleSubMenu"><span>'.$d['title'].'</span><ul class="subMenu">';
-		foreach ($d['data'] AS $url => $data)
-		{
-		echo '<li><a href="'.$data.'">'.$url.'</a></li>';
-		
-		}
-	echo '</ul></li>';
-	}
-echo '</ul><a class="settingbutton" href="#">	</a></div>';//*/
+    foreach ($adminSiderbar AS $k=>$d)
+    {
+    echo '<li class="toggleSubMenu"><span>'.$d['title'].'</span><ul class="subMenu">';
+        foreach ($d['data'] AS $url => $data)
+        {
+        echo '<li><a href="'.$data.'">'.$url.'</a></li>';
+
+        }
+    echo '</ul></li>';
+    }
+echo '</ul><a class="settingbutton" href="#">   </a></div>';//*/
 /*
 echo '<div class="opSiderbar" id="opSiderbar"><ul id="opMenu">';
-	foreach ($adminSiderbar AS $k=>$d) 
-	{
-	echo '<li class="opMenu">
-		<a href="#">'.$d['title'].'</a>
-		<ul id="m'.$k.'">';
-		foreach ($d['data'] AS $url => $data)
-		{
-		echo '<li><a href="'.$data.'">'.$url.'</a></li>';
-		
-		}
-	echo '</ul></li>';
-	}
+    foreach ($adminSiderbar AS $k=>$d)
+    {
+    echo '<li class="opMenu">
+        <a href="#">'.$d['title'].'</a>
+        <ul id="m'.$k.'">';
+        foreach ($d['data'] AS $url => $data)
+        {
+        echo '<li><a href="'.$data.'">'.$url.'</a></li>';
 
-	echo '</ul><a class="settingbutton" href="#">	</a></div>';//*/
+        }
+    echo '</ul></li>';
+    }
+
+    echo '</ul><a class="settingbutton" href="#">   </a></div>';//*/
 }
 
 /**
@@ -118,7 +383,7 @@ function getmicrotime()
 {
     if (function_exists('gettimeofday'))
     {
-    // retourne le timestamp Unix, avec les microsecondes. 
+    // retourne le timestamp Unix, avec les microsecondes.
     // Cette fonction est uniquement disponible
     //  sur les systèmes qui supportent la fonction gettimeofday().
     list($usec, $sec) = explode(" ",microtime());
@@ -148,62 +413,62 @@ function pagination($nb_page)
 {
 $page = (int) (isset($_GET['page'])) ? $_GET['page'] : 1;
 /***************************************
-*	Pagination
+*   Pagination
 ***************************************/
 $html = NULL;
 if ($nb_page > 1)
 {
-$html	=	'<div class="pagination">';
-$html	.=	'<ul>';
-	// Si la page - une est suppérieur a 0
-	// Il y a une page
-	if ($page-1 > 0)
-	{
-		$html	.=	'<li class="prev"><a href="?page='.($page-1).'">Precedent</a></li>';
-	}
-	// Sinon, il n'y en a pas
-	else
-	{
-		$html	.=	'<li class="prev disabled"><a href="#">Precedent</a></li>';	
-	}
-	
-/***************************************
-*	Bloucle simple multi info
-***************************************/
-		
-			for($i=$page-5; $i<$page+5; $i++)
-			{
-				if ($i<=$nb_page && $i>0)
-				{
-					if ($page == $i)
-					{
-					$html	.=	'<li><a href="#" class="disabled">'.$i.'</a></li>';
-					}
-					else
-					{
-					$html	.=	'<li><a href="?page='.$i.'">'.$i.'</a></li>';
-					}
-				}
-			}		
-		
-/***************************************
-*	END Bloucle simple multi info
-***************************************/
-		
-	// Si la page + une est inférieur ou egal au nombre de page
-	if ($page+1 <= $nb_page)
-	{
-		$html	.=	'<li class="next"><a href="?page='.($page+1).'">Suivant</a></li>';
-	}
-	// Sinon, il n'y en a pas
-	else
-	{
-		$html	.=	'<li class="next disabled"><a href="#">Suivant</a></li>';	
-	}
+$html   =   '<div class="pagination">';
+$html   .=  '<ul>';
+    // Si la page - une est suppérieur a 0
+    // Il y a une page
+    if ($page-1 > 0)
+    {
+        $html   .=  '<li class="prev"><a href="?page='.($page-1).'">Precedent</a></li>';
+    }
+    // Sinon, il n'y en a pas
+    else
+    {
+        $html   .=  '<li class="prev disabled"><a href="#">Precedent</a></li>';
+    }
 
-	
-$html	.=	'</ul>';
-$html	.=	'</div>';
+/***************************************
+*   Bloucle simple multi info
+***************************************/
+
+            for($i=$page-5; $i<$page+5; $i++)
+            {
+                if ($i<=$nb_page && $i>0)
+                {
+                    if ($page == $i)
+                    {
+                    $html   .=  '<li><a href="#" class="disabled">'.$i.'</a></li>';
+                    }
+                    else
+                    {
+                    $html   .=  '<li><a href="?page='.$i.'">'.$i.'</a></li>';
+                    }
+                }
+            }
+
+/***************************************
+*   END Bloucle simple multi info
+***************************************/
+
+    // Si la page + une est inférieur ou egal au nombre de page
+    if ($page+1 <= $nb_page)
+    {
+        $html   .=  '<li class="next"><a href="?page='.($page+1).'">Suivant</a></li>';
+    }
+    // Sinon, il n'y en a pas
+    else
+    {
+        $html   .=  '<li class="next disabled"><a href="#">Suivant</a></li>';
+    }
+
+
+$html   .=  '</ul>';
+$html   .=  '</div>';
 }
 
 return $html;
@@ -220,86 +485,6 @@ return $html;
 function alerte($msg, $echo = false)
 {
 $box = '<div class="MSGbox MSGalerte"><p>' . $msg . '</p></div>';
-if ($echo == true) { echo $box; } else { return $box; }
-}
-
-
-/**
-* Retourne une alerte "astuce"
-*
-* @author Christophe BUFFET
-* @link http://crystal-web.org
-* @param string $msg|Message retourné par la fonction
-* @param bool $echo|Le message doit être print ou return
-* @return string
-*/
-function astuce($msg, $echo = false)
-{ 
-$box = '<div class="MSGbox MSGastuce"><p>' . $msg . '</p></div>';
-if ($echo == true) { echo $box; } else { return $box; }
-}
-
-
-/**
-* Retourne une alerte "beta"
-*
-* @author Christophe BUFFET
-* @link http://crystal-web.org
-* @param string $msg|Message retourné par la fonction
-* @param bool $echo|Le message doit être print ou return
-* @return string
-*/
-function beta($msg, $echo = false)
-{
-$box = '<div class="MSGbox MSGbeta"><p>' . $msg . '</p></div>';
-if ($echo == true) { echo $box; } else { return $box; }
-}
-
-
-/**
-* Retourne une alerte "info"
-*
-* @author Christophe BUFFET
-* @link http://crystal-web.org
-* @param string $msg|Message retourné par la fonction
-* @param bool $echo|Le message doit être print ou return
-* @return string
-*/
-function info($msg, $echo = false)
-{
-$box = '<div class="MSGbox MSGinfo"><p>' . $msg . '</p></div>';
-if ($echo == true) { echo $box; } else { return $box; }
-}
-
-
-/**
-* Retourne une alerte "note"
-*
-* @author Christophe BUFFET
-* @link http://crystal-web.org
-* @param string $msg|Message retourné par la fonction
-* @param bool $echo|Le message doit être print ou return
-* @return string
-*/
-function note($msg, $echo = false)
-{
-$box = '<div class="MSGbox MSGnote"><p>' . $msg . '</p></div>';
-if ($echo == true) { echo $box; } else { return $box; }
-}
-
-
-/**
-* Retourne une alerte "valide"
-*
-* @author Christophe BUFFET
-* @link http://crystal-web.org
-* @param string $msg|Message retourné par la fonction
-* @param bool $echo|Le message doit être print ou return
-* @return string
-*/
-function valide($msg, $echo = false)
-{
-$box = '<div class="MSGbox MSGvalide"><p>' . $msg . '</p></div>';
 if ($echo == true) { echo $box; } else { return $box; }
 }
 
@@ -323,10 +508,11 @@ return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $u
 *
 * @author Jay Salvat
 * @link http://blog.jaysalvat.com/article/zipper-des-dossiers-a-la-volee-avec-php
-* @param string $folder|Dossier a scanner 
+* @param string $folder|Dossier a scanner
 * @return array
 */
-function scanfolder($folder) {
+function scanfolder($folder)
+{
     $files = array();
     $dh = opendir($folder);
     // je parcours le dossier dans lequel je me trouve
@@ -387,40 +573,47 @@ $var .= '</pre></p>';
 }
 
 
-function debug($var){
+function debug($var)
+{
 
-	if(__DEV_MODE){
-		$debug = debug_backtrace(); 
-		echo '<p>&nbsp;</p><p><a href="#" onclick="$(this).parent().next(\'ol\').slideToggle(); return false;"><strong>'.$debug[0]['file'].' </strong> l.'.$debug[0]['line'].'</a></p>'; 
-		echo '<ol style="display:none;">';
-		$lastFile = $lastLine = false;
-		foreach($debug as $k=>$v){ if($k>0){
-		$lastFile = isSet($v['file']) ? $v['file'] : $lastFile;
-		$lastLine = isSet($v['line']) ? $v['line'] : $lastLine;
-			echo '<li><strong>'.$lastFile.' </strong> l.'.$lastLine.'</li>'; 
-		}}
-		echo '</ol>'; 
-		echo '<pre class="code">';
-		var_dump($var);
-		echo '</pre>'; 
-	}
-	
+    if(__DEV_MODE){
+        $debug = debug_backtrace();
+        echo '<p>&nbsp;</p><p><a href="#" onclick="$(this).parent().next(\'ol\').slideToggle(); return false;"><strong>'.$debug[0]['file'].' </strong> l.'.$debug[0]['line'].'</a></p>';
+        echo '<ol style="display:none;">';
+        $lastFile = $lastLine = false;
+        foreach($debug as $k=>$v){ if($k>0){
+        $lastFile = isSet($v['file']) ? $v['file'] : $lastFile;
+        $lastLine = isSet($v['line']) ? $v['line'] : $lastLine;
+            echo '<li><strong>'.$lastFile.' </strong> l.'.$lastLine.'</li>';
+        }}
+        echo '</ol>';
+        echo '<pre class="code">';
+        var_dump($var);
+        echo '</pre>';
+    }
+
 }
+
 
 /**
 * Enregistrement des erreurs dans un fichier cache
 *
 * @author Christophe BUFFET
 * @link http://crystal-web.org
-* @param array $data|Tableau de variables
 * @param string $errno|type de l'erreur
 * @param string $errstr|message d'erreur
 * @param string $errfile|fichier correspondant à l'erreur
-* @param string $errline|ligne correspondante à l'erreur 
+* @param string $errline|ligne correspondante à l'erreur
 * @return mixed
 */
 function erreur_alerte($errno,$errstr,$errfile,$errline)
 {
+	global $sys__bool;
+	if ($sys__bool)
+	{
+		return;		
+	}
+	
     // On définit le type de l'erreur
     switch($errno)
     {
@@ -429,7 +622,7 @@ function erreur_alerte($errno,$errstr,$errfile,$errline)
     case E_USER_NOTICE : $type = "Warning:"; break;
     case E_ERROR : $type = "Fatal"; break;
     case E_WARNING : $type = "Erreur:"; break;
-    case E_NOTICE :	$type = "Warning:"; break;
+    case E_NOTICE : $type = "Warning:"; break;
     default : $type = "Inconnu:"; break;
     }
 
@@ -441,15 +634,17 @@ Fichier : " . $errfile;
 
 /* Pour passer les valeurs des différents tableaux, nous utilisons la fonction serialize()
 Le rapport d'erreur contient le type de l'erreur, la date, l'ip, et les tableaux. */
-$variables = get_defined_vars(); // Donne le contenu et les valeurs de toutes les variables dans la portée actuelle 
+
+
 $info = date("d/m/Y H:i:s",time())." :
     GET:".print_r($_GET, true).
     "POST:".print_r($_POST, true).
     "SERVER:".print_r($_SERVER, true).
     "COOKIE:".(isset($_COOKIE)? print_r($_COOKIE, true) : "Undefined").
     "SESSION:".(isset($_SESSION)? print_r($_SESSION, true) : "Undefined");
+	//"LOG:" . print_r(Log::console(), true);
 
-
+$error_array['date'] = time();
 $error_array['more'] = $info;
 $error_array['type'] = $type;
 $error_array['msg'] = "[".$errno."] ".$errstr;
@@ -459,19 +654,56 @@ $error_array['errfile'] = $errfile;
 // Lecture du cache
 $cache_error = new Cache('erreur_alerte');
 $error_cache = $cache_error->getCache();
-$error_cache[time()] = $error_array;
+$error_cache[md5($erreur)] = $error_array;
 
-// Ecriture du cache
-$cache_error_p = new Cache('erreur_alerte', $error_cache);
-$cache_error_p->setCache();
-
-    if (__DEV_MODE==true)
+	// Ecriture du cache
+	$cache_error_p = new Cache('erreur_alerte', $error_cache);
+	$cache_error_p->setCache();
+	
+	
+    /*if (__DEV_MODE==true)
     {
     echo nl2br('<div class="MSGbox MSGalerte"><p>'.$erreur.'</p></div>');
-    }
+    }//*/
 }
 set_error_handler('erreur_alerte');
 
+$sys__bool = false;
+function noError($bool)
+{
+global $sys__bool;
+$sys__bool  = $bool;
+}
+
+
+
+/**
+ * Searches haystack for needle and
+ * returns an array of the key path if
+ * it is found in the (multidimensional)
+ * array, FALSE otherwise.
+ *
+ * @mixed array_searchRecursive ( mixed needle,
+ * array haystack [, bool strict[, array path]] )
+ * @url http://greengaloshes.cc/2007/04/recursive-multidimensional-array-search-in-php/
+ */
+function array_searchRecursive( $needle, $haystack, $strict=false, $path=array() )
+{
+    if( !is_array($haystack) ) {
+        return false;
+    }
+
+    foreach( $haystack as $key => $val ) {
+        if( is_array($val) && $subPath = array_searchRecursive($needle, $val, $strict, $path) ) {
+            $path = array_merge($path, array($key), $subPath);
+            return $path;
+        } elseif( (!$strict && $val == $needle) || ($strict && $val === $needle) ) {
+            $path[] = $key;
+            return $path;
+        }
+    }
+    return false;
+}
 
 
 /**
@@ -481,7 +713,8 @@ set_error_handler('erreur_alerte');
 * @link http://crystal-web.org
 * @return mixed
 */
-function is_ie() {
+function is_ie()
+{
 $user_agent = (isSet($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT']: '';
 $match=preg_match('/msie ([0-9]\.[0-9])/',strtolower($user_agent),$reg);
 if($match==0) return false;
@@ -503,23 +736,23 @@ else return floatval($reg[1]);
 function truncatestr($string, $lengthMax, $safe_word=true)
 {
 if (strlen($string) < $lengthMax) { return $string; }
-	
-	if ($safe_word == true)
-	{
-	// Récupération de la position du dernier espace (afin déviter de tronquer un mot)
-	$position_espace = strrpos($string, " ");
-		if ($position_espace)
-		{
-		$string = substr($string, 0, $position_espace);
-		}
-	}
-	else
-	{
-	$string = substr($string, 0, $lengthMax);
-	}
-	// Ajout des "..."
-	$string .= '...';
-	return $string;
+
+    if ($safe_word == true)
+    {
+    // Récupération de la position du dernier espace (afin déviter de tronquer un mot)
+    $position_espace = strrpos($string, " ");
+        if ($position_espace)
+        {
+        $string = substr($string, 0, $position_espace);
+        }
+    }
+    else
+    {
+    $string = substr($string, 0, $lengthMax);
+    }
+    // Ajout des "..."
+    $string .= '...';
+    return $string;
 }
 
 
@@ -534,17 +767,18 @@ if (strlen($string) < $lengthMax) { return $string; }
 * @deprecated utiliser truncatestr() a la place
 * @return string
 */
-function truncate($string, $lengthMax){
+function truncate($string, $lengthMax)
+{
  // Variable locale
     $positionDernierEspace = 0;
- 
+
     if( strlen($string) >= $lengthMax )
     {
-      $string = substr($string,0,$lengthMax); 
-      $positionDernierEspace = strrpos($string,' '); 
+      $string = substr($string,0,$lengthMax);
+      $positionDernierEspace = strrpos($string,' ');
       $string = substr($string,0,$positionDernierEspace).'...';
     }
-	return $string;
+    return $string;
 }
 
 
@@ -556,9 +790,10 @@ function truncate($string, $lengthMax){
 * @param string $str|chaine a nettoyer
 * @return string
 */
-function stripspace($str){
+function stripspace($str)
+{
 $str = trim($str);
-$str = preg_replace ("/\s+/", " ", $str);
+$str = preg_replace ("#\s+#", " ", $str);
 return $str;
 }
 
@@ -591,35 +826,35 @@ return ($nombre%2 == 0) ? true : false;
 * @return array
 */
 
-function parsePHPModules() { 
- ob_start(); 
- phpinfo(INFO_MODULES); 
- $s = ob_get_contents(); 
- ob_end_clean(); 
-  
- $s = strip_tags($s,'<h2><th><td>'); 
- $s = preg_replace('/<th[^>]*>([^<]+)<\/th>/',"<info>\\1</info>",$s); 
- $s = preg_replace('/<td[^>]*>([^<]+)<\/td>/',"<info>\\1</info>",$s); 
- $vTmp = preg_split('/(<h2>[^<]+<\/h2>)/',$s,-1,PREG_SPLIT_DELIM_CAPTURE); 
- $vModules = array(); 
- for ($i=1;$i<count($vTmp);$i++) { 
-  if (preg_match('/<h2>([^<]+)<\/h2>/',$vTmp[$i],$vMat)) { 
-   $vName = trim($vMat[1]); 
-   $vTmp2 = explode("\n",$vTmp[$i+1]); 
-   foreach ($vTmp2 AS $vOne) { 
-    $vPat = '<info>([^<]+)<\/info>'; 
-    $vPat3 = "/$vPat\s*$vPat\s*$vPat/"; 
-    $vPat2 = "/$vPat\s*$vPat/"; 
-    if (preg_match($vPat3,$vOne,$vMat)) { // 3cols 
-     $vModules[$vName][trim($vMat[1])] = array(trim($vMat[2]),trim($vMat[3])); 
-    } elseif (preg_match($vPat2,$vOne,$vMat)) { // 2cols 
-     $vModules[$vName][trim($vMat[1])] = trim($vMat[2]); 
-    } 
-   } 
-  } 
- } 
- return $vModules; 
-} 
+function parsePHPModules() {
+ ob_start();
+ phpinfo(INFO_MODULES);
+ $s = ob_get_contents();
+ ob_end_clean();
+
+ $s = strip_tags($s,'<h2><th><td>');
+ $s = preg_replace('/<th[^>]*>([^<]+)<\/th>/',"<info>\\1</info>",$s);
+ $s = preg_replace('/<td[^>]*>([^<]+)<\/td>/',"<info>\\1</info>",$s);
+ $vTmp = preg_split('/(<h2>[^<]+<\/h2>)/',$s,-1,PREG_SPLIT_DELIM_CAPTURE);
+ $vModules = array();
+ for ($i=1;$i<count($vTmp);$i++) {
+  if (preg_match('/<h2>([^<]+)<\/h2>/',$vTmp[$i],$vMat)) {
+   $vName = trim($vMat[1]);
+   $vTmp2 = explode("\n",$vTmp[$i+1]);
+   foreach ($vTmp2 AS $vOne) {
+    $vPat = '<info>([^<]+)<\/info>';
+    $vPat3 = "/$vPat\s*$vPat\s*$vPat/";
+    $vPat2 = "/$vPat\s*$vPat/";
+    if (preg_match($vPat3,$vOne,$vMat)) { // 3cols
+     $vModules[$vName][trim($vMat[1])] = array(trim($vMat[2]),trim($vMat[3]));
+    } elseif (preg_match($vPat2,$vOne,$vMat)) { // 2cols
+     $vModules[$vName][trim($vMat[1])] = trim($vMat[2]);
+    }
+   }
+  }
+ }
+ return $vModules;
+}
 
 
 
@@ -630,10 +865,10 @@ function parsePHPModules() {
 * @package parsePHP
 * @return array
 */
-function getModuleSetting($pModuleName,$pSetting) { 
- $vModules = parsePHPModules(); 
- return $vModules[$pModuleName][$pSetting]; 
-} 
+function getModuleSetting($pModuleName,$pSetting) {
+ $vModules = parsePHPModules();
+ return $vModules[$pModuleName][$pSetting];
+}
 
 
 
@@ -654,25 +889,25 @@ function getModuleSetting($pModuleName,$pSetting) {
 */
 function ecartdate($fin)
 {
-	if (!is_int($fin))
-	{
-		$debut = date("d/m/y");
-		list($jourDebut, $moisDebut, $anneeDebut) = explode('/', $debut); 
-		list($jourFin, $moisFin, $anneeFin) = explode('/', $fin);
-		$timestampDebut = mktime(0,0,0,$moisDebut,$jourDebut,$anneeDebut); 
-		$timestampFin = mktime(0,0,0,$moisFin,$jourFin,$anneeFin);
-		$ecart = abs($timestampFin - $timestampDebut)/86400;
-		/*$s = ($ecart>1) ? 's' : '';
-		$annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
-		return $ecart; // $annonce;
-	}
-	else
-	{
-		$ecart = abs($fin - time())/86400;
-		/*$s = ($ecart>1) ? 's' : '';
-		$annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
-		return $ecart; // $annonce;
-	}
+    if (!is_int($fin))
+    {
+        $debut = date("d/m/y");
+        list($jourDebut, $moisDebut, $anneeDebut) = explode('/', $debut);
+        list($jourFin, $moisFin, $anneeFin) = explode('/', $fin);
+        $timestampDebut = mktime(0,0,0,$moisDebut,$jourDebut,$anneeDebut);
+        $timestampFin = mktime(0,0,0,$moisFin,$jourFin,$anneeFin);
+        $ecart = abs($timestampFin - $timestampDebut)/86400;
+        /*$s = ($ecart>1) ? 's' : '';
+        $annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
+        return $ecart; // $annonce;
+    }
+    else
+    {
+        $ecart = abs($fin - time())/86400;
+        /*$s = ($ecart>1) ? 's' : '';
+        $annonce = "Il vous reste ". $ecart ." jour" . $s . " d'offre";*/
+        return $ecart; // $annonce;
+    }
 }
 
 
@@ -696,8 +931,8 @@ function getRelativeTime($date)
     {// Déduction de la date donnée à la date actuelle
      $time = time() - strtotime($date);
     }
-    
-    
+
+
      // Calcule si le temps est passé ou à venir
     if ($time > 0)
     {
@@ -715,12 +950,12 @@ $time = abs($time);
 
 // Tableau des unités et de leurs valeurs en secondes
 $times = array(
-    31104000 =>  'an{s}',		 // 12 * 30 * 24 * 60 * 60 secondes
-    2592000  =>  'mois',		  // 30 * 24 * 60 * 60 secondes
-    86400	 =>  'jour{s}',	  // 24 * 60 * 60 secondes
-    3600	  =>  'heure{s}',	 // 60 * 60 secondes
-    60		 =>  'minute{s}',	// 60 secondes
-    1		  =>  'seconde{s}'); // 1 seconde
+    31104000 =>  'an{s}',        // 12 * 30 * 24 * 60 * 60 secondes
+    2592000  =>  'mois',          // 30 * 24 * 60 * 60 secondes
+    86400    =>  'jour{s}',   // 24 * 60 * 60 secondes
+    3600      =>  'heure{s}',    // 60 * 60 secondes
+    60       =>  'minute{s}',   // 60 secondes
+    1         =>  'seconde{s}'); // 1 seconde
 
     foreach ($times as $seconds => $unit)
     {
@@ -759,7 +994,7 @@ $times = array(
 function dates($time, $format)
 {
 /* Translation */
-$jours= array("lundi", "mardi",	"mercredi", "jeudi", "vendredi","samedi","dimanche");
+$jours= array("lundi", "mardi", "mercredi", "jeudi", "vendredi","samedi","dimanche");
 $joursNum=array("1", "2", "3", "4", "5", "6", "7");
 $j = str_replace($joursNum, $jours, date("N",$time));
 $mois = array("janvier", "fevrier", "mars",
@@ -773,13 +1008,13 @@ $moisTxt=array("Jan", "Feb", "Mar",
 $m = str_replace($moisTxt, $mois, date("M",$time));
 /* Format */
 if ($format=="fr_date")
-	{
-	return $j." ".date("j",$time)." ".$m." ".date("Y",$time);
-	}
+    {
+    return $j." ".date("j",$time)." ".$m." ".date("Y",$time);
+    }
 elseif ($format=="fr_datetime")
-	{
-	return $j." ".date("j",$time)." ".$m." ".date("Y",$time).", a ".date("G:i",$time);
-	}
+    {
+    return $j." ".date("j",$time)." ".$m." ".date("Y",$time).", a ".date("G:i",$time);
+    }
 $in_format= array("jour", "mois", "num", "annee", "NumSem", "12h", "24h");
 $to_format=array($j, $m, date("j",$time), date("Y",$time), date("W",$time), date("g:i",$time), date("G:i",$time), );
 $is_array_format = explode(" ", $format);
@@ -791,14 +1026,14 @@ return  implode(" ", $t);
 
 
 /**
-*	@desc		Réecriture d'url Crystal-Web
-*	@author 	Christophe BUFFET <developpeur@crystal-web.org>
-*	@copyright	Open Source
-*	@version 	1.0
-*	@since		1.0
+*   @desc       Réecriture d'url Crystal-Web
+*   @author     Christophe BUFFET <developpeur@crystal-web.org>
+*   @copyright  Open Source
+*   @version    1.0
+*   @since      1.0
 */
 
-/* htaccess : 
+/* htaccess :
 RewriteEngine On
 RewriteBase /
 RewriteRule ^(.*)\.html index.php?rewrite=$1 [L]
@@ -807,8 +1042,8 @@ RewriteRule ^(.*)\.html index.php?rewrite=$1 [L]
 // De : index.php?module=forum&amp;action=lire&amp;page=2&titre=un super coup
 // A : forum/lire/page_2/titre_un-super-coup.html
 function cleanerUrl($url){
-$cleaner = strtr($url, 
-'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ', 
+$cleaner = strtr($url,
+'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ',
 'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy');
 return preg_replace('/([^.a-z0-9]+)/i', '-', $cleaner);
 }
@@ -883,17 +1118,17 @@ function randCar($nb=10)
 $random_name=NULL;
 // Charactère liste
 $list_char = array("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-// Boucle 
-	for($i=0; $i < $nb; $i++)
-	{
-	// Ajout un caractère de la liste
-	/*
-	Liste de charactère : $list_char[]
-	NB aléatoire de 0 a ? : rand(0,(x))
-	Compte tous les éléments du tableau, retire 1 (count compte 1,2,3 | rand 0,1,2,3 comme array)  : count($list_char)-1
-	*/
-	$random_name.=$list_char[rand(0,(count($list_char)-1))];
-	}
+// Boucle
+    for($i=0; $i < $nb; $i++)
+    {
+    // Ajout un caractère de la liste
+    /*
+    Liste de charactère : $list_char[]
+    NB aléatoire de 0 a ? : rand(0,(x))
+    Compte tous les éléments du tableau, retire 1 (count compte 1,2,3 | rand 0,1,2,3 comme array)  : count($list_char)-1
+    */
+    $random_name.=$list_char[rand(0,(count($list_char)-1))];
+    }
 return $random_name;
 }
 
@@ -930,14 +1165,14 @@ return $str;
 * @param string $plus|Caractere devant la valeur HEXADECIMAL
 * @return string
 */
-function encodeHEX($bin, $plus=NULL) 
+function encodeHEX($bin, $plus=NULL)
 {
     $hex = '';
     for($i = 0; $i < strlen($bin); $i++)
     {
-        $hex.=$plus.bin2hex($bin[$i]); 
+        $hex.=$plus.bin2hex($bin[$i]);
     }
-    
+
     return $hex;
 }
 
@@ -952,7 +1187,7 @@ function encodeHEX($bin, $plus=NULL)
 * @param string $moins|Caractere devant la valeur HEXADECIMAL
 * @return string
 */
-function decodeHEX($hex, $moins="%") 
+function decodeHEX($hex, $moins="%")
 {
 $hex=strtolower($hex);
     if (preg_match("/".$moins."/i", $hex))
@@ -963,11 +1198,11 @@ $hex=strtolower($hex);
     }
 $bin="";
 
-    for ($i=0;$i<strlen($hex);$i=$i+2) 
-    { 
-    $bin .= chr(hexdec(substr ($hex, $i,2))); 
-    } 
-return $bin; 
+    for ($i=0;$i<strlen($hex);$i=$i+2)
+    {
+    $bin .= chr(hexdec(substr ($hex, $i,2)));
+    }
+return $bin;
 }
 
 
@@ -1016,6 +1251,27 @@ $libraryList['htmlentitie'] = array('À'=>'&Agrave;','à'=>'&agrave;','Á'=>'&Aa
 $libraryList['fr_regions'] = array("Alsace","Aquitaine","Auvergne","Bourgogne","Bretagne","Centre","Champagne-Ardenne","Corse","Franche-Comté","Île-de-France","Languedoc-Roussillon","Limousin","Lorraine","Midi-Pyrénées","Nord-Pas-de-Calais","Basse-Normandie","Haute-Normandie","Pays de la Loire","Picardie","Poitou-Charentes","Provence-Alpes-Côte d'Azur","Rhône-Alpes","Guyane","Guadeloupe","Martinique","Réunion");
 $libraryList['fr_departements'] = array("01"=>"Ain", "02"=>"Aisne", "03"=>"Allier", "04"=>"Alpes-de-Haute-Provence", "05"=>"Hautes-Alpes", "06"=>"Alpes-Maritimes", "07"=>"Ardèche", "08"=>"Ardennes", "09"=>"Ariège", "10"=>"Aube", "11"=>"Aude", "12"=>"Aveyron", "13"=>"Bouches-du-Rhône", "14"=>"Calvados", "15"=>"Cantal", "16"=>"Charente", "17"=>"Charente-Maritime", "18"=>"Cher", "19"=>"Corrèze", "2A" => "Corse-du-Sud", "2B" => "Haute-Corse", "21"=>"Côte-d'Or", "22"=>"Côtes-d'Armor", "23"=>"Creuse", "24"=>"Dordogne", "25"=>"Doubs", "26"=>"Drôme", "27"=>"Eure", "28"=>"Eure-et-Loir", "29"=>"Finistère", "30"=>"Gard", "31"=>"Haute-Garonne", "32"=>"Gers", "33"=>"Gironde", "34"=>"Hérault", "35"=>"Ille-et-Vilaine", "36"=>"Indre", "37"=>"Indre-et-Loire", "38"=>"Isère", "39"=>"Jura", "40"=>"Landes", "41"=>"Loir-et-Cher", "42"=>"Loire", "43"=>"Haute-Loire", "44"=>"Loire-Atlantique", "45"=>"Loiret", "46"=>"Lot", "47"=>"Lot-et-Garonne", "48"=>"Lozère", "49"=>"Maine-et-Loire", "50"=>"Manche", "51"=>"Marne", "52"=>"Haute-Marne", "53"=>"Mayenne", "54"=>"Meurthe-et-Moselle", "55"=>"Meuse", "56"=>"Morbihan", "57"=>"Moselle", "58"=>"Nièvre", "59"=>"Nord", "60"=>"Oise", "61"=>"Orne", "62"=>"Pas-de-Calais", "63"=>"Puy-de-Dôme", "64"=>"Pyrénées-Atlantiques", "65"=>"Hautes-Pyrénées", "66"=>"Pyrénées-Orientales", "67"=>"Bas-Rhin", "68"=>"Haut-Rhin", "69"=>"Rhône", "70"=>"Haute-Saône", "71"=>"Saône-et-Loire", "72"=>"Sarthe", "73"=>"Savoie", "74"=>"Haute-Savoie", "75"=>"Paris", "76"=>"Seine-Maritime", "77"=>"Seine-et-Marne", "78"=>"Yvelines", "79"=>"Deux-Sèvres", "80"=>"Somme", "81"=>"Tarn", "82"=>"Tarn-et-Garonne", "83"=>"Var", "84"=>"Vaucluse", "85"=>"Vendée", "86"=>"Vienne", "87"=>"Haute-Vienne", "88"=>"Vosges", "89"=>"Yonne", "90"=>"Territoire de Belfort", "91"=>"Essonne", "92"=>"Hauts-de-Seine", "93"=>"Seine-Saint-Denis", "94"=>"Val-de-Marne", "95"=>"Val-d'Oise");
 
+$libraryList['mailjetable'] = array(
+'null', /* Pour les faux positif */
+'yopmail.com',
+'yopmail.fr',
+'yopmail.net',
+'cool.fr.nf',
+'jetable.fr.nf',
+'jetable.org',
+'nospam.ze.tc',
+'nomail.xl.cx',
+'mega.zik.dj',
+'speed.1s.fr',
+'courriel.fr.nf',
+'moncourrier.fr.nf',
+'monemail.fr.nf',
+'monmail.fr.nf',
+'spamgourmet.com',
+'tempomail.fr',
+'rppkn.com',
+'get2mail.fr'
+);
 return isSet($libraryList[$lib]) ? $libraryList[$lib] : $libraryList;
 }
 

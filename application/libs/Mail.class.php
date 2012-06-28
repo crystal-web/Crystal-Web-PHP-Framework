@@ -12,38 +12,47 @@ class Mail
 	private $m_reponse;
 	private $m_boundary;
 	
-	public function __construct($p_objet,$p_text,$p_destinataire,$p_emetteur,$p_reponse = null,$p_importance = "Normal",$p_priority = 3)
+	public function __construct($p_objet, $p_subtitle, $p_text,$p_destinataire,$p_emetteur,$p_reponse = null,$p_importance = "Normal",$p_priority = 3)
 	{
-		
-		$this->m_boundary = "----www.".$_SERVER['HTTP_HOST']."----".md5(time());
+		Log::setLog('Mail enabled', 'mail');
+		$this->m_boundary = "----".$_SERVER['HTTP_HOST']."----".md5(time());
 		$this->m_priority = $p_priority;
 		$this->m_importance = $p_importance;
 		$this->m_emetteur = $p_emetteur;
+		$this->m_subtitle = $p_subtitle;
+		
 		if($p_reponse == null)
+		{
 			$this->m_reponse = $p_emetteur;
+		}
 		else
+		{
 			$this->m_reponse = $p_reponse;
-		$this->m_objet = $p_objet;
-		$this->m_destinataire = $p_destinataire;
-		$this->m_textTxt = $p_text;
+			$this->m_objet = $p_objet;
+			$this->m_destinataire = $p_destinataire;
+			$this->m_textTxt = $p_text;
+		}
 	}
 	
 	public function __get($champ)
 	{
-		return $this->{$champ};
+		Log::setLog('Get ' . $champ, 'mail');
+		return isSet($this->{$champ}) ? $this->{$champ} : '';
 	}
 	
 	public function __set($champ,$value)
 	{
+		Log::setLog('Set ' . $champ . ' => ' . $value, 'mail');
 		$this->{$champ} = $value;
 	}
 	
 	private function reload_entete()
 	{
+		Log::setLog('Chargement de l\'entete', 'mail');
 		$this->m_entete = "From: ".$_SERVER['HTTP_HOST']." <".$this->m_emetteur .">\n";
 		$this->m_entete .= "Mime-Version: 1.0\n";
 		$this->m_entete .= "Content-Type: multipart/alternative; boundary=\"".$this->m_boundary ."\"\n";
-		$this->m_entete .= "X-Sender: <www.".$_SERVER['HTTP_HOST'].">\n";
+		$this->m_entete .= "X-Sender: <".$_SERVER['HTTP_HOST'].">\n";
 		$this->m_entete .= "X-Mailer: PHP/" . phpversion() . " \n" ;
 		$this->m_entete .= "X-Priority: ".$this->m_priority ."\n";
 		$this->m_entete .= "X-auth-smtp-user: ".$this->m_emetteur ."\n";
@@ -60,14 +69,49 @@ class Mail
 		$this->m_textHtml .= "Content-Type: text/html; charset=ISO-8859-1\n";
 		$this->m_textHtml .= "Content-Transfer-Encoding: 8bit\n\n";
 		$this->m_textHtml .= $this->m_textTxt;
-		
-		 return (mail($this->m_destinataire,$this->m_objet,$this->m_textHtml,$this->m_entete)) ? true : false;	
+		Log::setLog('Envois du mail en mode html', 'mail');
+		return (mail($this->m_destinataire,'['.SITENAME.'] ' .$this->m_objet,$this->m_textHtml,$this->m_entete)) ? true : false;	
 	}
 	
 	public function sendMailText()
 	{
+		Log::setLog('Envois du mail en mode texte', 'mail');
 		$this->reload_entete();
-		return (mail($this->m_destinataire,$this->m_objet,$this->m_textTxt,$this->m_entete)) ? true : false;
+		return (mail($this->m_destinataire,$this->m_objet,$this->loadTemplate(),$this->m_entete)) ? true : false;
+	}
+	
+	
+	
+	private function loadTemplate()
+	{
+		Log::setLog('Chargement du Template', 'mail');
+		ob_start();
+		
+		$politesse = array(
+			'Cordialement ',
+			'Bien cordialement ',
+			'Cordialement vôtre ',
+			'Sincèrement ',
+			'Bien sincèrement ',
+			'Sincèrement vôtre ',
+			'Sincères salutations '
+			);
+		
+		$file = file_get_contents(__APP_PATH . DS . 'mail' . DS . 'base.mail');
+		
+		$file = preg_replcace("#{OBJECT}#", $this->m_objet, $file);
+		$file = preg_replcace("#{SUBTITLE}#", $this->m_subtitle, $file);
+		$file = preg_replcace("#{TEXT}#", $this->m_textTxt, $file);
+		$file = preg_replcace("#{SINCERLY}#", $politesse[rand(0,count($politesse)-1)], $file);
+		$file = preg_replcace("#{EMAIL}#", $this->m_destinataire, $file);
+		$file = preg_replcace("#{TEAMNAME}#", TEAM_NAME, $file);
+		
+		$file = preg_replcace("#{UNSUBSCRIBE}#", Router::url('member/unsubscribe'), $file);
+		
+		$content = ob_get_contents();
+  		ob_end_clean();
+		
+  		return $content;
 	}
 }
 ?>

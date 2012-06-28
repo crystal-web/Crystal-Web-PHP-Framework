@@ -7,25 +7,7 @@
 */
 Class authController Extends Controller {
 
-private $module=array(
-	/* BOOL */
-	'sitemap' => false,
-	'title' => 'Authentification', // Titre du module
-	'page_title' => NULL, // Titre page courante
-	'breadcrumb' => false, // breadcrumb hierarchy $url => $title
-	);
 
-/*** Methode ***/
-
-	public function getInfo(){
-	return $this->module;
-	}
-
-	public function setInfo($name, $is){
-	$this->module[$name]=$is;
-	return $this->module;
-	}
-	
 /*********************************************/
 /* Connection d'un membre/client 			 */
 /*********************************************/
@@ -45,24 +27,28 @@ $auth = $this->loadModel('Member');
 		$this->mvc->Request->data->loginmember = $auth->clean($this->mvc->Request->data->loginmember);
 			
 			// Ca correspond a un membre ?
-			if ($user = $auth->checkLogin($this->mvc->Request->data))
+			$user = $auth->checkLogin($this->mvc->Request->data);
+			if ($user)
 			{
-			// ok, on ecris dans la session
-			$this->mvc->Session->write('user',$user);
-			// Met a jour la dernière activité
-			$auth->lastActivity($user->idmember);
-				
-				// Doit-on mettre le cookie de cnnection automatique ?
-				if (isSet($this->mvc->Request->data->connect) && $this->mvc->Request->data->connect == '1')
-				{
-					$hash_cookie = sha1(Securite::Hcrypt($this->mvc->Request->data->loginmember.magicword));
-					setcookie( 'id', $user->idmember, ( time() + 60*60*24*30), '/');
-					setcookie('connection_auto', $hash_cookie, ( time() + 60*60*24*30), '/');
-					unset($hash_cookie);
-				}
 			
-			$this->mvc->Session->setFlash('<strong>'.$this->mvc->Session->user('loginmember').'</strong>, vous &ecirc;tes maintenant connect&eacute;', 'success');
-			Router::redirect('article');
+				if ($user->validemember == 'off')
+				{
+				$this->mvc->Session->setFlash('<strong>'.$user->loginmember.'</strong>, vous n\'avez pas encore validé votre compte<br>Pour rappel, vous avez utilisé l\'adresse e-mail suivante: '.$user->mailmember, 'warning');
+				}
+				else
+				{
+
+				// ok, on ecris dans la session
+				$this->mvc->Session->write('user',$user);
+				// Met a jour la dernière activité
+				$auth->lastActivity($user->idmember);
+					
+
+				$this->mvc->Plugin->triggerEvents('onMemberLogin');
+				
+				$this->mvc->Session->setFlash('<strong>Bonjour '.$this->mvc->Session->user('login').'</strong>, vous &ecirc;tes maintenant connect&eacute;', 'success');
+				Router::redirect('');
+				}
 			}
 			else
 			{
@@ -90,141 +76,12 @@ $auth = $this->loadModel('Member');
 }
 
 
-
-public function BAKindex()
-{
-$this->setInfo('sitemap', true);
-$this->setInfo('page_title', 'Connection au site');
-
-
-
-$this->mvc->Template->link_registration = Router::url('registration');
-$this->mvc->Template->link_forgotpassword = Router::url('auth/forgotpassword');
-
-	/* Retour a la page précédente après connection */
-	if (!isSet($_SESSION['pageBeforeConnect']))
-	{
-
-		$array_refere=Securite::referer();
-		if (/* La requete est interne */
-			preg_match("/".$_SERVER['SERVER_NAME']."/Usi", $array_refere['host']) 
-			
-			/* La requete n'est pas la demande */
-			&& !preg_match("/auth/Usi", $_SERVER['HTTP_REFERER'])
-		) {
-		$_SESSION['pageBeforeConnect']=$_SERVER['HTTP_REFERER'];
-		}
-	}
-
-	// Création d'un tableau des erreurs
-	$errors_connection = array();
-
-	// Validation des champs suivant les règles
-	if (isSet($_POST['user']))
-	{
-	$user = $_POST['user']; 
-	$password = $_POST['password'];
-	$infos_user = Auth::checkLogin($user, $password);
-	
-		// Si les identifiants sont valides
-		if (false !== $infos_user) {
-			Auth::updateLastactivity($infos_user['id_user']);
-
-			if ($infos_user['validemember'] == 'on')
-			{
-			// On enregistre les informations dans la session
-			$_SESSION['user']['id']     = $infos_user['id_user'];
-			$_SESSION['user']['pseudo'] = $infos_user['loginmember'];
-			$_SESSION['user']['mail']  = $infos_user['mailmember'];
-			$_SESSION['user']['power_level'] = $infos_user['levelmember'];
-
-				// Mise en place des cookies de connexion automatique
-				if (isSet($_POST['connection_auto']))
-				{
-				$hash_cookie = sha1(Securite::Hcrypt($user.magicword));
-
-				setcookie( 'id', $_SESSION['user']['id'], ( time() + 60*60*24*30), '/');
-				setcookie('connection_auto', $hash_cookie, ( time() + 60*60*24*30), '/');
-				unset($hash_cookie);
-				}
-				
-			// Affichage de la confirmation de la connexion
-
-			/*** Affichage ***/
-			$url=(isSet($_SESSION['pageBeforeConnect'])) ? $_SESSION['pageBeforeConnect'] : url('index.php?module=news');
-			$this->mvc->Template->url=$url;
-			$this->mvc->Template->user = $_SESSION['user']['pseudo'];
-			$this->mvc->Template->show('auth/login_success');
-			header("Refresh: 5;url=".$url);
-			
-			}
-			else
-			{
-			
-
-			$hash_validation  = $infos_user['hash_validation'];
-			
-
-			// On transforme la chaine en entier
-			$id_user = (int) $infos_user['idmember'];
-			$email = $infos_user['mailmember'];
-
-			// Preparation du mail
-				$message_mail = '<html><head></head><body>
-				<p>
-					Bonjour '.$infos_user['loginmember'].'.<br />
-					Vous n\'avez pas encore valid&eacute; votre e-mail.
-				</p>
-				<p>
-					Voici le lien &agrave; suivre pour valider votre compte :
-				<a href="'.url('index.php?module=auth&action=validate&hash='.$infos_user['hash_validation']).'">'.url('index.php?module=auth&action=validate&hash='.$infos_user['hash_validation']).'</a><br /><br />
-				Merci.
-				</p>
-				<hr>
-				IP demandeur: '.Securite::ipX().'
-				En cas d\'abus ou d\'utilisation par un tiers, n\'h&eacute;sitez; pas &agrave; nous le faire savoir.
-				</body></html>';
-			
-			$mail_send = new Mail('Inscribed on <'.$_SERVER['SERVER_NAME'].'>',$message_mail,strtolower($email), ADMIN_MAIL);
-			$mail_send->sendMailHtml() or die('Mail restriction, can not send');
-			
-			$this->mvc->Template->user = $infos_user['loginmember'];
-			$this->mvc->Template->show('auth/index_noactive');
-			}
-		
-		
-		} else {
-
-			$errors_connection[] = "Couple nom d'utilisateur / mot de passe inexistant.";
-
-			// On réaffiche le formulaire de connexion
-			
-			/*** Variables ***/
-			$this->mvc->Template->errors_connection = $errors_connection;
-
-			/*** Affichage ***/
-			$this->mvc->Template->show('auth/index');
-		}
-
-	} else {
-
-		// On réaffiche le formulaire de connexion
-		/*** Variables ***/
-		$this->mvc->Template->errors_connection = $errors_connection;
-
-		/*** Affichage ***/
-		$this->mvc->Template->show('auth/index');
-	}
-			
-}
-
-
 /*********************************************/
 /* Forgot password				 			 */
 /*********************************************/
 public function forgotpassword()
 {
-$this->setInfo('sitemap', true);
+
 $this->mvc->Page->setPageTitle('Mot de passe oublié');
 $this->mvc->Template->link_registration = Router::url('auth/subscribe');
 $this->mvc->Template->link_forgotpassword = Router::url('auth/forgotpassword');
@@ -269,7 +126,7 @@ $this->mvc->Template->link_forgotpassword = Router::url('auth/forgotpassword');
 			IP demandeur: '.Securite::ipX().'
 			En cas d\'abus ou d\'utilisation par un tiers, n\'h&eacute;sitez; pas &agrave; nous le faire savoir.
 			</body></html>';
-			$mail_send = new Mail('New password <'.__CW_PATH.'>', $message_mail, $info_user->mailmember, ADMIN_MAIL);
+			$mail_send = new Mail('Nouveau mot de passe <'.__CW_PATH.'>', $message_mail, $info_user->mailmember, ADMIN_MAIL);
 			$this->mvc->Template->mailStatus = $mail_send->sendMailHtml();
 			$this->mvc->Template->user = $info_user->loginmember;
 			$this->mvc->Template->show('auth/forgotpassword_success');
@@ -283,36 +140,30 @@ $this->mvc->Template->link_forgotpassword = Router::url('auth/forgotpassword');
 		}
 		else // Membre introuvable
 		{
-		$this->mvc->Session->setFlash("Votre adresse de messagerie est introuvable.", 'error');
-		$this->mvc->Template->show('auth/forgotpassword');
+			$this->mvc->Session->setFlash("Votre adresse de messagerie est introuvable.", 'error');
+			$this->mvc->Template->show('auth/forgotpassword');
 		}
 	}
 	else
 	{
-	$this->mvc->Template->show('auth/forgotpassword');
+		$this->mvc->Template->show('auth/forgotpassword');
 	}
-	
-
 
 }
 
 	
-	
-	
-	
 /*********************************************/
 /* Deconnexon d'un membre/client 			 */
 /*********************************************/
-public function logout(){
-$this->setInfo('sitemap', false);
+public function logout()
+{
 $this->mvc->Page->setPageTitle('Confirmation de déconnexion');
 
-
-	
+	$this->mvc->Plugin->triggerEvents('onMemberLogout');
 // Suppression des cookies de connexion automatique
 setcookie('id', '', 0, '/');
 setcookie('connection_auto', '', 0, '/');
-$this->mvc->Session->setFlash('<strong>'.$this->mvc->Session->user('loginmember').'</strong>, vous &ecirc;tes maintenant d&eacute;connect&eacute;.');
+$this->mvc->Session->setFlash('<strong>Au revoir '.$this->mvc->Session->user('login').'</strong>, vous &ecirc;tes maintenant d&eacute;connect&eacute;.');
 
 $this->mvc->Session->logout();
 Router::redirect('');
@@ -321,7 +172,6 @@ Router::redirect('');
 	
 public function subscribe()
 {
-$this->setInfo('sitemap', true);
 $this->mvc->Page->setPageTitle('Cr&eacute;ation d\'un compte');
 
 $Captcha = new Captcha();
@@ -329,16 +179,18 @@ $errorCount=0;
 
 if (isSet($this->mvc->Request->data->loginmember))
 {
-
-$loginmember = strtr($this->mvc->Request->data->loginmember, 
-'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ', 
-'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy');
-$loginmember = preg_replace('/([^.a-z0-9]+)/i', '-', $loginmember);
-$this->mvc->Request->data->loginmember = trim($loginmember, '-');
-
-
 $subscribe = $this->loadModel('Member');
-	if ($subscribe->validates($this->mvc->Request->data,$subscribe->subscribe))
+
+// Check lenght 
+$lenStart = strlen($this->mvc->Request->data->loginmember);
+$this->mvc->Request->data->loginmember = clean($this->mvc->Request->data->loginmember, 'alphaNumUnder');
+$lenStop = strlen($this->mvc->Request->data->loginmember);
+
+
+
+
+
+	if ($subscribe->validates($this->mvc->Request->data, 'subscribe'))
 	{
 		// Anti robot
 		if ($Captcha->checkCaptcha()==false)
@@ -349,10 +201,10 @@ $subscribe = $this->loadModel('Member');
 		if ($this->mvc->Request->data->passmember != $this->mvc->Request->data->otherpassword)
 		{
 		$errorCount++;
-		$subscribe->errors['othermember'] = 'Les mot de passes doivent être identique';
+		$subscribe->errors['otherpassword'] = 'Les mot de passes doivent être identique';
 		}
 		// Pseudo
-		if (strlen($this->mvc->Request->data->loginmember) < 5)
+		if (strlen($this->mvc->Request->data->loginmember) < 3)
 		{
 		$errorCount++;
 		$subscribe->errors['loginmember'] = 'Votre pseudo est trop court (min: 5 car. alphanumérique)';
@@ -361,6 +213,12 @@ $subscribe = $this->loadModel('Member');
 		{
 		$errorCount++;
 		$subscribe->errors['loginmember'] = 'Ce pseudo est déjà utilisé';
+		}
+		
+		if ($lenStop != $lenStart)
+		{
+		$errorCount++;
+		$subscribe->errors['loginmember'] = 'Votre pseudo contient des caractères incorrect';
 		}
 		
 		// Mail
@@ -406,26 +264,37 @@ Mot de passe: '.$this->mvc->Request->data->passmember.'<br />
 </body>
 </html>';
 $mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] Confirmation d\'inscription',$message_mail,$this->mvc->Request->data->mailmember, ADMIN_MAIL);
-			if (!$mail_send->sendMailHtml())
-			{
-			$log = new Log();
-			$log->error('Mail restriction, can not send', $this->mvc->Request->controller, $this->mvc->Request->action);
-			}
-			
+
+
 // loginmember		mailmember	validemember	levelmember	groupmember	firstactivitymember	lastactivitymember	hash_validation			
 			$data = new stdClass();
 			$data->loginmember = $this->mvc->Request->data->loginmember;
-			$data->passmember = $subscribe->genPass($this->mvc->Request->data->loginmember, $this->mvc->Request->data->passmember);
+			$data->password = md5($this->mvc->Request->data->passmember).'$devphp';
 			$data->mailmember = $this->mvc->Request->data->mailmember;
 			$data->levelmember = 1;
 			$data->firstactivitymember = time();
 			$data->lastactivitymember = time();
+			$data->ip = Securite::ipX();
 			$data->hash_validation = $hash_validation;
+			
+
+			if (!$mail_send->sendMailHtml())
+			{
+				$log = new Log();
+				$log->error('Mail restriction, can not send', $this->mvc->Request->controller, $this->mvc->Request->action);
+			}
+			
+
 			$subscribe->save($data);
-			$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.');
-			Router::redirect();
+			//debug($subscribe->sql);
+			$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.<br>ATTENTION: Si vous ne recevez pas l\'e-mail, vérifier vos e-mail indésirables','error');
+			//Router::redirect();
 		}
-		
+		else
+		{
+			$err = (count($subscribe->errors) > 1) ? 'les erreurs' : 'l\'erreur';
+			$this->mvc->Session->setFlash('Veuillez corriger '.$err, 'error');
+		}
 	
 	}
 	
@@ -443,6 +312,7 @@ $mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] Confirmation d\'in
 	
 
 }
+
 
 
 public function validate()
@@ -468,12 +338,139 @@ $hash = (isSet($this->mvc->Request->params['hash'])) ? $this->mvc->Request->para
 	}
 	else
 	{
-	header('location: '.__CW_PATH);die();
+		header('location: '. Router::url('launcher'));die();
 	}
 }
 	
 
-		
+
+public function cgu()
+{
+$cgu = new Cache('cgu');
+
+	if (!$meCache = $cgu->getCache())
+	{
+
+	$meCache = new stdClass();
+	$meCache->title = 'Conditions général d\'utilisation du site';
+	$meCache->text = '<p>Les modérateurs de ce site s\'efforceront de supprimer ou éditer tous les messages à caractère répréhensible aussi rapidement que possible. Toutefois, il leur est impossible de passer en revue tous les messages. Vous admettez donc que tous les messages postés sur ce site expriment la vue et opinion de leurs auteurs respectifs, et non celles des modérateurs ou du webmestre (excepté des messages postés par eux-mêmes) et par conséquent qu\'ils ne peuvent pas être tenus pour responsables des discussions. </p>
+
+<p>L\'adresse e-mail est uniquement utilisée afin de confirmer les détails de votre inscription ainsi que votre mot de passe (et aussi pour vous renvoyer votre mot de passe en cas d\'oubli). </p>
+
+<ul>
+	<li>les messages agressifs ou diffamatoires, les insultes et critiques personnelles, les grossièretés et vulgarités, et plus généralement tout message contrevenant aux lois sont interdits </li>
+	<li>les messages incitant à - ou évoquant - des pratiques illégales sont interdits ;</li>
+	<li>si vous diffusez des informations provenant d\'un autre site web, vérifiez auparavant si le site en question ne vous l\'interdit pas. Mentionnez l\'adresse du site en question par respect du travail de ses administrateurs !</li>
+	<li>merci de poster vos messages une seule fois. Les répétitions sont désagréables et inutiles !</li>
+	<li>merci de faire un effort sur la grammaire et l\'orthographe. Style SMS fortement déconseillé !</li>
+	<li>aucun compte ouvert ne pourra être supprimé ! (ceci pour des raisons technique)</li>
+</ul>
+
+<p>Tout message contrevenant aux dispositions ci-dessus sera édité ou supprimé sans préavis ni justification supplémentaire dans des délais qui dépendront de la disponibilité des modérateurs. Tout abus entraînera le bannisment de votre compte, e-mail, adresse IP. <br>
+Internet n\'est ni un espace anonyme, ni un espace de non-droit ! Nous nous réservons la possibilité d\'informer votre fournisseur d\'accès et/ou les autorités judiciaires de tout comportement malveillant. L\'adresse IP de chaque intervenant est enregistrée afin d\'aider à faire respecter ces conditions.</p>
+
+<p>En vous inscrivant sur le site vous reconnaissez avoir lu dans son intégralité le présent règlement. Vous vous engagez à respecter sans réserve le présent règlement. Vous accordez aux modérateurs de ce site le droit de supprimer, déplacer ou éditer n\'importe quel sujet de discussion à tout moment.</p>
+
+<p>Nous protégeons la vie privée de nos utilisateurs en respectant la législation en vigueur.<br>
+Ainsi, vos données personnelles restent strictement confidentielles et ne seront donc pas distribuées à des tierces parties sans votre accord.</p>';
+	}
+
+$this->mvc->Page->setPageTitle($meCache->title);
+$this->mvc->Template->cgu = $meCache->text;
+$this->mvc->Template->show('auth/cgu');
+}
+
+
+
+public function cgu_manager()
+{
+	if ($this->mvc->Acl->isAllowed())
+	{
+	$this->mvc->Page->setPageTitle('Changement de la CGU');
+	
+	
+$cgu = new Cache('cgu');
+	if (isSet($this->mvc->Request->data->text ))
+	{
+	$cgu->setCache($this->mvc->Request->data);
+	
+	}
+	
+
+
+
+	if (!$meCache = $cgu->getCache())
+	{
+	$meCache = new stdClass();
+	$meCache->title = 'Conditions général d\'utilisation du site';
+	$meCache->text = '<p>Les modérateurs de ce site s\'efforceront de supprimer ou éditer tous les messages à caractère répréhensible aussi rapidement que possible. Toutefois, il leur est impossible de passer en revue tous les messages. Vous admettez donc que tous les messages postés sur ce site expriment la vue et opinion de leurs auteurs respectifs, et non celles des modérateurs ou du webmestre (excepté des messages postés par eux-mêmes) et par conséquent qu\'ils ne peuvent pas être tenus pour responsables des discussions. </p>
+
+<p>L\'adresse e-mail est uniquement utilisée afin de confirmer les détails de votre inscription ainsi que votre mot de passe (et aussi pour vous renvoyer votre mot de passe en cas d\'oubli). </p>
+
+<ul>
+	<li>les messages agressifs ou diffamatoires, les insultes et critiques personnelles, les grossièretés et vulgarités, et plus généralement tout message contrevenant aux lois sont interdits </li>
+	<li>les messages incitant à - ou évoquant - des pratiques illégales sont interdits ;</li>
+	<li>si vous diffusez des informations provenant d\'un autre site web, vérifiez auparavant si le site en question ne vous l\'interdit pas. Mentionnez l\'adresse du site en question par respect du travail de ses administrateurs !</li>
+	<li>merci de poster vos messages une seule fois. Les répétitions sont désagréables et inutiles !</li>
+	<li>merci de faire un effort sur la grammaire et l\'orthographe. Style SMS fortement déconseillé !</li>
+	<li>aucun compte ouvert ne pourra être supprimé ! (ceci pour des raisons technique)</li>
+</ul>
+
+<p>Tout message contrevenant aux dispositions ci-dessus sera édité ou supprimé sans préavis ni justification supplémentaire dans des délais qui dépendront de la disponibilité des modérateurs. Tout abus entraînera le bannisment de votre compte, e-mail, adresse IP. <br>
+Internet n\'est ni un espace anonyme, ni un espace de non-droit ! Nous nous réservons la possibilité d\'informer votre fournisseur d\'accès et/ou les autorités judiciaires de tout comportement malveillant. L\'adresse IP de chaque intervenant est enregistrée afin d\'aider à faire respecter ces conditions.</p>
+
+<p>En vous inscrivant sur le site vous reconnaissez avoir lu dans son intégralité le présent règlement. Vous vous engagez à respecter sans réserve le présent règlement. Vous accordez aux modérateurs de ce site le droit de supprimer, déplacer ou éditer n\'importe quel sujet de discussion à tout moment.</p>
+
+<p>Nous protégeons la vie privée de nos utilisateurs en respectant la législation en vigueur.<br>
+Ainsi, vos données personnelles restent strictement confidentielles et ne seront donc pas distribuées à des tierces parties sans votre accord.</p>';
+	}
+	
+	
+	
+	$this->mvc->Template->cgu = $meCache;
+	$this->mvc->Template->show('auth/cgu_manager');
+	}
+	else
+	{
+	Router::redirect();
+	}
+}
+
+
+
+public function manager()
+{
+if ($this->mvc->Acl->isAllowed())
+{
+$page = (int) (isSet($_GET['page'])) ? $_GET['page'] : 1;
+$member = $this->loadModel('Member');
+
+$to = (30 *($page-1));
+$req = array('limit' => $to.',30 ');
+$order = isSet($this->mvc->Request->params['order']) ? $this->mvc->Request->params['order'] : 'asc';
+$getOrder = strtoupper($order);
+if (isSet($this->mvc->Request->params['by']))
+{
+
+	switch($this->mvc->Request->params['by']):
+	case 'id': $req['order'] = 'idmember '.$getOrder;  break;
+	case 'login': $req['order'] = 'loginmember '.$getOrder;  break;
+	case 'mail': $req['order'] = 'mailmember '.$getOrder;  break; 
+	case 'subscribe': $req['order'] = 'mailmember '.$getOrder;  break; 
+	endswitch;
+}
+
+$nbMember = $member->count();
+
+$this->mvc->Template->order			= $order;
+$this->mvc->Template->nbMember		= $nbMember;
+$this->mvc->Template->nbPage		= ceil($nbMember / 30);
+$this->mvc->Template->memberList	= $member->find($req);
+$this->mvc->Template->show('auth/manager');
+}
+}
+
+
 }
 
 ?>

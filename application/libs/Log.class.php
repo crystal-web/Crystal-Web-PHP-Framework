@@ -7,62 +7,71 @@
 * @description 
 */
 Class Log {
-
-
-private $oCache;
-private $arrCache = array();
-private $logDate;
+private static $log;
+private static $color = array();
 	
-	public function __Construct()
+	public static function setLog($logToSet, $type='LOG')
 	{
-	$tmp = new Cache('logdate');
-	$this->logDate = $tmp->getCache();
-
-	if (isSet($this->logDate['log-'.date('y-m-d')]))
-	{
-	$this->logDate['log-'.date('y-m-d')]++;
-	}
-	else
-	{
-	$this->logDate['log-'.date('y-m-d')] = 1;
-	}
-	 
-	$tmp->setCache($this->logDate);
-	
-	$this->oCache = new Cache('log-'.date('y-m-d'));
-	$this->arrCache = $this->oCache->getCache();
-	return $this;
-	}
-
-
-	public function error($msg, $module, $action, $level='notice')
-	{
-	$this->arrCache[] = array(
-			'msg'		=> $msg,				// Information 
-			'module'	=> $module,				// Module / Controller
-			'action'	=> $action,				// Action / methode
-			'ip'		=> Securite::ipX(),		// IP client
-			'level' 	=> $level				// niveau d'erreur
-			);
-	}
-	
-	public function getLog()
-	{
-	$tmp=array();
-
-		foreach($this->logDate AS $cacheFile=>$k)
-		{
-			$c = new Cache($cacheFile);
-			$data = $c->getCache();	
-			$tmp[$cacheFile] = $data;
+		if (!isset(self::$log)) {
+			
+			self::$log[] = array('message' => 'Starting service log', 'type' => 'SERVICE'); 
 		}
-	return $tmp;
+		
+		self::$log[] = array('message' => $logToSet, 'type' => strtoupper($type));
 	}
 	
-	public function __destruct()
+	public static function getLog()
 	{
-	$this->oCache->setCache($this->arrCache);
+	return self::$log; 
 	}
-
+	
+	
+	public static function console($printResult = false)
+	{
+		if (count(self::$log))
+		{
+			$html = '<ol>';
+			foreach (self::$log as $k => $v)
+			{
+				$html .= '<li><span style="font-weight: bold;color: '.Log::randColor($v['type']).'">[' . $v['type'] . ']</span>&nbsp;' . $v['message'] . '</li>';
+			//	$html .= '<li><span style="font-weight: bold;color: '.Log::hexColor($v['type']).'">[' . $v['type'] . ']</span>&nbsp;' . $v['message'] . '</li>';
+			} 
+			$html .= '</ol>';
+			
+			if (!$printResult)
+			{
+			return $html;
+			} else { echo $html; }
+		}
+	}
+	
+	
+	private static function randColor($type)
+	{
+		if (isSet(Log::$color[$type]))
+		{
+			return Log::$color[$type];
+		}
+		else
+		{
+			$r = rand(0, 200);
+			$g = rand(0, 200);
+			$b = rand(0, 200);
+			
+			foreach(Log::$color AS $t => $c)
+			{
+				if ($c == "rgb($r, $g, $b);")
+				{
+					return Log::randColor($type);
+				}
+			}
+			
+			
+			Log::$color[$type] = "rgb($r, $g, $b);";
+			return Log::$color[$type];
+		}
+		
+	}
+	
 }
 ?>

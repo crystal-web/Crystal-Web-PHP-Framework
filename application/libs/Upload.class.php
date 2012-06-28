@@ -21,7 +21,7 @@ private $extBlacklist = array(
         # PHP scripts may execute arbitrary code on the server
  'application/x-php', 'text/x-php',
         # Other types that may be interpreted by some servers
- 'text/x-python', 'text/x-perl', 'text/x-bash', 'text/x-sh', 'text/x-csh',
+ 'text/x-python', 'text/x-perl', 'text/x-bash', 'text/x-sh', 'text/x-csh', 'text/x-shellscript',
         # Client-side hazards on Internet Explorer
  'text/scriptlet', 'application/x-msdownload',
         # Windows metafile, client-side vulnerability on some systems
@@ -45,64 +45,261 @@ public $save_as;				// Nom du fichier de ortie
 private $upload_max_filesize;	// Taille en octe maximum des fichiers uploader
 public $log=array();			// log ;-)
 
-/*** Télécharge le fichier et le stock temporairement ***/
-public function __construct($file, $strict=true)
-{
-$this->file = $file;
-$this->tmp_file = basename($this->file['name']);
-$this->tmp_file = strtr($this->tmp_file,
-     'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ',
-     'AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy'); 
 
-$this->tmp_file = preg_replace('/([^.a-z0-9]+)/i', '-', $this->tmp_file);
-
-$this->ext = strtolower(strrchr($this->file['name'], '.'));
-
-if (function_exists('finfo_open'))
-{
-$this->log[] = 'Recherche du mime-type par finfo';
-$finfo = finfo_open(FILEINFO_MIME_TYPE); // Retourne le type mime à la extension mimetype
-$this->mime = finfo_file($finfo, $this->file['tmp_name']);
-finfo_close($finfo);
-}
-elseif (function_exists('mime_content_type'))
-{
-$this->log[] = 'Recherche du mime-type par mime_content_type';
-$this->mime = mime_content_type($this->file['tmp_name']);
-}
-else
-{
-$this->log[] = '/!\ Serveur insuffisament s&eacute;ris&eacute; : Requ&egrave;te Mime-Type non trait&eacute;';
-}
-
-if (!$this->control($this->extBlacklist))
-{
-	//Si la fonction renvoie TRUE, c'est que ça a fonctionné...
-	if(move_uploaded_file($this->file['tmp_name'], $this->tmp . $this->tmp_file)) 
+	/*** Télécharge le fichier et le stock temporairement ***/
+	public function __construct($file, $strict=true)
 	{
-		$this->log[]='Upload effectu&eacute; avec succ&egrave;s !';
-		return true;
+		
+		$this->file = $file;
+		$this->tmp_file = basename($this->file['name']);
+		$this->tmp_file = clean($this->tmp_file, 'str'); 
+
 	}
-	else //Sinon (la fonction renvoie FALSE).
+
+	public function prepare()
 	{
-		$this->log[]='Echec de l\'upload !';
+		
+		#$this->tmp_file = preg_replace('/([^.a-z0-9]+)/i', '-', $this->tmp_file);
+		Log::setLog('File is ' . $this->tmp_file, 'Upload');
+		
+		$this->ext = strtolower(strrchr($this->file['name'], '.'));
+		Log::setLog('File extention is ' . $this->ext, 'Upload');
+		
+		if (strlen($this->file['tmp_name']) == 0)
+		{
+			Log::setLog('Pas de fichier', 'Upload');
+			return false;
+		}
+		
+		/*
+		 * Test de l'extention
+		 */
+		if (function_exists('finfo_open'))
+		{
+			Log::setLog('Recherche du mime-type par finfo', 'Upload');
+			$finfo = finfo_open(FILEINFO_MIME_TYPE); // Retourne le type mime à la extension mimetype
+			$this->mime = finfo_file($finfo, $this->file['tmp_name']);
+			Log::setLog('Mime-type est ' . $this->mime, 'Upload');
+			finfo_close($finfo);
+		}
+		elseif (function_exists('mime_content_type'))
+		{
+			Log::setLog('Recherche du mime-type par mime_content_type', 'Upload');
+			$this->mime = mime_content_type($this->file['tmp_name']);
+			Log::setLog('Mime-type est ' . $this->mime, 'Upload');
+		}
+		else
+		{
+			$this->mime = $this->file['type'];
+			Log::setLog('/!\ Serveur insuffisament s&eacute;ris&eacute; : Requ&egrave;te Mime-Type non trait&eacute;', 'Upload');
+		}
+		
+		
+		//Si la fonction renvoie TRUE, c'est que ça a fonctionné...
+		if(move_uploaded_file($this->file['tmp_name'], $this->tmp . $this->tmp_file)) 
+		{
+			Log::setLog( 'Upload effectu&eacute; avec succ&egrave;s ! ' . $this->tmp . $this->tmp_file, 'Upload');
+			return true;
+		}
+		else //Sinon (la fonction renvoie FALSE).
+		{
+			Log::setLog( 'Echec de l\'upload ! Vérifié qut ' . $this->tmp . ' qoit accèssible en écriture', 'Upload');
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * Retourne le mime type
+	 */
+	public function getMime() {return $this->mime;}
+	
+	/**
+	 * 
+	 * Retourne le chemin vers le fichier temporaire
+	 */
+	public function getUploadPath(){return $this->tmp . $this->tmp_file;}
+	
+	/**
+	 * 
+	 * Retourne le nom du fichier uploader
+	 */
+	public function getFileName() {return $this->tmp_file; }
+	
+	
+	
+	/**
+	 * 
+	 * Test si le fichier est blacklister
+	 */
+	public function isBlacklisted()
+	{
+		/*
+		 * Controle si l'extention est blacklisté
+		 */
+		if ( array_search($this->mime, $this->MimeTypeBlacklist) )
+		{
+			Log::setLog('Mime-type, blacklister  ('.$this->mime.')', 'Upload');
+			return true;
+		}
+		elseif ( array_search(trim($this->ext, '.'), $this->extBlacklist) )
+		{
+			Log::setLog('Extention, blacklister ('.$this->ext.')', 'Upload');
+			return true;
+		}
+		else
+		{
+			Log::setLog('Extention et mime-type, non-blacklister  ('.$this->ext.')', 'Upload');
+			return false;
+		}		
+		
+	}
+	
+	
+	public function isWhitelisted($aListExtent)
+	{
+		/*
+		 * Controle si l'extention est blacklisté
+		 */
+		if ( array_search(strtolower(trim($this->ext, '.')), $aListExtent) )
+		{
+			Log::setLog('Extention, whitelister ('.$this->ext.')', 'Upload');
+			return true;
+		}
+		else
+		{
+			Log::setLog('Extention et mime-type, non-whitelister  ('.$this->ext.')', 'Upload');
+			return false;
+		}		
+	}
+	
+	
+	/**
+	 * 
+	 * Deplace le fichier du tampon, vers le dossier temporaire du systeme
+	 */
+	public function move()
+	{
+		 
+		//Si la fonction renvoie TRUE, c'est que ça a fonctionné...
+		if(move_uploaded_file($this->file['tmp_name'], $this->tmp)) 
+		{
+			Log::setLog('Upload effectu&eacute; avec succ&egrave;s dans le dossier "'.$this->tmp.'" !', 'Upload');
+			return true;
+		}
+		else //Sinon (la fonction renvoie FALSE).
+		{
+			Log::setLog('Echec de l\'upload !', 'Upload');
+			return false;
+		}
+	}
+	
+	
+	
+	/**
+	 * @deprecated
+	 * Controle le type mime
+	 */
+	public function control($extAttendu)
+	{
+		// Control BlackListage
+		if (in_array($this->mime, $this->MimeTypeBlacklist))
+		{
+		Log::setLog('@deprecated BlackListed MineType', 'Upload');
 		return false;
+		}
+	Log::setLog('@deprecated Controle extention : type is '.$this->ext, 'Upload');
+	return in_array($this->ext, $extAttendu);
 	}
-}
-else
-{
-	if ($strict)
+	
+	/**
+	 * @deprecated
+	 * Controle le type mime
+	 */	
+	public function control_ext($extAttendu)
 	{
-	die($this->ext . ' est interdit');
+		Log::setLog('@deprecated controle_ext', 'Upload');
+		return $this->control($extAttendu);
 	}
-	else
+	
+	
+
+	/**
+	 * 
+	 * Crée l'arboressence des dossiers
+	 * @param string $dir_to_save
+	 */
+	private function mkdir($dir_to_save)
 	{
-	return false;
+	$dir_array = explode('/', $dir_to_save);
+	$last = NULL;
+	
+		foreach ($dir_array AS $key => $dir)
+		{
+		$last=$last.$dir.'/';
+	
+			if (!is_dir($last))
+			{
+	
+				if (mkdir($last, 0775))
+				{
+				Log::setLog( 'Cr&eacute;ation du dossier "' . $last . ' effectu&eacute;"', 'Upload');
+				}
+				else
+				{
+				Log::setLog( 'Cr&eacute;ation du dossier "' . $last . ' a &eacute;chou&eacute;...', 'Upload');
+				return false;
+				}
+				
+			}
+	
+		}
+	return true;
 	}
-}
+	
+	
+	
 
-}
+	/**
+	 * 
+	 *  Enregistrement du fichier
+	 * @param string $dir_to_save
+	 */
+	public function save($dir_to_save)
+	{
+		if (!is_dir($dir_to_save))
+		{
+			Log::setLog( 'Dossier "' . $dir_to_save . ' n\'existe pas" essaye de créer...', 'Upload');
 
+			if ($this->mkdir($dir_to_save)==false)
+			{
+				Log::setLog( 'Echec de la création du dossier "' . $dir_to_save, 'Upload');
+				return false;
+			}
+		}
+	
+	$this->save_as = $dir_to_save.'/'.$this->tmp_file;
+	
+
+	
+		if (!copy($this->tmp . $this->tmp_file, $this->save_as))
+		{
+			Log::setLog( 'La copie  du fichier "' . $this->save_as . '" a &eacute;chou&eacute;...' , 'Upload');
+			return false;
+		}
+		else
+		{
+			Log::setLog( 'La copie  du fichier "' . $this->save_as . '" effectu&eacute;...' , 'Upload');
+			return true;
+		}
+	
+	}
+	
+	
+	
+	
+	
 private function generateRandomString($length = 5) 
 {    
     $string = ""; 
@@ -132,34 +329,6 @@ return (file_exists($rename)) ? $dir_to_save.'/'.$this->generateRandomString(6).
 }
 
 
-/*** Création de l'arboresence ***/
-private function mkdir($dir_to_save)
-{
-$dir_array = explode('/', $dir_to_save);
-$last = NULL;
-
-	foreach ($dir_array AS $key => $dir)
-	{
-	$last=$last.$dir.'/';
-
-		if (!is_dir($last))
-		{
-
-			if (mkdir($last, 0775))
-			{
-			$this->log[] = 'Cr&eacute;ation du dossier "' . $last . ' effectu&eacute;"';
-			}
-			else
-			{
-			$this->log[] = 'Cr&eacute;ation du dossier "' . $last . ' a &eacute;chou&eacute;...';
-			return false;
-			}
-			
-		}
-
-	}
-return true;
-}
 
 
  public function controlExtWhiteList($arrayWhiteList=array('.png','.jpeg','.jpg','.gif'))
@@ -167,62 +336,15 @@ return true;
 	// Control Liste blanche
 	if (in_array($this->ext, $arrayWhiteList))
 	{
-	$this->log[]='Listed extention';
-	$this->log[]='Controle white list extention : type is '.$this->ext;
+	Log::setLog( 'Listed extention', 'Upload');
+	Log::setLog( 'Controle white list extention : type is '.$this->ext, 'Upload');
 	return true;
 	}return false;
 }
 
-public function control($extAttendu)
-{
-	// Control BlackListage
-	if (in_array($this->mime, $this->MimeTypeBlacklist))
-	{
-	$this->log[]='BlackListed MineType';
-	return false;
-	}
-$this->log[]='Controle extention : type is '.$this->ext;
-return in_array($this->ext, $extAttendu);
-}
-
-public function control_ext($extAttendu)
-{
-return $this->control($extAttendu);
-
-}
 
 
 
-/*** Enregistrement du fichier ***/
-public function save($dir_to_save)
-{
-	if (!is_dir($dir_to_save))
-	{
-	$this->log[] = 'Dossier "' . $dir_to_save . ' n\'existe pas"';
-		if ($this->mkdir($dir_to_save)==false) {return false;}
-	}
-
-$this->save_as = $dir_to_save.'/'.$this->tmp_file;
-
-	if (file_exists($this->save_as))
-	{
-	$this->log[] = 'Fichier existe "'.$this->save_as.'" d&eacute;j&agrave;';
-	$this->save_as=$this->rename($dir_to_save);
-	$this->log[] = 'Fichier renom&eacute; "'.$this->save_as.'"';
-	}
-
-	if (!copy($this->tmp . $this->tmp_file, $this->save_as))
-	{
-	$this->log[] = 'La copie  du fichier "' . $this->save_as . '" a &eacute;chou&eacute;...';
-	return false;
-	}
-	else
-	{
-	$this->log[] = 'La copie  du fichier "' . $this->save_as . '" effectu&eacute;...';
-	return true;
-	}
-
-}
 
 
 public function get_upload_max_filesize()
@@ -233,14 +355,11 @@ $mul = ($mul == 'M' ? 1048576 : ($mul == 'K' ? 1024 : ($mul == 'G' ? 1073741824 
 return $mul*(int)$max_filesize;
 }
 
-public function controlKill()
-{
-$this->log[]='Effacement du tampon';
-if (file_exists($this->save_as) && !is_dir($this->save_as)) {@unlink($this->save_as);}
-}
+
+
 public function __destruct()
 {
-$this->log[]='Effacement du tampon';
+Log::setLog( 'Effacement du tampon', 'Upload');
 if (file_exists($this->tmp . $this->tmp_file) && !is_dir($this->tmp .$this->tmp_file)) {@unlink($this->tmp .$this->tmp_file);}
 }
 
