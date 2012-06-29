@@ -1,10 +1,10 @@
 <?php
 /**
-* @title Connection
+* @title Simple MVC systeme
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
-* @description 
+* @documentation: http://www.crystal-web.org/viki/class-log
 */
 Class Log {
 private static $log;
