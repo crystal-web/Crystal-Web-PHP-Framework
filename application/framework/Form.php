@@ -315,14 +315,22 @@ class Form{
 		}
 		
 		// Chargement de l'editeur, apres le textarea
-		$html .= '<script type="text/javascript">//<![CDATA[
+	/*	Suppréssion de //<![CDATA[ script //]]> pour une compatibilité avec Config.class.php
+	 * ***************************************************
+	 * $html .= '<script type="text/javascript">//<![CDATA[
 		window.CKEDITOR_BASEPATH=\''.__CW_PATH.'/ckeditor/\';
 		//]]></script>
 		<script type="text/javascript" src="'.__CW_PATH.'/ckeditor/ckeditor.js?t=B5GJ5GG"></script>
 		<script type="text/javascript">//<![CDATA[
 		CKEDITOR.replace(\''.$name.'\', '.$params.');
-		//]]></script>';
-		
+		//]]></script>';*/
+		$html .= '<script type="text/javascript">
+		window.CKEDITOR_BASEPATH=\''.__CW_PATH.'/ckeditor/\';
+		</script>
+		<script type="text/javascript" src="'.__CW_PATH.'/ckeditor/ckeditor.js?t=B5GJ5GG"></script>
+		<script type="text/javascript">
+		CKEDITOR.replace(\''.$name.'\', '.$params.');
+		</script>';
 		
 		return $html;
 	

@@ -27,8 +27,8 @@ public $layout;
 	*/
 	public function setSiteTitle($title)
 	{
-	$this->siteTitle = $title;
-	return $this;
+		$this->siteTitle = $title;
+		return $this;
 	}
 	
 	
@@ -39,7 +39,7 @@ public $layout;
 	*/
 	public function getSiteTitle()
 	{
-	return $this->siteTitle;
+		return $this->siteTitle;
 	}
 	
 	
@@ -50,8 +50,8 @@ public $layout;
 	*/
 	public function setPageTitle($title)
 	{
-	$this->pageTitle = $title;
-	return $this;
+		$this->pageTitle = $title;
+		return $this;
 	}
 	
 	
@@ -62,20 +62,20 @@ public $layout;
 	*/
 	public function getPageTitle()
 	{
-	return $this->pageTitle;
+		return $this->pageTitle;
 	}
 	
 	
 	/**
 	* 
 	* @param string $title|Titre du menu
-	* @param string $name|Intitulé du lien
+	* @param string $name|Intitulï¿½ du lien
 	* @param string $url|url du lien
 	*/
 	public function setMenu($title, $name, $url)
 	{
-	$this->menu[$title][] = array($url, $name);
-	return $this;
+		$this->menu[$title][] = array($url, $name);
+		return $this;
 	}
 	
 	
@@ -86,7 +86,7 @@ public $layout;
 	*/
 	public function getMenu()
 	{
-	return $this->menu;
+		return $this->menu;
 	}
 	
 	/**
@@ -95,42 +95,48 @@ public $layout;
 	
 	public function getHeader()
 	{
-	return $this->head;
+		return $this->head;
+	}
+	
+	public function setHeader($source)
+	{
+		$this->head.= $source;
+		return $this;
 	}
 	
 	public function setHeaderCss($url)
 	{
-	$this->head.= '<link rel="stylesheet" href="'.$url.'">';
-	return $this;
+		$this->head.= '<link rel="stylesheet" href="'.$url.'">';
+		return $this;
 	}
 	
 	
 	public function setHeaderJs($url)
 	{
-	$this->head.= '<script type="text/javascript" src="'.$url.'"></script>';
-	return $this;
+		$this->head.= '<script type="text/javascript" src="'.$url.'"></script>';
+		return $this;
 	}
 	
 	
 	public function setBreadcrumb($url, $name)
 	{
-	$this->breadcrumb[$url] = $name;
-	return $this;
+		$this->breadcrumb[$url] = $name;
+		return $this;
 	}
 	
 	public function getBreadcrumb()
 	{
-	return $this->breadcrumb;
+		return $this->breadcrumb;
 	}
 	
 	public function body($body)
 	{
-	$this->body = $body;
-	return $this;
+		$this->body = $body;
+		return $this;
 	}
 	public function getBody()
 	{
-	return $this->body;
+		return $this->body;
 	}	
 	
 }

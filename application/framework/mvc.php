@@ -14,21 +14,30 @@ public $vars = array();
 
 	public function __construct()
 	{
-	header("X-Powered-By: Crystal-Web.org");
+		header("X-Powered-By: Crystal-Web.org");
+		Log::setLog('Chargement...', 'mvc');
 	}
 
 	
 	public function __set($index, $value)
 	{
-	$this->vars[$index] = $value;
+		$index = clean($index, 'str');
+		Log::setLog('Création de (' . gettype($value) . ') ' . $index, 'mvc');
+		$this->vars[$index] = $value;
 	}
 
 	public function __get($index)
 	{
-	return $this->vars[$index];
+		$index = clean($index, 'str');
+		return isSet($this->vars[$index]) ? $this->vars[$index] : false;
 	}
 	
-	
+	public function __unset($index)
+	{
+		$index = clean($index, 'str');
+		Log::setLog('Destruction de ' . $index , 'mvc');
+		unset($this->vars[$index]);
+	}
 	
 	
 /***************************************REQUEST********************************************/

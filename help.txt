@@ -1,0 +1,3 @@
+Erreur 500: Votre dossier /application/cache n'est pas ouvert en écriture
+			Votre serveur ne support pas mod_rewirte
+			
