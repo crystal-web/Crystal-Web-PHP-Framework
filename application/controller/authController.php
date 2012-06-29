@@ -278,12 +278,19 @@ $mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] Confirmation d\'in
 			$data->hash_validation = $hash_validation;
 			
 
-			if (!$mail_send->sendMailHtml())
+			if (!$mail_send->sendMailTemplate())
 			{
-				$log = new Log();
-				$log->error('Mail restriction, can not send', $this->mvc->Request->controller, $this->mvc->Request->action);
+				error('Mail restriction, can not send', $this->mvc->Request->controller, $this->mvc->Request->action);
+				$data->password = md5($this->mvc->Request->data->passmember);
+				$data->levelmember = 2;
+				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.');
 			}
-			
+			else
+			{
+				//Log::console(true);
+				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.<br>ATTENTION: Si vous ne recevez pas l\'e-mail, vérifier vos e-mail indésirables.<br>Votre adresse e-mail est ' . $data->mailmember,'error');
+				//
+			}
 
 			$subscribe->save($data);
 			//debug($subscribe->sql);

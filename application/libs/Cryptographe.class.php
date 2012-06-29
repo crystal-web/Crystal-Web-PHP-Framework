@@ -1,4 +1,11 @@
 <?php
+/**
+* @title Simple MVC systeme
+* @author Christophe BUFFET <developpeur@crystal-web.org> 
+* @license Creative Commons By 
+* @license http://creativecommons.org/licenses/by-nd/3.0/
+* @documentation: http://www.crystal-web.org/viki/class-cryptographe 
+*/
 class Cryptographe 
 {
         

@@ -11,15 +11,15 @@ class Mail
 	private $m_emetteur;
 	private $m_reponse;
 	private $m_boundary;
-	
-	public function __construct($p_objet, $p_subtitle, $p_text,$p_destinataire,$p_emetteur,$p_reponse = null,$p_importance = "Normal",$p_priority = 3)
+
+	public function __construct($p_objet, $p_text,$p_destinataire,$p_emetteur,$p_reponse = null,$p_importance = "Normal",$p_priority = 3)
 	{
 		Log::setLog('Mail enabled', 'mail');
 		$this->m_boundary = "----".$_SERVER['HTTP_HOST']."----".md5(time());
 		$this->m_priority = $p_priority;
 		$this->m_importance = $p_importance;
 		$this->m_emetteur = $p_emetteur;
-		$this->m_subtitle = $p_subtitle;
+		
 		
 		if($p_reponse == null)
 		{
@@ -28,10 +28,11 @@ class Mail
 		else
 		{
 			$this->m_reponse = $p_reponse;
+		}
+		
 			$this->m_objet = $p_objet;
 			$this->m_destinataire = $p_destinataire;
 			$this->m_textTxt = $p_text;
-		}
 	}
 	
 	public function __get($champ)
@@ -65,19 +66,43 @@ class Mail
 	{
 		$this->reload_entete();
 		
+		
 		$this->m_textHtml = "--".$this->m_boundary ."\n";
 		$this->m_textHtml .= "Content-Type: text/html; charset=ISO-8859-1\n";
 		$this->m_textHtml .= "Content-Transfer-Encoding: 8bit\n\n";
 		$this->m_textHtml .= $this->m_textTxt;
+		
+		
 		Log::setLog('Envois du mail en mode html', 'mail');
-		return (mail($this->m_destinataire,'['.SITENAME.'] ' .$this->m_objet,$this->m_textHtml,$this->m_entete)) ? true : false;	
+		return (mail($this->m_destinataire,'['.SITENAME.'] ' . $this->m_objet, $this->m_textHtml, $this->m_entete)) ? true : false;	
 	}
 	
 	public function sendMailText()
 	{
 		Log::setLog('Envois du mail en mode texte', 'mail');
 		$this->reload_entete();
-		return (mail($this->m_destinataire,$this->m_objet,$this->loadTemplate(),$this->m_entete)) ? true : false;
+		
+		$this->m_textHtml = "--".$this->m_boundary ."\n";
+		$this->m_textHtml .= "Content-Type: text/html; charset=ISO-8859-1\n";
+		$this->m_textHtml .= "Content-Transfer-Encoding: 8bit\n\n";
+		$this->m_textHtml .= $this->m_textTxt;
+		
+		return (mail($this->m_destinataire,'['.SITENAME.'] ' . $this->m_objet, $this->m_textHtml, $this->m_entete)) ? true : false;
+	}
+	
+	
+	public function sendMailTemplate($p_subtitle = NULL)
+	{
+		Log::setLog('Envois du mail en mode texte', 'mail');
+		$this->reload_entete();
+		
+		$this->m_subtitle = $p_subtitle;
+		
+		$this->loadTemplate();
+		
+
+		return (mail($this->m_destinataire,'['.SITENAME.'] ' . $this->m_objet, $this->m_textHtml, $this->m_entete)) ? true : false;
+		
 	}
 	
 	
@@ -85,6 +110,7 @@ class Mail
 	private function loadTemplate()
 	{
 		Log::setLog('Chargement du Template', 'mail');
+	
 		ob_start();
 		
 		$politesse = array(
@@ -99,19 +125,25 @@ class Mail
 		
 		$file = file_get_contents(__APP_PATH . DS . 'mail' . DS . 'base.mail');
 		
-		$file = preg_replcace("#{OBJECT}#", $this->m_objet, $file);
-		$file = preg_replcace("#{SUBTITLE}#", $this->m_subtitle, $file);
-		$file = preg_replcace("#{TEXT}#", $this->m_textTxt, $file);
-		$file = preg_replcace("#{SINCERLY}#", $politesse[rand(0,count($politesse)-1)], $file);
-		$file = preg_replcace("#{EMAIL}#", $this->m_destinataire, $file);
-		$file = preg_replcace("#{TEAMNAME}#", TEAM_NAME, $file);
+		$file = preg_replace("#{EMAILTITLE}#", $this->m_objet, $file);
+		$file = preg_replace("#{EMAILSUBTITLE}#", $this->m_subtitle, $file);
+		$file = preg_replace("#{TEXT}#", $this->m_textTxt, $file);
+		$file = preg_replace("#{SINCERLY}#", $politesse[rand(0,count($politesse)-1)], $file);
+		$file = preg_replace("#{EMAIL}#", $this->m_destinataire, $file);
+		$file = preg_replace("#{TEAMNAME}#", TEAM_NAME, $file);
+		$file = preg_replace("#{SITENAME}#", SITENAME, $file);
 		
-		$file = preg_replcace("#{UNSUBSCRIBE}#", Router::url('member/unsubscribe'), $file);
-		
+		$file = preg_replace("#{UNSUBSCRIBE}#", Router::url('member/unsubscribe'), $file);//*/
+		echo $file;
 		$content = ob_get_contents();
   		ob_end_clean();
-		
-  		return $content;
+ 
+		$this->m_textHtml = "--".$this->m_boundary ."\n";
+		$this->m_textHtml .= "Content-Type: text/html; charset=ISO-8859-1\n";
+		$this->m_textHtml .= "Content-Transfer-Encoding: 8bit\n\n";
+		$this->m_textHtml .= htmlspecialchars_decode(htmlentities($content, ENT_NOQUOTES, 'UTF-8'));  
+
+  	//	return $content;
 	}
 }
 ?>

@@ -26,14 +26,15 @@ $http = (isSet($_SERVER['HTTPS'])) ? 'https' : 'http';
 define ('__CW_PATH', $http . '://' . $_SERVER['SERVER_NAME']); //' . $_SERVER['SERVER_NAME'] Site url/~devphp
 
 /*** DB Configuration ***/
-define ('DB_host', 'localhost'); // le chemin vers le serveur
-define ('DB_type', 'mysql'); // Choix entre mysql, pgsql, OCI et sqlite
-define ('DB_port', '3306');	// Port si nécessaire mysql 3306/3305 pgsql 4444
-define ('DB_name', 'dbname'); // le nom de votre base de données
-define ('DB_user', 'root'); // nom d'utilisateur pour se connecter
-define ('DB_password', ''); // mot de passe de l'utilisateur pour se connecter
-define ('__SQL', 'cYw_'); // Prefixe Au choix [A-Z_]
+define ('DB_HOSTNAME', 'localhost'); // le chemin vers le serveur
+define ('DB_DRIVER', 'mysql'); // Choix entre mysql, pgsql, OCI et sqlite
+define ('DB_PORT', '3306'); // Port si nï¿½cessaire mysql 3306/3305 pgsql 4444
+define ('DB_DATABASE', ''); // le nom de votre base de donnï¿½es
+define ('DB_USERNAME', ''); // nom d'utilisateur pour se connecter
+define ('DB_PASSWORD', ''); // mot de passe de l'utilisateur pour se connecter
 
-define ('ADMIN_MAIL', 'noreply@'.$_SERVER['SERVER_NAME']); // Adresse expéditeur
+define ('__SQL', 'git_'); // Prefixe Au choix [A-Z_]
+
+define ('ADMIN_MAIL', 'noreply@'.$_SERVER['SERVER_NAME']); // Adresse expï¿½diteur
 
 include __APP_PATH . DS . 'function' . DS . 'function.inc.php';

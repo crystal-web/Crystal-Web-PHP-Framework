@@ -26,7 +26,7 @@ define ('__APP_PATH', dirname(__SITE_PATH) . DS . 'application');
 /**
  * Doit etre false en production
  */
-define ('__DEV_MODE', 0);
+define ('__DEV_MODE', 1);
 
 /**
  * Dev mode is enabled ?

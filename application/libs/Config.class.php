@@ -23,7 +23,7 @@ private $compteur = 1;
 	{
 		$this->mvc = $mvc;
 		$this->model = new ConfigModel();
-		$this->modelController = $this->model->getController($this->mvc->getController(), $this->mvc->getAction());
+		$this->modelController = $this->model->getConfig($this->mvc->getController(), $this->mvc->getAction());
 		$this->modelController->params = unserialize($this->modelController->params);
 		
 		if (isSet($this->mvc->Request->data->controller) && isSet($this->mvc->Request->data->action) )
@@ -110,6 +110,7 @@ private $compteur = 1;
 		$this->input('Enregistrer', 'submit', array('type' => 'submit', 'class' => 'btn info'));
 		
 		$height = ($this->compteur > 12) ? 600 : ($this->compteur * 45) + 20; //94;
+		$height = ($height < 300) ? 300 : $height;
 		
 		$content = addslashes($this->html);
 		$content = preg_replace('#\n#', '', $content);
@@ -156,12 +157,13 @@ Class ConfigModel extends Model {
 		$this->query("CREATE TABLE ".__SQL."_Config (
 			`id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
 			`controller` VARCHAR( 256 ) NOT NULL ,
+			`action` VARCHAR( 256 ) NOT NULL ,
 			`params` TEXT NOT NULL ,
 			PRIMARY KEY (  `id` )
 			) ENGINE = MYISAM ;");
 	}
 	
-	
+
 	/**
 	 * 
 	 * Recherche dans la base de donnée
@@ -170,7 +172,7 @@ Class ConfigModel extends Model {
 	 * @param string $action
 	 * @return object stdClass
 	 */
-	public function getController($controller, $action)
+	public function getConfig($controller, $action)
 	{
 		$f = array('conditions' => array('controller' => $controller, 'action' =>  $action));
 		return $this->findFirst($f);

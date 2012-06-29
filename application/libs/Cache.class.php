@@ -24,7 +24,7 @@ public $stat;
  
 
 	public function Cache($filename, $toCache = NULL, $type = NULL){
-	$this->filename = DB_USERNAME. '_' .$filename;
+	$this->filename = __SQL. '_' .$filename;
 	$this->toCache = $toCache;
 	$this->type = (!empty($type)) ? $type . DS : NULL;
 	Log::setLog('Starting Cache with file ' . $filename, 'Cache');

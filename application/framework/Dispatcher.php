@@ -1,5 +1,5 @@
 <?php
-define ('__VER', 12.04);
+
 class Dispatcher {
 
 protected $mvc;
@@ -79,7 +79,10 @@ function loadController()
 		$file = __APP_PATH . DS . 'controller' . DS . $name . '.php';
 		//$this->error('Le controller '.$this->mvc->Request->controller.' n\'existe pas dans '.$file);
 	}
-	require $file; 
+
+		require $file; 
+	
+
 	$controller = new $name($this->mvc); 
 	return $controller;  
 }
