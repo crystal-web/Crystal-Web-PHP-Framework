@@ -6,7 +6,6 @@ if (count($group))
 	{
 		echo '<li style="display:inline;padding:5px;margin:5px;"><a href="' . Router::url('media/browser/type:' . $d->type . '/sub:' . $d->subType) . '">' . $d->subType . '</a> ('.$d->countSubType.')</li>';
 	}
-	
 	echo '</ul>';
 	
 }
@@ -18,15 +17,14 @@ if (count($list))
 			<th>filename</th>
 			<th>filetype</th>
 			<th>filesubtype</th>
-			<th>filesize</th>
 		</tr>';
 	foreach($list AS $k => $d)
 	{
+		//$d->subType = substr($d->subType, 1);
 		echo '<tr>
-			<td><a href="' . __CW_PATH . '/media/' . $d->mime . '/' . $d->name .'">' . $d->name .'</a></td>
+			<td><a href="' . Router::url('media/fileinfo/id:' . $d->id) .'">' . $d->name .'</a></td>
 			<td><a href="' . Router::url('media/browser/type:' . $d->type) . '">' . $d->type . '</a></td>
 			<td><a href="' . Router::url('media/browser/type:' . $d->type . '/sub:' . $d->subType) . '">'.$d->subType.'</a></td>
-			<td>' . $d->filesize . '</td>
 			</tr>';
 	}
 	echo '</table>';

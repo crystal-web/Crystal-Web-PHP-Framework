@@ -3,7 +3,7 @@ var uploader = new plupload.Uploader({
 	containes: 'plupload',
 	browse_button: 'browse',
 	drop_element:"droparea",
-	url : 'ajax',
+	url : 'addfile',
 	flash_swf_url:'./files/js/plupload/plupload.flash.swf',
 	multipart : true,
 	urlstream_upload:true,
@@ -19,7 +19,7 @@ uploader.bind('Init',function(up, params){
 
 uploader.bind('UploadProgress',function(up, file){
 	console.log(file);
-	$('#'+file.id).find('.progress').css('width',file.percent+'%');
+	$('#'+file.id).find('.progress').css('width',file.percent+'%').attr("title", file.percent+'%');
 })
 
 uploader.init();

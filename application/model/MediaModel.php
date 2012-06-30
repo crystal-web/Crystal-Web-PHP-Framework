@@ -36,7 +36,7 @@ public function getId($id)
 	$id = (int) $id;
 	
 	$p = array(
-		'fields' => '*, CONCAT( SUBSTRING_INDEX( mime,  \''.$type.'/\', -1 ) ) AS subType',
+		'fields' => '*, CONCAT( SUBSTRING_INDEX( mime,  type, -1 ) ) AS subType',
 		'conditions' => array('id' => $id),
 		'join' => array(__SQL . '_Member AS Member' => 'Member.idmember = Media.id_member'),
 		);
@@ -48,7 +48,7 @@ public function getId($id)
 public function getList()
 {
 $p = array(
-	'fields' => '*, CONCAT( SUBSTRING_INDEX( mime,  \''.$type.'/\', -1 ) ) AS subType',
+	'fields' => '*, CONCAT( SUBSTRING_INDEX( mime,  type, -1 ) ) AS subType',
 	'order' => 'name ASC'
 	);
 	
@@ -69,7 +69,7 @@ return $this->find($p);
 public function getListBySubType($mime)
 {
 $p = array(
-	'fields' => '*, CONCAT( SUBSTRING_INDEX( mime,  \''.$type.'/\', -1 ) ) AS subType',
+	'fields' => '*, CONCAT( SUBSTRING_INDEX( mime,  type, -1 ) ) AS subType',
 	'conditions' => array('mime' => $mime),
 	'order' => 'name ASC'
 	);

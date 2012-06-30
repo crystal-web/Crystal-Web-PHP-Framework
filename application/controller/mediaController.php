@@ -37,8 +37,7 @@ public function index()
 	}
 	
 	$this->mvc->Page->setBreadcrumb('media', 'Media')
-					->setPageTitle('M&eacute;diath&egrave;que')
-					->body('onunload="exitwindow();"');
+					->setPageTitle('M&eacute;diath&egrave;que');
 	$mediaModel = $this->loadModel('Media');
 	
 	$find=array(
@@ -58,7 +57,7 @@ public function browser()
 		return Router::redirect('');
 	}
 	$this->mvc->Page->setPageTitle('Navigateur');
-	$this->mvc->Page->setBreadcrumb('media/browser', 'browser');
+	$this->mvc->Page->setBreadcrumb('media', 'Media');
 	
 	$mMedia = $this->loadModel('Media');
 
@@ -78,7 +77,7 @@ public function browser()
 	{
 		
 		$type = $this->mvc->Request->params['type'];
-		$this->mvc->Page->setBreadcrumb('media/browser/type:' . $type, $type);
+		$this->mvc->Page->setBreadcrumb('media/browser', 'Browser')->setBreadcrumb('media/browser/type:' . $type, $type);
 		
 		$prepare = array(
 			'fields' => '* , CONCAT( SUBSTRING_INDEX( mime,  \''.$type.'/\', -1 ) ) AS subType, COUNT(type) AS countSubType',
@@ -96,8 +95,7 @@ public function browser()
 		$type = $this->mvc->Request->params['type'];
 		$subType = $this->mvc->Request->params['sub'];
 		
-		$this->mvc->Page->setBreadcrumb('media/browser/type:' . $type, $type);
-		$this->mvc->Page->setBreadcrumb('media/browser/type:' . $type . '/sub:' . $subType, $subType);
+		$this->mvc->Page->setBreadcrumb('media/browser', 'Browser')->setBreadcrumb('media/browser/type:' . $type, $type)->setBreadcrumb('media/browser/type:' . $type . '/sub:' . $subType, $subType);
 		
 		$prepare = array(
 			'fields' => '* , CONCAT( SUBSTRING_INDEX( mime,  \''.$type.'/\', -1 ) ) AS subType, COUNT(type) AS countSubType',
@@ -108,7 +106,7 @@ public function browser()
 		$this->mvc->Template->group = $mMedia->find($prepare);
 		
 		$this->mvc->Template->list = $mMedia->getListBySubType($type.'/'.$subType);
-		$this->mvc->Template->show('media/browser-type');
+		$this->mvc->Template->show('media/browser-type-sub');
 	}	
 }
 
@@ -126,7 +124,7 @@ public function fileinfo()
 	}
 	
 	$this->mvc->Page->setPageTitle('Fileinfo');
-	$this->mvc->Page->setBreadcrumb('media/browser', 'browser');
+	$this->mvc->Page->setBreadcrumb('media', 'Media')->setBreadcrumb('media/browser', 'Browser');
 	
 	$id = (int) $this->mvc->Request->params['id'];
 	
@@ -301,8 +299,8 @@ public function ajax()
 		} 
 		die();
 	}
+	
 }
-
 
 
 }

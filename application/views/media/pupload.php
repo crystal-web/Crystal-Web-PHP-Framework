@@ -1,10 +1,5 @@
-<script language="javascript">
-$(window).bind('beforeunload', function(){
-return 'ATTENTION\nSi un upload est en cours, il sera perdu !!';
-});
-
-</script>
-<style type="text/css">#plupload {  font-family: Arial,Helvetica;  color: #AAA; }  #plupload #droparea {
+<?php 
+$this->mvc->Page->setHeader('<style type="text/css">#plupload {  font-family: Arial,Helvetica;  color: #AAA; }  #plupload #droparea {
 	border: 4px dashed #ddd;
 	height: 200px;
 	text-align: center;
@@ -84,7 +79,11 @@ return 'ATTENTION\nSi un upload est en cours, il sera perdu !!';
 	  -khtml-border-radius: 25px;
 	  border-radius: 25px; }@-webkit-keyframes progress {  from {
 	background-position: 0 0; }  to {
-	background-position: 54px 0; } }audio { width: 200px;}</style><div id="plupload">
+	background-position: 54px 0; } }audio { width: 200px;}</style>'); ?>
+	
+	
+	
+	<div id="plupload">
 	<div id="droparea">
 	
 	<p>Déposez vos fichiers ici</p><span class="or">ou</span>
