@@ -19,7 +19,7 @@ class Form{
 	{
 		$error = false; 
 		$value = $classError = ''; 
-		
+		$name = trim($name);
 		/**
 		 * Ajoute la valeur d'erreur textuelle au champ en erreur
 		 */
@@ -114,10 +114,10 @@ class Form{
 		/**
 		 * Un champ d'option est d�fini on le traite
 		 */
-		elseif(isset($options['options']))
+		elseif($options['type'] == 'select')
 		{
 			$html .= '<select id="input'.$name.'" name="'.$name.'" '.$attr.'>';
-			foreach($options['options'] as $k=>$v)
+			foreach($options['option'] as $k=>$v)
 			{
 				$html .= '<option value="'.$k.'" '.($k==$value?'selected':'').'>'.$v.'</option>'; 
 			}
@@ -138,7 +138,7 @@ class Form{
 			// On demand le textarea sans l'editeur visuel
 			else
 			{
-			$html .= '<textarea id="input'.$name.'" name="'.$name.'"'.$attr.'>'.$value.'</textarea>';
+			$html .= '<textarea id="input'.$name.'" name="'.$name.'" '.$attr.'>'.$value.'</textarea>';
 			}
 			
 		}
@@ -149,7 +149,31 @@ class Form{
 		 */
 		elseif($options['type'] == 'checkbox')
 		{
-			$html .= '<input type="hidden" name="'.$name.'" value="0"><input type="checkbox" name="'.$name.'" value="1" '.(empty($value)?'':'checked').'>'; 
+		$html .= '<input type="hidden" name="'.$name.'[]" value="0">';
+
+		
+		$html .= '<ul class="inputs-list" id="'.$name.'">';
+			foreach($options['option'] AS $k=>$v)
+			{
+				$sel = NULL;
+            	if (isSet($this->mvc->Request->data->$name))
+            	{
+					foreach($this->mvc->Request->data->$name AS $ke=>$va)
+					{
+						if ($va == $k)
+		            	{
+		            		 $sel = 'checked="checked"';
+		            	}
+					}
+            	}
+            	
+			 $html .= '<li>
+                  <label><input type="checkbox" name="'.$name.'[]" id="'.clean($name . $k, 'slug').'" value="'.$k.'" '.$sel.'>
+                  <span>'.$v.'</span></label>
+                </li>'; 
+			}
+		$html .= '</ul>';
+		
 		}
 		
 		
@@ -161,10 +185,10 @@ class Form{
 		$html .= '<ul class="inputs-list">';
 			foreach($options['option'] AS $k=>$v)
 			{
-            
+            	
 			 $sel = ($value === $k) ?'checked="checked"':'';
 			 $html .= '<li>
-                  <label><input type="radio" name="'.$name.'" value="'.$k.'" '.$sel.'> <span>'.$v.'</span></label>
+                  <label><input type="radio" name="'.$name.'" id="'.clean($name . $k, 'slug').'" value="'.$k.'" '.$sel.'> <span>'.$v.'</span></label>
                 </li>'; 
 			}
 		$html .= '</ul>';
@@ -261,59 +285,75 @@ class Form{
 		// les champ editor et value sont vide, on affiche 
 		else { 	$html .= '<textarea id="input'.$name.'" name="'.$name.'"></textarea>'; }
 		
-
-		// A-t-on des paramettres ?
-		if (isSet($options['editor']['params']))
+		if ( !is_array($options['editor']) )
 		{
-			// On utilise un model ?
-			if (!isSet($options['editor']['params']['model']))
+			switch($options['editor'])
 			{
-				
-				if (isSet($options['editor']['params']['extraPlugins']))
-				{
-				$extraPlugins = $options['editor']['params']['extraPlugins'];
-				}
-				else
-				{
-				$extraPlugins = '"extraPlugins":"bbcode",';
-				}
-				
-				/*
-				* http://docs.cksource.com/CKEditor_3.x/Developers_Guide/Toolbar
-				*/
-				if (isSet($options['editor']['params']['toolbar']))
-				{
-				$toolbar = $options['editor']['params']['toolbar'];
-				}
-				else
-				{
-	$toolbar = '"toolbar":[["Undo","Redo","-","Bold","Italic","Underline","Strike","FontSize"],["Image","Link","Unlink"],["Find","Replace","-","SelectAll","RemoveFormat","\/","BulletedList","-","Blockquote","TextColor","-","Smiley","-","Maximize"]]';
-				}
-				$params = '{'.$extraPlugins.''.$toolbar.'}';
-			}
-			else
-			{
-	
-				switch ($options['editor']['params']['model'])
-				{
 				case 'htmlfull':
-				$params = '{"toolbar":['.$document.', '.$documentEdit.', '.$basic.', '.$paragraph.', '.$insert.', '.$link.', '.$color.', '.$style.']}';
+					$params = '{"toolbar":['.$document.', '.$documentEdit.', '.$basic.', '.$paragraph.', '.$insert.', '.$link.', '.$color.', '.$style.']}';
 				break;
 				case 'html':
-				$params = '{"toolbar":['.$documentNoSource.', '.$documentEdit.', '.$basic.', '.$paragraph.', '.$insert.', '.$link.', '.$color.', '.$style.']}';
+					$params = '{"toolbar":['.$documentNoSource.', '.$documentEdit.', '.$basic.', '.$paragraph.', '.$insert.', '.$link.', '.$color.', '.$style.']}';
 				break;	
 				default:
-				$params = '{"extraPlugins":"bbcode","toolbar":['.$bbcode.']}';
+					$params = '{"extraPlugins":"bbcode","toolbar":['.$bbcode.']}';
 				break;
-				}
 			}
-			
 		}
 		else
 		{
-		$params = '{"extraPlugins":"bbcode","toolbar":['.$bbcode.']}';
-		}
+			// A-t-on des paramettres ?
+			if (isSet($options['editor']['params']))
+			{
+				// On utilise un model ?
+				if (!isSet($options['editor']['params']['model']))
+				{
+					
+					if (isSet($options['editor']['params']['extraPlugins']))
+					{
+					$extraPlugins = $options['editor']['params']['extraPlugins'];
+					}
+					else
+					{
+					$extraPlugins = '"extraPlugins":"bbcode",';
+					}
+					
+					/*
+					* http://docs.cksource.com/CKEditor_3.x/Developers_Guide/Toolbar
+					*/
+					if (isSet($options['editor']['params']['toolbar']))
+					{
+					$toolbar = $options['editor']['params']['toolbar'];
+					}
+					else
+					{
+		$toolbar = '"toolbar":[["Undo","Redo","-","Bold","Italic","Underline","Strike","FontSize"],["Image","Link","Unlink"],["Find","Replace","-","SelectAll","RemoveFormat","\/","BulletedList","-","Blockquote","TextColor","-","Smiley","-","Maximize"]]';
+					}
+					$params = '{'.$extraPlugins.''.$toolbar.'}';
+				}
+				else
+				{
 		
+					switch ($options['editor']['params']['model'])
+					{
+					case 'htmlfull':
+					$params = '{"toolbar":['.$document.', '.$documentEdit.', '.$basic.', '.$paragraph.', '.$insert.', '.$link.', '.$color.', '.$style.']}';
+					break;
+					case 'html':
+					$params = '{"toolbar":['.$documentNoSource.', '.$documentEdit.', '.$basic.', '.$paragraph.', '.$insert.', '.$link.', '.$color.', '.$style.']}';
+					break;	
+					default:
+					$params = '{"extraPlugins":"bbcode","toolbar":['.$bbcode.']}';
+					break;
+					}
+				}
+				
+			}
+			else
+			{
+			$params = '{"extraPlugins":"bbcode","toolbar":['.$bbcode.']}';
+			}
+		}
 		// Chargement de l'editeur, apres le textarea
 	/*	Suppréssion de //<![CDATA[ script //]]> pour une compatibilité avec Config.class.php
 	 * ***************************************************
@@ -345,8 +385,8 @@ class Form{
 	 */
 	private function date($value)
 	{
-		$fr_month = array('Janvier', 'F�vrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet',
-		'Ao�t', 'Septembre', 'Octobre', 'Novembre', 'D�cembre');
+		$fr_month = array('Janvier', 'F&eacute;vrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet',
+		'Ao&ucirc;t', 'Septembre', 'Octobre', 'Novembre', 'D&eacute;cembre');
 	
 		if (isSet($this->mvc->Request->data->day) AND isSet($this->mvc->Request->data->month) AND isSet($this->mvc->Request->data->year))
 		{
@@ -418,7 +458,7 @@ class Form{
 			if (!checkdate($month, $day, $year))
 			{
 				// Recherche le nombre de jour dans le mois
-				$nbDay = date(�t�,mktime(0,0,0,$month,1,$year));
+				$nbDay = date('t',mktime(0,0,0,$month,1,$year));
 				
 				/**
 				 * Si le jour est plus grand que le nombre de jour total

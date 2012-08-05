@@ -23,5 +23,29 @@ CREATE TABLE IF NOT EXISTS `".__SQL."_Acl` (
 }
 
 
+public function test()
+{/*
+	$this->table = 'git__AclInheritance';
+	
+	$prepare = array(
+			'join' => array(	
+				'git__AclPermission' => 'git__AclPermission.name = Acl.parent',
+				),
+			'conditions' => 'Acl.child = "Moderateur" OR git__AclPermission.name = "Moderateur"',
+		);
+
+		
+	debug( $this->find($prepare) );
+	
+	debug($this->sql);
+	debug($this->lastError);//*/
+
+	
+	
+	
 }
+
+}
+
+
 ?>

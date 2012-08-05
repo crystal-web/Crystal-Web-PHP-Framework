@@ -1,9 +1,11 @@
 <?php
 /**
 * @title Cache systeme
+* @package systeme
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
+* @documentation: http://www.crystal-web.org/viki/class-cache
 */
 
 /* Le but ici est de minimizer les acces a la BDD en utilisant le cache 
@@ -23,6 +25,17 @@ private $errno;
 public $stat;
  
 
+	/**
+	 * 
+	 * Constructeur de class, ouvre un nouveau cache de $filename
+	 * $filename correspond au non du cache
+	 * $toCache permet de pre-enregistré un cache
+	 * $type permet de mettre dans un dossier au dessus
+	 * @param string $filename
+	 * @param $toCache
+	 * @param string $type
+	 * @throws Exception
+	 */
 	public function Cache($filename, $toCache = NULL, $type = NULL){
 	$this->filename = __SQL. '_' .$filename;
 	$this->toCache = $toCache;
@@ -52,14 +65,17 @@ public $stat;
 	}
 
 	
-	/*
-	 * Set file cache
+	/**
+	 * 
+	 * Ecrit dans le fichier de cache la valeur de $arr sans traitement
+	 * @param $arr
+	 * @throws Exception
 	 */
 	public function setCache($arr = NULL)
 	{
 	$arr = ($arr == NULL) ? $this->toCache : $arr;
 	
-	    // �criture du code dans le fichier.
+	    // écriture du code dans le fichier.
 	    if (file_put_contents(__APP_PATH . DS . 'cache' . DS . $this->type . $this->filename . '.cache', serialize($arr), LOCK_EX) === false)
 	    {
 	        throw new Exception('Impossible d\'&eacute;crire le fichier cache');
@@ -72,9 +88,11 @@ public $stat;
 	    }
 	}
 	
-
-	/*
-	 * Get file cache
+	
+	/**
+	 * 
+	 * Retourne le cache sans traitement, par defaut retourne un tableau vide
+	 * @param bool $return_bool
 	 */
 	public function getCache($return_bool = false)
 	{
@@ -100,8 +118,9 @@ public $stat;
 	}
 
 
-	/*
-	 * Delete file cache
+	/**
+	 * 
+	 * Supprime le fichier de cache courant, si il existe et que la suppréssion est possible
 	 */
 	public function delCache()
 	{
@@ -118,7 +137,13 @@ public $stat;
 	    }		
 	}
 
-
+	
+	/**
+	 * 
+	 * Recherche si un mot, une lettre se trouve dans la source sérializé
+	 * a utiliser avec prudence, cette requète peut retourner des valeurs érroné
+	 * @param string $string
+	 */
 	public function search($string)
 	{
 		Log::setLog('Search ' . $string, 'Cache');
@@ -134,21 +159,20 @@ public $stat;
 	}
 
 		
-	/*
-	 * Get file time
+	/**
+	 * 
+	 * Retourne un tableau contenant la date d'acces, de modification et de création
+	 * @return array
 	 */
 	public function getTime()
-	{
-		if (file_exists(__APP_PATH . DS . 'cache' . DS . $this->type . $this->filename . '.cache'))
-		{
-		return  filemtime(__APP_PATH . DS . 'cache' . DS . $this->type . $this->filename . '.cache');
-		}
-	return 0;
+	{	
+		return $this->stat['time'];
 	}
 
 
-	/*
-	 *  Destruct var  
+	/**
+	 * 
+	 * Destruction du cache, libération de la mémoire
 	 */
 	public function __destruct() {
 		Log::setLog('Erase session ' . $this->filename, 'Cache');

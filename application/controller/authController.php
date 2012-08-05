@@ -1,10 +1,13 @@
 <?php
 /**
-* @title Simple MVC systeme 
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
 */
+if (!defined('__APP_PATH'))
+{
+	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
 Class authController Extends Controller {
 
 
@@ -66,7 +69,7 @@ $auth = $this->loadModel('Member');
 	$this->mvc->Form->setErrors($auth->errors);
 	$form = $this->mvc->Form->input('loginmember', 'Login:');
 	$form .= $this->mvc->Form->input('passmember', 'Mot de passe', array('type' => 'password'));
-	$form .= $this->mvc->Form->input('connect', 'Connection auto', array('type' => 'checkbox'));
+	$form .= $this->mvc->Form->input('connect', 'Connection auto', array('type' => 'checkbox', 'option' => array('Me connecter automatiquement')));
 	$form .= $this->mvc->Form->input('send', 'Connection', array('type' => 'submit', 'class' => 'btn primary'));
 
 
@@ -245,8 +248,7 @@ $lenStop = strlen($this->mvc->Request->data->loginmember);
 
 			$hash_validation = md5(uniqid(rand(), true));
 // Preparation du mail			
-$message_mail = '<html>
-<body>
+$message_mail = '
 <p>
 Bonjour '.$this->mvc->Request->data->loginmember.'.<br />
 Merci pour votre inscription sur '.$this->mvc->Page->getSiteTitle().'. <br />
@@ -259,17 +261,14 @@ Merci.
 Pour rappel :<br />
 Login: '.$this->mvc->Request->data->loginmember.'<br />
 Mot de passe: '.$this->mvc->Request->data->passmember.'<br />
-</p>
-
-</body>
-</html>';
-$mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] Confirmation d\'inscription',$message_mail,$this->mvc->Request->data->mailmember, ADMIN_MAIL);
+</p>';
+$mail_send = new Mail('Confirmation d\'inscription',$message_mail,$this->mvc->Request->data->mailmember, ADMIN_MAIL);
 
 
 // loginmember		mailmember	validemember	levelmember	groupmember	firstactivitymember	lastactivitymember	hash_validation			
 			$data = new stdClass();
 			$data->loginmember = $this->mvc->Request->data->loginmember;
-			$data->password = md5($this->mvc->Request->data->passmember).'$devphp';
+			$data->password = md5($this->mvc->Request->data->passmember);
 			$data->mailmember = $this->mvc->Request->data->mailmember;
 			$data->levelmember = 1;
 			$data->firstactivitymember = time();
@@ -280,22 +279,22 @@ $mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] Confirmation d\'in
 
 			if (!$mail_send->sendMailTemplate())
 			{
-				error('Mail restriction, can not send', $this->mvc->Request->controller, $this->mvc->Request->action);
-				$data->password = md5($this->mvc->Request->data->passmember);
+				$LOGGER = loadModel('Log');
+				$LOGGER->setLog('auth', 'Mail restriction, can not send ' . $this->mvc->Request->controller . ' ' . $this->mvc->Request->action);
+
 				$data->levelmember = 2;
-				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.');
+				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.', 'warning');
 			}
 			else
 			{
 				//Log::console(true);
-				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.<br>ATTENTION: Si vous ne recevez pas l\'e-mail, vérifier vos e-mail indésirables.<br>Votre adresse e-mail est ' . $data->mailmember,'error');
+				$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.<br>ATTENTION: Si vous ne recevez pas l\'e-mail, vérifier vos e-mail indésirables.<br>Votre adresse e-mail est ' . $data->mailmember,'warning');
 				//
 			}
 
 			$subscribe->save($data);
 			//debug($subscribe->sql);
-			$this->mvc->Session->setFlash('Félicitation, votre inscription c\'est bien déroulé.<br>Vérifier votre boite mail pour valider votre inscription.<br>ATTENTION: Si vous ne recevez pas l\'e-mail, vérifier vos e-mail indésirables','error');
-			//Router::redirect();
+			Router::redirect();
 		}
 		else
 		{

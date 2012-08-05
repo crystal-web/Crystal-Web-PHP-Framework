@@ -23,8 +23,30 @@ $this->mvc->Request = new Request();
 */
 Router::parse($this->mvc->Request->url,$this->mvc->Request);
 
-	$controller = $this->loadController();
-	$action = $this->mvc->Request->action;
+
+
+	
+	/*** Si le loader est rcon on ne charge pas tout ***/
+	if (__LOADER != 'rcon')
+	{
+		$controller = $this->loadController();
+		$action = $this->mvc->Request->action;
+		
+		$this->mvc->Form = new Form($this->mvc);
+		$this->mvc->Session = new Session();
+		$this->mvc->Acl = new AccessControlList($this->mvc);
+		$this->mvc->Plugin	= new Plugin($this->mvc);
+		$this->mvc->Plugin->triggerEvents('onEnabled');
+	}
+	else
+	{
+		$this->mvc->Request->controller = 'rcon';
+		$controller = $this->loadController();
+		$action = $this->mvc->Request->action;
+		
+		$this->mvc->Session = new Session();
+		$this->mvc->Acl = new AccessControlList($this->mvc);
+	}	
 	
 	if($this->mvc->Request->prefix){
 		$action = $this->mvc->Request->prefix.'_'.$action;
@@ -33,24 +55,16 @@ Router::parse($this->mvc->Request->url,$this->mvc->Request);
 	/*** Determine si l'argument peut etre appele comme fonction ***/
 	if (is_callable(array($controller, $action)) == false)
 	{
-	$action = 'index';
+		$action = 'index';
 	}
 
 
-	
-	$this->mvc->Form = new Form($this->mvc);	
-	$this->mvc->Session = new Session();
-	$this->mvc->Acl = new AccessControlList($this->mvc->Request, $mvc->Session->user('group'));
-	$this->mvc->Plugin	= new Plugin($this->mvc);
-
-	$this->mvc->Plugin->triggerEvents('onEnabled');
-	
 	ob_start();
 	try
 	{
-	call_user_func_array(array($controller,$action),array($this->mvc));
+		call_user_func_array(array($controller,$action),array($this->mvc));
 	}catch(Exception $e){
-	$this->error($e->getMessage());
+		$this->error($e->getMessage());
 	}
 	$this->mvc->contenu = ob_get_clean();
 	
@@ -60,7 +74,7 @@ Router::parse($this->mvc->Request->url,$this->mvc->Request);
 
 	if ($this->mvc->Request->action == 'ajax')
 	{
-	die($this->mvc->contenu);
+		die($this->mvc->contenu);
 	}
 	
 }
@@ -93,7 +107,7 @@ function loadController()
 * Permet de générer une page d'erreur en cas de problème au niveau du routing (page inexistante)
 **/
 function error($message, $type='error'){
-$this->mvc->Session->setFlash($message, $type);
+	$this->mvc->Session->setFlash($message, $type);
 }
 
 }

@@ -1,17 +1,10 @@
 <?php
 Class autologinPlugin extends PluginManager{
 	
-	private $show = true;
+	private $show = false;
 	public function onEnabled()
 	{
 		Log::setLog('Enabled', 'autologin');
-		
-		if (isSet($_GET['logi']))
-		{
-			debug($_SESSION['log']);
-			$this->show = true;
-		}
-		
 		
 		if ($this->mvc->Session->read('autologin'))
 		{
@@ -61,7 +54,7 @@ Class autologinPlugin extends PluginManager{
 						$search->ip = Securite::ipX();
 						$search->lastactivitymember =  time();
 						$mMember->save($search);
-						//Router::refresh();
+						Router::refresh();
 					}
 				}
 			}

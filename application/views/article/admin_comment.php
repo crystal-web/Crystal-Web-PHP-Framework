@@ -1,3 +1,8 @@
+<?php
+debug($getComm);
+
+/*
+?>
 <form action="<?php echo Router::url('article/admin_comment'); ?>" method="post">
 <?php
 echo $this->mvc->Form->input('valide', 'Afficher les ', array('options' => array('n' => 'En attente','y' => 'Approuvé', 's' => 'Indésirable'), 'onchange' => 'this.form.submit();')).'</form>';
@@ -78,3 +83,6 @@ $('#modalText').html('<p>Supprimer le commentaire ?</p>');
 		<a href="#" id="del" class="btn danger">OUI</a>
 	</div>
 </div>
+
+
+<?php //*/ ?>

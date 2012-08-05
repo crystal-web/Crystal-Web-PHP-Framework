@@ -16,9 +16,11 @@
 		</div>
 	</div>		
 
-	<?php echo $this->mvc->Form->input('declare_coche', '', array(
+	<?php
+	echo $this->mvc->Form->input('declare_coche', '', array(
 		'type' => 'checkbox',
-		'help' => '<a href="'.Router::url('auth/cgu').'">J\'ai lu et j\'accepte le réglement</a>')); ?>
+		'option' => array('declare_coche' => '<a href="'.Router::url('auth/cgu').'">J\'ai lu et j\'accepte le réglement</a>')));
+	?>
 	<div class="clearfix">
 		<div class="input">
 			<input type="submit" name="submit" value="Connection" class="btn success">

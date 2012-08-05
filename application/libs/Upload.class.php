@@ -56,6 +56,12 @@ public $log=array();			// log ;-)
 
 	}
 
+	
+	/**
+	 * 
+	 * Preparation de l'upload
+	 * @return bool
+	 */
 	public function prepare()
 	{
 		
@@ -265,6 +271,7 @@ public $log=array();			// log ;-)
 	 * 
 	 *  Enregistrement du fichier
 	 * @param string $dir_to_save
+	 * @return bool
 	 */
 	public function save($dir_to_save)
 	{

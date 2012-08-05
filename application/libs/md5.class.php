@@ -28,39 +28,45 @@ private $oCache;
 	} 
 
 
-	public function ScanDirectory()
+	public function ScanDirectory($dir=false)
 	{
-	$MyDirectory = opendir($this->dir) or die('Erreur');
+		$dir = ($dir) ? $dir : $this->dir;
+		
+		$MyDirectory = opendir($dir) or die('Erreur');
+
+
+
+		
 		while($Entry = @readdir($MyDirectory))
 		{
-			if(is_dir($this->dir.'/'.$Entry) && $Entry != '.' && $Entry != '..')
+			if(is_dir($dir . DS . $Entry) && $Entry != '.' && $Entry != '..')
 			{
-			$this->ScanDirectory($this->dir.'/'.$Entry);
+				$this->ScanDirectory($dir . DS . $Entry);
 			}
-			elseif($Entry != '.' && $Entry != '..' && $this->findexts($Entry)=='php')
+			elseif($Entry != '.' && $Entry != '..')
 			{
 			
-				if (array_key_exists($this->dir.'/'.$Entry, $this->arr_control))
+				if (array_key_exists($dir . DS . $Entry, $this->arr_control))
 				{
-				$this->arr_md5[$this->dir.'/'.$Entry]=md5_file($this->dir.'/'.$Entry);
-					if ($this->arr_md5[$this->dir.'/'.$Entry] != $this->arr_control[$this->dir.'/'.$Entry])
+				$this->arr_md5[$dir . DS . $Entry]=md5_file($dir . DS . $Entry);
+					if ($this->arr_md5[$dir . DS . $Entry] != $this->arr_control[$dir . DS . $Entry])
 					{
-					$this->output[$this->dir.'/'.$Entry] = 'red';
+					$this->output[$dir . DS . $Entry] = 'modified';
 					}
 					else
 					{
-					$this->output[$this->dir.'/'.$Entry] = 'green';
+					$this->output[$dir . DS . $Entry] = 'unmodified';
 					}
 				}
 				else
 				{
-				$this->arr_md5[$this->dir.'/'.$Entry]=md5_file($this->dir.'/'.$Entry);
-				$this->output[$this->dir.'/'.$Entry] = 'norefered';
+				$this->arr_md5[$dir . DS . $Entry]=md5_file($dir . DS . $Entry);
+				$this->output[$dir . DS . $Entry] = 'norefered';
 				}
 			}
 		}
 	closedir($MyDirectory);
-	
+	return $this->arr_control;
 	}
 
 

@@ -1,32 +1,27 @@
 <?php
 /**
-* @title Espace membre
-* @author Christophe BUFFET <developpeur@crystal-web.org>
-* @license Creative Commons By
+* @author Christophe BUFFET <developpeur@crystal-web.org> 
+* @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
-* @description
-* @acl
-    member.editother
-    member.approb_change_login
-    member.cgu_manager
-
-Membre
-Groupe
-Rank
-Réglement
 */
+if (!defined('__APP_PATH'))
+{
+	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
+
+
 Class memberController extends Controller {
 
 private function getMenu()
 {
-/*  if ($this->mvc->Acl->isAllowed('member', 'getList'))
+	if ($this->mvc->Acl->isAllowed('member', 'getList'))
     {
     $this->mvc->Page->setMenu('Membres Manager', 'Liste des membres', Router::url('member/getlist'));
     }
     if ($this->mvc->Acl->isAllowed('member', 'approb_change_login'))
     {
     $this->mvc->Page->setMenu('Membres Manager', 'Modification pseudo', Router::url('member/approb_change_login'));
-    }   */
+    }
 
 }
 
@@ -58,11 +53,11 @@ $this->getMenu('index');
 
             if ($actu->save($data))
             {
-            $this->mvc->Session->setFlash('Actualité enregistré');
+         	   $this->mvc->Session->setFlash('Actualité enregistré');
             }
 			else
 			{
-          	$this->mvc->Session->setFlash('Oups...', 'warning');
+       		   	$this->mvc->Session->setFlash('Oups...', 'warning');
 			}
 
         }
@@ -118,7 +113,83 @@ $this->getMenu('index');
             );
     $this->mvc->Template->actu = $actu->find($query);
     
-
+    try {
+    	$mTopic = loadModel('ForumTopic');
+    	$nbTopic = $mTopic->countTopicMember($respon->idmember)->nbTopic;
+    }
+    catch ( Exception $e)
+    {
+    	$nbTopic = false;
+    }
+    
+    try {
+    	$mPost = loadModel('ForumPost');
+    	$nbPost = $mPost->countPostMember($respon->idmember)->nbPost;
+    }
+    catch ( Exception $e)
+    {
+    	$nbPost = false;
+    }    
+	$this->mvc->Template->forumNbTopic = $nbTopic;
+	$this->mvc->Template->forumNbPost = $nbPost;
+	
+	try {
+		$mBanlist = loadModel('Banlist');
+		$nBanL = $mBanlist->getBanMember($respon->loginmember); //$mBanlist->countBanMember($respon->loginmember)->nbBan;
+		$nBan = count($nBanL);
+	}
+	catch ( Exception $e)
+	{
+		$nBan = false;
+	}
+	$this->mvc->Template->banlistNb = $nBan;
+	
+	try {
+		$mIcon = loadModel('Iconomy');
+		$nBalance = $mIcon->getBalance($respon->loginmember);
+		if ($nBalance)
+		{
+			$nBalance = $nBalance->balance;
+		}
+		else
+		{
+			$nBalance = 0;
+		}
+	}
+	catch ( Exception $e)
+	{
+		$nBalance = false;
+	}
+	$this->mvc->Template->iconomy = $nBalance;
+	
+	try {
+		$mMonnaie = loadModel('MonnaieCash');
+		$nCredit = $mMonnaie->getClientId($respon->idmember);
+		if ($nCredit)
+		{
+			$nCredit = $nCredit->cash;
+		}
+		else
+		{
+			$nCredit = 0;
+		}
+	}
+	catch ( Exception $e)
+	{
+		$nCredit = false;
+	}
+	$this->mvc->Template->credit = $nCredit;
+	
+	try {
+		$mVote = loadModel('VoteBy');
+		$nVote = $mVote->countVote($respon->idmember);
+	}
+	catch ( Exception $e)
+	{
+		$nVote = false;
+	}
+	$this->mvc->Template->votes = $nVote;
+	
     $this->mvc->Template->info = $respon;
     $this->mvc->Template->show('member/profile');
 
@@ -338,12 +409,12 @@ $this->mvc->Page->setPageTitle('Editer mon profil')->setBreadcrumb('member', 'Me
     echo '</ul>';
     //*/
     
-    $mMemberInfo = loadModel('MemberInfo');
-    $profilInfo = $mMemberInfo->findFirst(array(
+    $mMember = loadModel('Member');
+    $profilInfo = $mMember->findFirst(array(
     	'conditions' => 
-    		array('thismember' => $this->mvc->Session->user('id')),
+    		array('idmember' => $this->mvc->Session->user('id')),
     	'join' => 
-    		array(__SQL . '_Member AS Member' => 'Member.idmember = MemberInfo.thismember')
+    		array(__SQL . '_MemberInfo AS MemberInfo' => 'Member.idmember = MemberInfo.thismember')
     	)
     	);
 
@@ -352,7 +423,7 @@ $this->mvc->Page->setPageTitle('Editer mon profil')->setBreadcrumb('member', 'Me
     if ($profilInfo)
     {
 		$this->mvc->Template->form = $this->mvc->Form->input('sex', 'Sexe:', array('options' => array('z' => 'Inconnu', 'x' => 'Masculin', 'y' => 'Féminin'), 'value' => $profilInfo->sex)).
-		    $this->mvc->Form->input('job', 'Mon travail:', array('placeholder' => 'Plombier, y a pas de saut métier', 'value' => clean($profilInfo->job, 'str'))).
+		    $this->mvc->Form->input('job', 'Mon travail:', array('placeholder' => 'Plombier, il n\'est point de sot métier', 'value' => clean($profilInfo->job, 'str'))).
 		    $this->mvc->Form->input('leisure', 'Mes passions:', array('placeholder' => 'La guitare, le saut à la perche et le vélo', 'value' => clean($profilInfo->leisure, 'str'))).
 		    $this->mvc->Form->input('website', 'Mon site internet:', array('placeholder' => 'http://www.monsiteetblog.com', 'value' => clean($profilInfo->website, 'str'))).
 		    $this->mvc->Form->input('location', 'Ma localisation:', array('placeholder' => 'France, Pyrénées', 'value' => clean($profilInfo->location, 'str'))).
@@ -456,7 +527,7 @@ $this->mvc->Page->setPageTitle('Editer mon profil')->setBreadcrumb('member', 'Me
 
         if (count($errors)==0)
         {
-
+			$mMemberInfo = loadModel('MemberInfo');
         	$dataToSave->bio = $this->mvc->Request->data->bio;
         	$dataToSave->sign = $this->mvc->Request->data->sign;
         	$dataToSave->leisure = $this->mvc->Request->data->leisure;

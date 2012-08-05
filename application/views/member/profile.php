@@ -49,6 +49,33 @@ if ($this->mvc->Session->isLogged())
 						?></li>
 						<li><strong>Inscription:</strong>	<?php echo dates($info->firstactivitymember, 'fr_date'); ?></li>
 						<li><strong>Dernière visite:</strong>	<?php echo getRelativeTime($info->lastactivitymember); ?></li>
+						
+						<?php
+						if ($forumNbTopic) {
+							echo '<li>Topic sur le forum ' . $forumNbTopic . '</li>';
+						} 
+						if ($forumNbPost) {
+							echo '<li>Post sur le forum ' . $forumNbPost . '</li>';
+						}
+						if ($banlistNb) {
+							echo '<li>Bannis du jeu ' . $banlistNb . '</li>';
+						}
+						if ($iconomy) {
+							echo '<li>Argent du jeu ' . $iconomy . '</li>';
+						}
+						if ($credit) {
+							echo '<li>Credit site ' . $credit . '</li>';
+						}
+
+						if ($votes)
+						{
+							
+							foreach ($votes AS $k => $v)
+							{
+								echo '<li>Vote sur ' . $v->name . ' (' . $v->nbVote . ')</li>';
+							}
+						}
+						?>
 					</ul>
 
 				</div>

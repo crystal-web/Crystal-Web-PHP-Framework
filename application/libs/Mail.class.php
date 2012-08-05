@@ -47,6 +47,7 @@ class Mail
 		$this->{$champ} = $value;
 	}
 	
+	
 	private function reload_entete()
 	{
 		Log::setLog('Chargement de l\'entete', 'mail');
@@ -64,6 +65,7 @@ class Mail
 	
 	public function sendMailHtml()
 	{
+		global $mvc;
 		$this->reload_entete();
 		
 		
@@ -71,10 +73,11 @@ class Mail
 		$this->m_textHtml .= "Content-Type: text/html; charset=ISO-8859-1\n";
 		$this->m_textHtml .= "Content-Transfer-Encoding: 8bit\n\n";
 		$this->m_textHtml .= $this->m_textTxt;
+		$this->m_textHtml .= $this->m_fileJoin;
 		
 		
 		Log::setLog('Envois du mail en mode html', 'mail');
-		return (mail($this->m_destinataire,'['.SITENAME.'] ' . $this->m_objet, $this->m_textHtml, $this->m_entete)) ? true : false;	
+		return (mail($this->m_destinataire,'['.$mvc->Page->getSiteTitle().'] ' . $this->m_objet, $this->m_textHtml, $this->m_entete)) ? true : false;	
 	}
 	
 	public function sendMailText()
@@ -86,6 +89,8 @@ class Mail
 		$this->m_textHtml .= "Content-Type: text/html; charset=ISO-8859-1\n";
 		$this->m_textHtml .= "Content-Transfer-Encoding: 8bit\n\n";
 		$this->m_textHtml .= $this->m_textTxt;
+		$this->m_textHtml = "--".$this->m_boundary ."--\n\n";
+		$this->m_textHtml .= $this->m_fileJoin;
 		
 		return (mail($this->m_destinataire,'['.SITENAME.'] ' . $this->m_objet, $this->m_textHtml, $this->m_entete)) ? true : false;
 	}
@@ -105,7 +110,24 @@ class Mail
 		
 	}
 	
+	public function addFile($file_path, $file_name)
+	{
+		if (file_exists($file_path . DS . $file_name))
+		{
 	
+		Log::setLog('Ajout de ' . $file_path . DS . $file_name . ' en pièce jointe', 'mail');
+		$attached_file = file_get_contents($file_path . DS . $file_name); //file name ie: ./image.jpg 
+		$attached_file = chunk_split(base64_encode($attached_file));
+
+
+		
+		$this->m_fileJoin = "\n\n". "--" .$this->m_boundary . "\nContent-Type: application; name=\"$file_name\"\r\nContent-Transfer-Encoding: base64\r\nX-Attachment-Id: f_".rand(1,65400)."\r\nContent-Disposition: attachment; filename=\"$file_name\"\r\n\n".$attached_file . "--" . $this->m_boundary . "--";
+		}
+		else
+		{
+		Log::setLog('Ajout de ' . $file_path . DS . $file_name . ' en pièce jointe', 'mail');
+		}
+	}
 	
 	private function loadTemplate()
 	{
@@ -123,18 +145,11 @@ class Mail
 			'Sincères salutations '
 			);
 		
-		$file = file_get_contents(__APP_PATH . DS . 'mail' . DS . 'base.mail');
 		
-		$file = preg_replace("#{EMAILTITLE}#", $this->m_objet, $file);
-		$file = preg_replace("#{EMAILSUBTITLE}#", $this->m_subtitle, $file);
-		$file = preg_replace("#{TEXT}#", $this->m_textTxt, $file);
-		$file = preg_replace("#{SINCERLY}#", $politesse[rand(0,count($politesse)-1)], $file);
-		$file = preg_replace("#{EMAIL}#", $this->m_destinataire, $file);
-		$file = preg_replace("#{TEAMNAME}#", TEAM_NAME, $file);
-		$file = preg_replace("#{SITENAME}#", SITENAME, $file);
+
 		
-		$file = preg_replace("#{UNSUBSCRIBE}#", Router::url('member/unsubscribe'), $file);//*/
-		echo $file;
+		require __APP_PATH . DS . 'mail' . DS . 'mail.php';
+		
 		$content = ob_get_contents();
   		ob_end_clean();
  

@@ -5,13 +5,82 @@ function kilobyte($size) {
     for ($i = 0; $size >= 1024 && $i < 4; $i++) $size /= 1024;
     return array('size' => round($size, 2), 'unit' => $units[$i]);
 }
+$this->mvc->Page->setHeader('
+<script type="text/javascript">
+jQuery(function($){
+	 setInterval(function() {       
+		 $("#charge").load("' . Router::url('sysinfo') . '?get=cpu");	
+	    }, 3000); 
+	 setInterval(function() {       
+		 $("#memoire").load("' . Router::url('sysinfo') . '?get=mem");	
+	    }, 3000);
+	 setInterval(function() {       
+		 $("#swa").load("' . Router::url('sysinfo') . '?get=swa");	
+	    }, 3000); 
+})
+</script>
+');
+
+//debug(exec("top -n1 | grep 'Cpu(s)'| awk '{print $5;}' | sed -e 's/id,//g'"));sleep(2);
 ?>
+
+<div class="wiget">
+	<div class="widget-header"><h3>En claire</h3></div>
+	<div class="widget-content" style="height: 150px;">
+	
+		<div style="width:200px;height:150px;float: left;display:inline-block;padding: 0 10px 0 10px;">
+			<h3>Mémoires</h3>
+			<div id="memoire">
+			<img alt="" src="http://chart.apis.google.com/chart?chl=<?php echo $memoire['percent_used']; ?>&chs=200x110&cht=gm&chco=77AB10,FFFF00|FF0000&chd=t:<?php echo trim($memoire['percent_used'], '%'); ?>">
+			</div>
+		</div>
+		
+		<div style="width:200px;height:150px;float: left;display:inline-block;padding: 0 10px 0 10px;">
+			<h3>Charge</h3>
+			<div id="charge">
+				<?php 
+				$sys_ticks = trim($uptime);
+				$sys_ticks = explode(' ', $sys_ticks);
+				$uptimeCut = array();
+				$uptimeCut['systime'] = (isSet($sys_ticks[0])) ? $sys_ticks[0] : 'UNDEFINED';
+				$uptimeCut['days'] = (isSet($sys_ticks[2])) ? $sys_ticks[2] : 'UNDEFINED';
+				$uptimeCut['hours'] = (isSet($sys_ticks[5])) ? trim($sys_ticks[5], ',') : 'UNDEFINED';
+				
+				$uptimeCut['avgnow'] = (isSet($sys_ticks[12])) ? trim($sys_ticks[12], ',') : 'UNDEFINED';
+				$uptimeCut['avg5'] = (isSet($sys_ticks[13])) ? trim($sys_ticks[13], ',') : 'UNDEFINED';
+				$uptimeCut['avg15'] = (isSet($sys_ticks[14])) ? trim($sys_ticks[14], ',') : 'UNDEFINED';
+				?>
+				<div style="padding: 30px 10px;
+				  color: #dedede;
+				  font-size: 55px;"><?php echo $uptimeCut['avgnow']; ?><span style="padding-left: 10px;
+				  font-size: 26px;
+				  color: #77AB10;">/<?php echo $total_cpu; ?></span></div>
+				<div style="padding: 0 20px">
+					<div style="float: left"><span><strong><?php echo $uptimeCut['avg5']; ?></strong></span><br />5 mins.</div>
+					<div style="float: right"><span><strong><?php echo $uptimeCut['avg15']; ?></strong></span><br />15 mins.</div>
+				</div>
+			</div>
+		</div>
+		
+		<div style="width:200px;height:150px;float: left;display:inline-block;"padding: 0 10px 0 10px;>
+			<h3>Memoire d'échange</h3>
+			<div id="swa">
+			<!-- &chf=bg,s,EDEDED pour la couleur du fond -->
+			<img alt="" src="http://chart.apis.google.com/chart?chl=<?php echo $memoire['percent_swap']; ?>&chs=200x110&cht=gm&chco=77AB10,FFFF00|FF0000&chd=t:<?php echo trim($memoire['percent_swap'], '%'); ?>">
+			</div>
+		</div>
+	</div> <!-- END widget-content -->
+</div>
+
 <h3>Information général:</h3>
 <div class="well">
 <table>
 	<tr>
 		<td>Uptime:</td>
-		<td><?php echo $uptime; ?></td>
+		<td><?php
+		//03:16:07 up 5 days, 2:03, 0 users, load average: 0.09, 0.03, 0.01
+		 echo $uptime;
+		 ?></td>
 	</tr>
 	<tr>
 		<td>Horloge serveur:</td>
@@ -33,6 +102,17 @@ function kilobyte($size) {
 		<td>Calcul par secondes:</td>
 		<td><?php echo $bogomips; ?></td>
 	</tr>
+	<?php  if (isset($partition['primary']) ){ ?>
+	<tr>
+		<td>Espace Disc:</td>
+		<td><?php
+			$s = kilobyte($partition['primary']['used']); echo $s['size'] . $s['unit'];
+			echo ' / ';
+			$s = kilobyte($partition['primary']['size']); echo $s['size'] . $s['unit'];		
+		?></td>
+	</tr>	
+	<?php } ?>
+	
 </table>
 </div>
 
@@ -50,7 +130,9 @@ function kilobyte($size) {
 </thead>
 <tbody>
 <?php
-foreach($partition AS $k => $v): ?>
+foreach($partition AS $k => $v):
+if ($k !== 'primary'):
+?>
 	<tr>
 		<td>Drive: <?php echo $v['drive']; ?><br>
 			Mount: <?php echo $v['mount']; ?>
@@ -69,7 +151,9 @@ foreach($partition AS $k => $v): ?>
 </div>
 		</td>
 	</tr>
-<?php endforeach; ?>
+<?php
+endif;
+endforeach; ?>
 </tbody>
 </table>
 </div>

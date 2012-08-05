@@ -23,12 +23,14 @@ private $compteur = 1;
 	{
 		$this->mvc = $mvc;
 		$this->model = new ConfigModel();
-		$this->modelController = $this->model->getConfig($this->mvc->getController(), $this->mvc->getAction());
-		$this->modelController->params = unserialize($this->modelController->params);
+		
+		$config = $this->model->getConfig($this->mvc->getController(), $this->mvc->getAction());
+		$this->modelController = ($config) ? $config : new stdClass();
+		$this->modelController->params = isSet($this->modelController->params) ? unserialize($this->modelController->params) : false;
 		
 		if (isSet($this->mvc->Request->data->controller) && isSet($this->mvc->Request->data->action) )
 		{
-			if ( $this->mvc->Acl->isAllowed($this->mvc->getController() . '.' . $this->mvc->getAction()) )
+			if ( $this->mvc->Acl->isAllowed($this->mvc->getController(), $this->mvc->getAction()) )
 			{
 				// Suppression de controller
 				unset($this->mvc->Request->data->controller);
@@ -105,34 +107,37 @@ private $compteur = 1;
 	
 	public function make($text = 'Configuration')
 	{
-		$this->input('controller', 'hidden', array('default' => $this->mvc->getController()));
-		$this->input('action', 'hidden', array('default' => $this->mvc->getAction()));
-		$this->input('Enregistrer', 'submit', array('type' => 'submit', 'class' => 'btn info'));
-		
-		$height = ($this->compteur > 12) ? 600 : ($this->compteur * 45) + 20; //94;
-		$height = ($height < 300) ? 300 : $height;
-		
-		$content = addslashes($this->html);
-		$content = preg_replace('#\n#', '', $content);
-		$content = preg_replace('#script>#', 'scr\' + \'ipt>', $content);
-		$content = preg_replace('#<script#', '<scr\' + \'ipt', $content);
-
-		
-		$html = '<script type="text/javascript">';
-		$html .= 'function configWin()';
-		$html .= '{';
-		$html .= 'myWindow=window.open(\'\',\'\',\'menubar=no, status=no, scrollbars=no, menubar=no, width=720, height='.$height.'\');';
-		$html .= 'myWindow.document.write(\'<html><head><link rel="stylesheet" href="'.__CDN.'/files/css/bootstrap/1.4.0/bootstrap.min.css"></head><body>\');';
-		$html .= 'myWindow.document.write(\'<div style="width: 700px;margin-left: auto;margin-right: auto;zoom: 1;"><div class="row" style="margin-top:30px;"><div class="span12">\');';
-		$html .= 'myWindow.document.write(\'<form method="post" action="' . __CW_PATH . $this->mvc->getUrl() . '">'.$content.'</form>\');';
-		
-		$html .= 'myWindow.document.write(\'</div></div></div>\');';
-		$html .= 'myWindow.document.write(\'</body></html>\');';
-		$html .= 'myWindow.focus();';
-		$html .= '}';
-		$html .= '</script>';
-		$this->mvc->Page->setHeader($html);
-		return '<a onclick="configWin()">'.$text.'</a>';
+		if ( $this->mvc->Acl->isAllowed($this->mvc->getController(), $this->mvc->getAction()) )
+		{
+			$this->input('controller', 'hidden', array('default' => $this->mvc->getController()));
+			$this->input('action', 'hidden', array('default' => $this->mvc->getAction()));
+			$this->input('Enregistrer', 'submit', array('type' => 'submit', 'class' => 'btn info'));
+			
+			$height = ($this->compteur > 12) ? 600 : ($this->compteur * 45) + 20; //94;
+			$height = ($height < 300) ? 300 : $height;
+			
+			$content = addslashes($this->html);
+			$content = preg_replace('#\n#', '', $content);
+			$content = preg_replace('#script>#', 'scr\' + \'ipt>', $content);
+			$content = preg_replace('#<script#', '<scr\' + \'ipt', $content);
+	
+			
+			$html = '<script type="text/javascript">';
+			$html .= 'function configWin()';
+			$html .= '{';
+			$html .= 'myWindow=window.open(\'\',\'\',\'menubar=no, status=no, scrollbars=no, menubar=no, width=720, height='.$height.'\');';
+			$html .= 'myWindow.document.write(\'<html><head><link rel="stylesheet" href="'.__CDN.'/files/css/bootstrap/1.4.0/bootstrap.min.css"></head><body>\');';
+			$html .= 'myWindow.document.write(\'<div style="width: 700px;margin-left: auto;margin-right: auto;zoom: 1;"><div class="row" style="margin-top:30px;"><div class="span12">\');';
+			$html .= 'myWindow.document.write(\'<form method="post" action="' . __CW_PATH . $this->mvc->getUrl() . '">'.$content.'</form>\');';
+			
+			$html .= 'myWindow.document.write(\'</div></div></div>\');';
+			$html .= 'myWindow.document.write(\'</body></html>\');';
+			$html .= 'myWindow.focus();';
+			$html .= '}';
+			$html .= '</script>';
+			$this->mvc->Page->setHeader($html);
+			return '<a onclick="configWin()">'.$text.'</a>';
+		}
 	}
 	
 	

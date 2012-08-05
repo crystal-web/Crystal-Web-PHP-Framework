@@ -67,7 +67,6 @@ class Cryptographe
         
         public function polybeDecryper($string, $tab)
         {
-        	
 			$messageDecrypte = NULL;
             
             
@@ -95,8 +94,19 @@ class Cryptographe
 
 			
 			}
-         
             
             return array($messageDecrypte, $tab);
         }
+        
+        
+        public function gzencode($phpcode)
+        {
+        	return base64_encode( gzcompress($phpcode));
+        }
+        
+        public function gzdecode($gzphpcode)
+        {
+        	eval('?>'.gzuncompress(base64_decode($gzphpcode)));
+        }
+        
     }

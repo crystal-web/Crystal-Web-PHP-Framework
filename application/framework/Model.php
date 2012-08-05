@@ -122,9 +122,9 @@ abstract class Model extends PDO{
 			return new $name();
 			}
 		}
-		elseif (__DEV_MODE)
+		else
 		{
-		throw new Exception ('File model not found '.$file);
+		throw new Exception ('File model not found for ' . $name);
 		}
 	}
 	
@@ -210,7 +210,7 @@ abstract class Model extends PDO{
 			
 			$sql .= ' FROM ' . $this->table . ' as ' . $this->tableAs . ' ';
 			
-			// Liaison
+			// Liaison simple
 			if (isset ( $req ['join'] )) {
 			
 				foreach ( $req ['join'] as $k => $v ) {
@@ -218,8 +218,28 @@ abstract class Model extends PDO{
 				}
 			}
 			
+			// Liaison a gauche (non null)
+			if (isset ( $req ['leftouter'] )) {
+			
+				foreach ( $req ['leftouter'] as $k => $v ) {
+					$sql .= 'LEFT OUTER JOIN ' . $k . ' ON ' . $v . ' ';
+				}
+			}
+			
+			// Liaison a droite
+			if (isset ( $req ['rightouter'] )) {
+			
+				foreach ( $req ['rightouter'] as $k => $v ) {
+					$sql .= 'RIGHT OUTER JOIN ' . $k . ' ON ' . $v . ' ';
+				}
+			}		
+				
 			// Construction de la condition
-			if (isset ( $req ['conditions'] )) {
+			if (isset ( $req ['conditions'] ) or isset ( $req['like']) ) {
+				
+				$req['conditions'] = (isSet($req['like'])) ? $req['like'] : $req['conditions'];
+
+				
 				$sql .= 'WHERE ';
 				if (! is_array ( $req ['conditions'] )) {
 					$sql .= $req ['conditions'];
@@ -227,6 +247,32 @@ abstract class Model extends PDO{
 					$cond = array ();
 					
 					foreach ( $req ['conditions'] as $k => $v ) {
+						if (!is_numeric( $v )) {
+							if (is_array ( $v )) {
+								debug ( $v );
+							}
+							$v = '"' . mysql_escape_string ( $v ) . '"';
+							$cond[] = $k.' LIKE ' .$v;
+						}
+						else
+						{
+							$v = (int) $v;
+							$cond[] = $k.'=' .$v;
+						}
+						
+					}
+					$sql .= implode ( ' AND ', $cond );
+				}
+			}
+			/* Supprimer pour un probleme de securite, injection SQL
+				 elseif (isset ( $req ['like'] )) {
+				$sql .= 'WHERE ';
+				if (! is_array ( $req ['like'] )) {
+					$sql .= $req ['like'];
+				} else {
+					$cond = array ();
+					
+					foreach ( $req ['like'] as $k => $v ) {
 						if (! is_numeric ( $v )) {
 							if (is_array ( $v )) {
 								debug ( $v );
@@ -234,12 +280,11 @@ abstract class Model extends PDO{
 							$v = '"' . mysql_escape_string ( $v ) . '"';
 						}
 						
-						$cond [] = "$k=$v";
+						$cond [] = "$k LIKE $v";
 					}
 					$sql .= implode ( ' AND ', $cond );
 				}
-			
-			}
+			} */
 			
 			if (isset ( $req ['group'] )) {
 				$sql .= ' GROUP BY ' . $req ['group'];
@@ -254,8 +299,8 @@ abstract class Model extends PDO{
 			}
 			$this->sql = $sql;
 			$pre = $this->pdo->prepare ( $sql );
-			$this->count ++;
-			//debug($this->sql);
+			$this->count ++; 
+//			debug($this->sql);
 			$pre->execute ();
 		} catch ( PDOException $e ) {
 			if ($e->getCode () == '42S02') {
@@ -264,7 +309,7 @@ abstract class Model extends PDO{
 				}
 			}
 		}
-		//debug($this->sql);
+//		debug($this->sql);
 		return $pre->fetchAll ( $fetch );
 	}
 	
@@ -290,7 +335,7 @@ abstract class Model extends PDO{
 	{
 		$res = $this->findFirst ( array ('fields' => 'COUNT(' . $this->primaryKey . ') as count') );
 		
-		return $res->count;
+		return ($res) ? $res->count : 0;
 	}
 	/**
 	 * Permet de récupérer un tableau indexé par primaryKey et avec name pour
@@ -371,7 +416,7 @@ abstract class Model extends PDO{
 			}
 		
 		} catch ( PDOException $e ) {
-			$this->lastError = $e->getMessage();
+			$this->lastError = $e->getMessage() . ' for ' . get_class ( $this ) . ' in ' . $this->table;
 			
 			if (__DEV_MODE)
 			{
@@ -400,6 +445,17 @@ abstract class Model extends PDO{
 		// debug($sql);
 		return $pre->execute ();
 	}
+	
+	
+	/**
+	 * 
+	 * Retourne le dernier ID apres un insert
+	 */
+	public function getLastId()
+	{
+		return $this->id;
+	}
+	
 	
 	/*
 	 * Construit l'arbre des table Avec un objetct ou un array

@@ -8,135 +8,131 @@
 */
 
 Class AccessControlList {
-private $idGroup;
-private $controlCode;
-private $controlCodeGrant;
-
-private $controller;
-private $action;
-private $fullPower = false;
-private $request;
-public $log=array();
-	public function __construct($request, $group)
+	protected $mvc;
+	private $fullPower = false;
+	private $group;
+	private $parent = array();
+	private $model;
+	private $permissionHistory;
+	
+	/**
+	 * 
+	 * Constructeur 
+	 * @param unknown_type $mvc
+	 */
+	public function __construct($mvc)
 	{
-	Log::setLog('Construction...', 'AccessControlList');
-		if (is_int($group))
-		{
-			Log::setLog('Has guest', 'AccessControlList');
-			// Has guest 
-			$this->idGroup=0;
-		}
-		else
-		{
-			// Si le group est different de *
-			// C'est un admin
-			if ($group != '*')
-			{
-				Log::setLog('is not a grant' . $group, 'AccessControlList');
-				$this->idGroup = explode('|',trim($group, '|'));
-			}
-			/***************************************
-			*	C'est un (super)admin
-			***************************************/
-			else
-			{
-				Log::setLog('is a grant', 'AccessControlList');
-				$this->fullPower = true;
-			}
-		}
-		
-		$this->controller			= $request->controller;
-		$this->action 				= $request->action;
-		$this->params				= $request->params;
-		
-		$this->controlCode 			= strtolower($this->controller.'.'.$this->action);
-		$this->controlCodeGrant 	= strtolower($this->controller.'.*');
-		return $this;
+		Log::setLog('Construction...', get_class($this));
+		$this->mvc = $mvc;
+	//	$this->group = ($this->mvc->Session->user('group')) ? 'Moderateur' : '*';
+		$this->group = ($this->mvc->Session->user('group')) ? $this->mvc->Session->user('group') : '*';
+		$this->permissionHistory = new stdClass();
 	}
 	
 	
-	/***************************************
-	*	Demande si l'utilisateur a le droit
-	***************************************/
-	public function isAllowed($controler=NULL, $action='*')
+	
+	private function getParent($lastParent)
 	{
-
-		/***************************************
-		*	C'est un (super)admin
-		***************************************/
-		if ($this->fullPower)
+		$this->parent[] =  "`name` LIKE  '" . $lastParent . "'";
+		
+		$this->model->table = __SQL . '_AclInheritance';
+		
+		$prepare = array(
+			'conditions' => array('child ' => $lastParent)
+		);
+		
+		$resp = $this->model->findFirst($prepare);
+		
+		if ($resp)
 		{
-			Log::setLog('is SuperUSer', 'AccessControlList');
-			return true;
+			Log::setLog($lastParent . ' is child of ' . $resp->parent, get_class($this));
+			return $this->getParent($resp->parent);
+		}
+
+	}
+	
+	
+	
+	public function isAllowed($controller =NULL, $action='*')
+	{
+		
+		if (strpos($controller, '.'))
+		{
+			Log::setLog('Params has old', get_class($this));
+			$new = explode('.', $controller);
+			$controller = (isSet($new[0])) ? $new[0] : null;
+			$action = (isSet($new[1])) ? $new[1] : '*';
 		}
 		
-		if(!empty($controler))
+		
+		if ($action == '*') { $action ='%';}
+		
+		if(!empty($controller))
+		{	
+			$searchThisAcl = $controller.'.'.$action;
+		}
+		else
 		{
-			$searchThisAcl = $controler.'.'.$action;
+			$searchThisAcl = $this->mvc->getController().'.'.$action;
 		}
 		
-
+		Log::setLog('Change ACL test to ' . $searchThisAcl, get_class($this));
+		
+		if (isSet($this->permissionHistory->$searchThisAcl))
+		{
+			Log::setLog('Request for ' . $searchThisAcl . ' has already checked return', get_class($this));
+			return $this->permissionHistory->$searchThisAcl;
+		}
+		
 		/***************************************
 		*	On charge le model
 		***************************************/
-		$m = loadModel('Acl');
-
-		/***************************************
-		*	On parcourt le tableau des groupes
-		*	Un utilisateur, peut avoir plusieurs groupes
-		***************************************/
-		if (is_array($this->idGroup))
+		$this->model = loadModel('Acl');
+		$this->model->table = __SQL . '_AclInheritance';
+		
+		// Search parent of group 
+		if (empty($this->parent))
 		{
-			foreach ($this->idGroup AS $key=>$data)
-			{
-				/***************************************
-				*	Prepare la requete en demandant
-				*	Toutes les possibilité
-				***************************************/
-				$query = array(
-					'fields' => 'controller, params',
-					'conditions' => "identifiant =".$data." AND controller LIKE  '".$this->controller."%'",
-					);
-				$respon = $m->find($query);
-				if ($respon)
-				{
-				/***************************************
-				*	Si on obtiens une reponse,
-				*	on test si l'utilisateur a le droit
-				***************************************/
-					foreach ($respon AS $k=>$v)
-					{
-						/***************************************
-						*	Si une correspondance existe
-						***************************************/
-						if ($v->controller == $this->controlCode
-									or
-							$v->controller == $this->controlCodeGrant)
-						{
-							return true;
-						}
-						elseif(isSet($searchThisAcl))
-						{
-							if ($v->controller == $searchThisAcl)
-							{
-								return true;						
-							}
-						}
-					}
-				}
-			}
+			Log::setLog('Search parent of ' . $this->group, get_class($this));
+			$this->getParent( $this->group );
 		}
-		/***************************************
-		*	Si toutes les requêtes echoue,
-		*	L'utilisateur n'as pas le droit
-		***************************************/
-		return false;
+		else
+		{
+			Log::setLog('Use parent of ' . $this->group . ' in memory', get_class($this));
+		}
+
+		
+		$search = array(
+			'conditions' => "`permission` LIKE  '".$searchThisAcl."'
+											AND ("  . implode(' OR ', $this->parent) . ")
+										OR `permission` LIKE '*'
+											AND ("  . implode(' OR ', $this->parent) . ")"
+		);
+		
+		$this->model->table = __SQL . '_AclPermission';
+		
+		$itsOk = $this->model->findFirst($search);
+		
+		//$this->model->debug();
+		if ($itsOk)
+		{
+			Log::setLog('Right obtain for '.$this->group.' with inheritance of  ' . $itsOk->name . ' for ' . $itsOk->permission, get_class($this));
+			$this->permissionHistory->$searchThisAcl = true;
+			return true;
+		}
+		else
+		{
+			Log::setLog('Permission deny for ' . $searchThisAcl, get_class($this));
+			$this->permissionHistory->$searchThisAcl = false;
+			return false;
+		}
 	}
 	
 	
 	public function isGrant()
 	{
-		return $this->fullPower;	
+		Log::setLog('Check permission for all access', get_class($this));
+		return $this->isAllowed('*');
 	}
+	
 }
-?>

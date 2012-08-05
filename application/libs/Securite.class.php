@@ -63,48 +63,172 @@ class Securite
 	return base64_decode(str_rot13($str));
 	}	
 
+	
 	/**
 	 * 
-	 * IRécupération de l'adresse ip
+	 * Récupération de l'adresse ip
 	 */ 
 	static function ipX() {
-	// On test si $_SERVER exist
-	if (isSet($_SERVER))
+		// On test si $_SERVER exist
+		if (isSet($_SERVER)) {
+			
+			if (isSet( $_SERVER ['HTTP_X_FORWARDED_FOR'] ))
+			{
+				$ip = $_SERVER ['HTTP_X_FORWARDED_FOR'];
+			}
+			elseif (isSet( $_SERVER ['HTTP_CLIENT_IP'] ))
+			{
+				$ip = $_SERVER ['HTTP_CLIENT_IP'];
+			}
+			else
+			{
+				$ip = $_SERVER ['REMOTE_ADDR'];
+			}
+		// Sinon on utilise une ancienne methode
+		} else {
+			// getenv � Retourne la valeur d'une variable d'environnement
+			if (getenv( 'HTTP_X_FORWARDED_FOR' ))
+			{
+				$ip = getenv( 'HTTP_X_FORWARDED_FOR' );
+			}
+			elseif (getenv( 'HTTP_CLIENT_IP' ))
+			{
+				$ip = getenv( 'HTTP_CLIENT_IP' );
+			}
+			else
+			{
+				$ip = getenv( 'REMOTE_ADDR' );
+			}
+			
+		}
+		
+		return trim($ip);
+	}
+	
+	
+	/**
+	 * 
+	 * Retourne un tableau dont le premier champ est boolean et le seconde le type
+	 */
+	static function detect_proxy($myIP = false) {
+		
+		if (!$myIP)
 		{
-		if (isSet($_SERVER["HTTP_X_FORWARDED_FOR"]))
+			$myIP = self::ipX();
+		}
+		
+		$scan_headers = array(	
+						'HTTP_VIA',
+						'HTTP_X_FORWARDED_FOR',
+						'HTTP_FORWARDED_FOR',
+						'HTTP_X_FORWARDED',
+						'HTTP_FORWARDED',
+						'HTTP_CLIENT_IP',
+						'HTTP_FORWARDED_FOR_IP',
+						'VIA',
+						'X_FORWARDED_FOR',
+						'FORWARDED_FOR',
+						'X_FORWARDED',
+						'FORWARDED',
+						'CLIENT_IP',
+						'FORWARDED_FOR_IP',
+						'HTTP_PROXY_CONNECTION'
+						);
+	 
+		
+		$flagProxy = false;
+		$libProxy = array(false, 'No');
+	 
+		
+		foreach($scan_headers as $i)
+		{
+			if (isSet($_SERVER[$i]))
 			{
-			$ipx = $_SERVER["HTTP_X_FORWARDED_FOR"];
-			}
-		elseif (isSet($_SERVER["HTTP_CLIENT_IP"]))
-			{
-			$ipx = $_SERVER["HTTP_CLIENT_IP"];
-			}
-		else
-			{
-			$ipx = $_SERVER["REMOTE_ADDR"];
+				if($_SERVER[$i]) { $flagProxy = true; }
 			}
 		}
-	// Sinon on utilise une ancienne methode
-	else
+		
+		
+		if (isSet($_SERVER['REMOTE_PORT']))
 		{
-		// getenv � Retourne la valeur d'une variable d'environnement
-		if ( getenv( 'HTTP_X_FORWARDED_FOR' ) )
+		if (
+			in_array($_SERVER['REMOTE_PORT'], array(8080,80,6588,8000,3128,553,554))
+				OR
+			@fsockopen($_SERVER['REMOTE_ADDR'], 80, $errno, $errstr, 30)
+				)
 			{
-			$ipx = getenv( 'HTTP_X_FORWARDED_FOR' );
+				$flagProxy = true;
+			}	
+		}
+		
+		// Proxy LookUp
+		if ($flagProxy == true
+			&&
+			isset ( $_SERVER ['REMOTE_ADDR'] )
+			&&
+			!empty ( $_SERVER ['REMOTE_ADDR'] )
+			)
+		{
+			// Transparent Proxy
+			// REMOTE_ADDR = proxy IP
+			// HTTP_X_FORWARDED_FOR = your IP   
+			if (isset ( $_SERVER ['HTTP_X_FORWARDED_FOR'] )
+				&&
+				!empty ( $_SERVER ['HTTP_X_FORWARDED_FOR'] )
+				&&
+				$_SERVER ['HTTP_X_FORWARDED_FOR'] == $myIP)
+			{
+				
+				$libProxy = array(true, 'Transparent Proxy');
 			}
-		elseif ( getenv( 'HTTP_CLIENT_IP' ) )
+			// Simple Anonymous Proxy            
+			// REMOTE_ADDR = proxy IP
+			// HTTP_X_FORWARDED_FOR = proxy IP
+			elseif (isset ( $_SERVER ['HTTP_X_FORWARDED_FOR'] )
+				&&
+				!empty( $_SERVER ['HTTP_X_FORWARDED_FOR'] )
+				&&
+				$_SERVER ['HTTP_X_FORWARDED_FOR'] == $_SERVER ['REMOTE_ADDR']
+				)
 			{
-			$ipx = getenv( 'HTTP_CLIENT_IP' );
+				$libProxy = array(true, 'Simple Anonymous (Transparent) Proxy');
 			}
-		else
+			// Distorting Anonymous Proxy            
+			// REMOTE_ADDR = proxy IP
+			// HTTP_X_FORWARDED_FOR = random IP address
+			elseif (isset( $_SERVER ['HTTP_X_FORWARDED_FOR'] )
+				&&
+				!empty ( $_SERVER ['HTTP_X_FORWARDED_FOR'] )
+				&&
+				$_SERVER['HTTP_X_FORWARDED_FOR'] != $_SERVER ['REMOTE_ADDR']
+				)
 			{
-			$ipx = getenv( 'REMOTE_ADDR' );
+				$libProxy = array(true, 'Distorting Anonymous (Transparent) Proxy');
+			}
+			// Anonymous Proxy
+			// HTTP_X_FORWARDED_FOR = not determined
+			// HTTP_CLIENT_IP = not determined
+			// HTTP_VIA = determined
+			elseif ($_SERVER ['HTTP_X_FORWARDED_FOR'] == ''
+				&&
+				$_SERVER ['HTTP_CLIENT_IP'] == ''
+				&&
+				!empty ( $_SERVER ['HTTP_VIA'] )
+				)
+			{
+				$libProxy = array(true, 'Anonymous Proxy');
+			}
+			// High Anonymous Proxy            
+			// REMOTE_ADDR = proxy IP
+			// HTTP_X_FORWARDED_FOR = not determined                    
+			else
+			{
+				$libProxy = array(true, 'High Anonymous Proxy');
 			}
 		}
-	return trim($ipx);
+		return $libProxy;
 	}
 
-	
 	/**
 	 * 
 	 * Intérroge le cache pour savoir si une ip est bloqué

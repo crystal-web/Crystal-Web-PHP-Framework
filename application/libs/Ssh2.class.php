@@ -4,7 +4,9 @@
 * @author Christophe BUFFET <developpeur(AROBASE)crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
+* @documentation: http://www.crystal-web.org/viki/class-ssh2
 */
+
 define('CONSOLE_SSH', '<span style="color:blue">[console] </span>');
 define('COMMENT_SSH', '<span style="color:green">[comment] </span>');
 define('ERROR_SSH', '<span style="color:red">[comment] </span>');
@@ -39,8 +41,8 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	 */
 	public function setServer($host, $port=22)
 	{
-	$this->server = $host;
-	$this->port = $port;
+		$this->server = $host;
+		$this->port = $port;
 	}	
 	
 	
@@ -52,8 +54,8 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	 */
 	public function setLogin($login, $password)
 	{
-	$this->login = $login;
-	$this->password = $password;
+		$this->login = $login;
+		$this->password = $password;
 	}
 
 	
@@ -72,22 +74,22 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	 */
 	public function getLog($getArray = true)
 	{
-	$this->log[] = CONSOLE_SSH . "Getting log" . PHP_EOL;
-		if ($getArray == false)
-		{
-		$this->log[] = CONSOLE_SSH . "Log return brut text" . PHP_EOL;
-		$buffer=NULL;
-			foreach ($this->log as $key => $debug)
+		$this->log[] = CONSOLE_SSH . "Getting log" . PHP_EOL;
+			if ($getArray == false)
 			{
-			$buffer.=$debug;
+			$this->log[] = CONSOLE_SSH . "Log return brut text" . PHP_EOL;
+			$buffer=NULL;
+				foreach ($this->log as $key => $debug)
+				{
+				$buffer.=$debug;
+				}
+			return $buffer;
 			}
-		return $buffer;
-		}
-		else
-		{
-		$this->log[] = CONSOLE_SSH . "Log return array" . PHP_EOL;
-		return $this->log;
-		}
+			else
+			{
+			$this->log[] = CONSOLE_SSH . "Log return array" . PHP_EOL;
+			return $this->log;
+			}
 	}
 	
 	
@@ -100,18 +102,12 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	{
 		if ($this->connect())
 		{
-			if ($this->auth())
-			{
-			return true;
-			}
-			else
-			{
-			return false;
-			}
+			return  ($this->auth()) ? true : false;
 		}
 		
 	return false;
 	}
+	
 	
 	/**
 	 * 
@@ -148,6 +144,7 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 		}
 	}
 
+	
 	/**
 	 * 
 	 * Close connection
@@ -241,7 +238,6 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	}
 	
 	
-	
 	/**
 	 * 
 	 * Search in file
@@ -267,11 +263,10 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 		$this->tampon['catSearch']['lastlog'] = $this->tampon['lastLogConsole'];
 		}
 	
-	preg_match("#".$rules."#", $this->tampon['catSearch']['lastlog'], $catch);
-	$this->log[] = CONSOLE_SSH . "catSearch: " . print_r($catch, true) . PHP_EOL;
-	return $catch;
+		preg_match("#".$rules."#", $this->tampon['catSearch']['lastlog'], $catch);
+		$this->log[] = CONSOLE_SSH . "catSearch: " . print_r($catch, true) . PHP_EOL;
+		return $catch;
 	}
-	
 	
 
 	/**
@@ -281,10 +276,10 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	 */
 	public function getPid($app)
 	{
-	$this->log[] = CONSOLE_SSH . "Get list of process" . PHP_EOL;
-	$this->cmd('ps -x');
-	$consoleLog = preg_replace("#\n|\r\n|\r#", '|', $this->getLog(false));
-	$array = explode('|', $consoleLog);
+		$this->log[] = CONSOLE_SSH . "Get list of process" . PHP_EOL;
+		$this->cmd('ps -x');
+		$consoleLog = preg_replace("#\n|\r\n|\r#", '|', $this->getLog(false));
+		$array = explode('|', $consoleLog);
 
 		foreach ($array AS $key => $value)
 		{
@@ -293,8 +288,8 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 				// Recherche du PID
 				if (preg_match_all('#([0-9]+).*[0-9]{1,2}:[0-9]{1,2}#', $value, $return))
 				{
-				$this->addComment( "PID found " . $return[1][0] );
-				return (int) $return[1][0];
+					$this->addComment( "PID found " . $return[1][0] );
+					return (int) $return[1][0];
 				}
 			}
 		}
@@ -390,7 +385,7 @@ private $tampon = array();			// Enregistrement de certainne valeur pour �conom
 	 */
 	public function addComment($comment)
 	{
-	$this->log[] = COMMENT_SSH . $comment . PHP_EOL;
+		$this->log[] = COMMENT_SSH . $comment . PHP_EOL;
 	}
 	
 }

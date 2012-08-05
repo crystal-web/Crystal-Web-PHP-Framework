@@ -1,153 +1,6 @@
 <?php
-
-/***************************************
-*	Plugins
-***************************************
-Router::connect('plugin/:slug-:stat',
-				'plugin/slug:([a-z0-9\-]+)/stat:([0-1])');
-	
-Router::connect('plugin/:slug-setting',
-				'plugin/manager/slug:([a-z0-9\-]+)');	
-Router::connect('plugin/:slug-setting-:menu',
-				'plugin/manager/slug:([a-z0-9\-]+)/menu:([a-z0-9\-]+)');	
-				
-Router::connect('vote-:id',
-				'vote/out/id:([0-9]+)');		
-
-
-Router::connect('faq/delete-:id',
-				'faq/manager/id:([0-9]+)');		
-
-Router::connect('alert',
-				'error');
-Router::connect('error/delete-:id',
-				'error/delete/id:([0-9]+)');				
-/***************************************
-*	Articles
-***************************************
-Router::connect('article/:slug-:id',
-				'article/post/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('article/categorie/:slug-:id',
-				'article/cat/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('article/commentaire/:id',	'article/commentpost/id:([0-9]+)');
-
-Router::connect('article/post',	'article/admin_addpost');
-Router::connect('article/post/:id',	'article/admin_addpost/id:([0-9]+)');
-Router::connect('article/post/del/:id',	'article/admin_delpost/id:([0-9]+)');		
-Router::connect('article/comment/:slug-:id','article/admin_comment/slug:(y|n|s)/id:([0-9]+)');
-Router::connect('article/list', 'article/getlist');
-Router::connect('article/conf', 'article/admin_config');
-
-
-/***************************************
-*	Calendrier
-***************************************
-Router::connect('calendrier',
-				'calendar');
-Router::connect('calendrier/:year',
-				'calendar/year:([0-9]+)');
-Router::connect('calendrier/:year-:month',
-				'calendar/year:([0-9]+)/month:([0-9]+)');
-// Event
-Router::connect('calendrier/event',
-				'calendar/event');
-Router::connect('calendrier/:year-:month-:day',
-				'calendar/event/year:([0-9]+)/month:([0-9]+)/day:([0-9]+)');
-
-
-/***************************************
-*	Espace Membre
-***************************************
-Router::connect('espace-membre',
-				'auth');
-Router::connect('espace-membre/recuperation',
-				'auth/forgotpassword');
-Router::connect('espace-membre/enregistrement',
-				'auth/subscribe');
-Router::connect('espace-membre/deconnection',
-				'auth/logout');
-Router::connect('espace-membre/validate/:hash',
-				'auth/validate/hash:([a-z0-9\-]+)');
-				
-/***************************************
-*	Gestion membres
-***************************************
-Router::connect('member/edition-de-:id',
-				'member/editother/id:([0-9]+)');
-Router::connect('member/mailto-:id',
-				'member/mailto/id:([0-9]+)');			
-Router::connect('member/getmulticompte-:id',
-				'member/getmulticompte/id:([0-9]+)');						
-Router::connect('member/approb_change_login-:id-:stat',
-				'member/approb_change_login/id:([0-9]+)/stat:([0-1])');			
-
-Router::connect('member/profil-:slug',
-				'member/index/slug:([A-Za-z0-9\-_]+)');
-				
-/***************************************
-*	Slider
-***************************************
-Router::connect('sliderpop',
-				'sliderpop');
-Router::connect('slidepop/:id-:stat',
-				'sliderpop/id:([0-9]+)/stat:([0-1])');
-Router::connect('sliderpop/efface-:id',
-				'sliderpop/del/id:([0-9]+)');		
-Router::connect('sliderpop/editer-:id',
-				'sliderpop/edit/id:([0-9]+)');	
-				
-/***************************************
-*	Media
-***************************************
-Router::connect('media/del/:id',
-				'media/delete/id:([0-9]+)');
-				
-/***************************************
-*	Forum
-***************************************
-Router::connect('forum/categorie-:slug-:id',
-				'forum/cat/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('forum/sujet-:slug-:id',
-				'forum/sujet/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('forum/topic-:slug-:id',
-				'forum/topic/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('forum/repondre-:slug-:id',
-				'forum/respon/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('forum/nouveau-:slug-:id',
-				'forum/addpost/slug:([a-z0-9_\-]+)/id:([0-9]+)');
-Router::connect('forum/admin_repondeur-:id',
-				'forum/admin_repondeur/id:([0-9]+)');
-
-Router::connect('forum/edition-:id',
-				'forum/edit_post/id:([0-9]+)');
-Router::connect('forum/delete-:id',
-				'forum/delete_post/id:([0-9]+)');		
-
-
-Router::connect('dedicace/manager-:s-:id',
-				'dedicace/manager/s:([a-z0-9_]+)/id:([0-9]+)');			
-
-
-/***************************************
-*	Viki
-***************************************
-Router::connect('viki/:slug/edition',
-				'viki/edit/slug:([a-zA-Z0-9-_]+)');			
-Router::connect('viki/:slug',
-				'viki/slug:([a-zA-Z0-9-_]+)');
-Router::connect('viki/:slug/restore',
-				'viki/restore/slug:([a-zA-Z0-9-_]+)');				
-
-Login : Administrateur
-Password : 2cKspQnd
-
-L'adresse IP de votre serveur est : 91.236.239.27
-Les serveurs DNS par défaut sont configurés sur Google : 8.8.8.8
-*/
-?>
-
-<?php
 $slug = 'A-Za-z0-9_\-';
+
 /***************************************
 *	Error
 ***************************************/
@@ -169,26 +22,14 @@ Router::connect('plugin/:slug-setting',
 Router::connect('plugin/:slug-setting-:menu',
 				'plugin/manager/slug:([a-z0-9\-]+)/menu:([a-z0-9\-]+)');
 
-/***************************************
-*	Viki
-***************************************/
-Router::connect('viki/:slug/edition',
-				'viki/edit/slug:([' . $slug . ']+)');			
-Router::connect('viki/:slug',
-				'viki/slug:([' . $slug . ']+)');
-Router::connect('viki/:slug/restore',
-				'viki/restore/slug:([' . $slug . ']+)');
-
-Router::connect('boutique/buy-:id',
-				'boutique/buy/id:([0-9]+)');
-Router::connect('boutique/:slug-:id',
-				'boutique/slug:([' . $slug . ']+)/id:([0-9]+)');
-
-Router::connect('boutique/:slug',
-				'boutique/slug:([' . $slug . ']+)');		
-
-
-
+Router::connect('livre-d-or',
+				'goldenbook');
+Router::connect('livre-d-or/valider-:id',
+				'goldenbook/valider/id:([0-9]+)');
+Router::connect('livre-d-or/supprimer-:id',
+				'goldenbook/supprimer/id:([0-9]+)');
+Router::connect('livre-d-or/bannir-:id',
+				'goldenbook/look/id:([0-9]+)');
 
 /***************************************
 *	Contact
@@ -215,26 +56,25 @@ Router::connect('minecraft-map-viewer',
 /***************************************
 *	Articles
 ***************************************/
-Router::connect('news',
-				'article');
-Router::connect('news/:slug-:id',
+// Router::connect('article', 'article');
+Router::connect('article/:slug-:id',
 				'article/post/slug:([' . $slug . ']+)/id:([0-9]+)');
-Router::connect('news/categorie/:slug-:id',
+Router::connect('article/categorie/:slug-:id',
 				'article/cat/slug:([' . $slug . ']+)/id:([0-9]+)');
-Router::connect('news/commentaire/:id',
+Router::connect('article/commentaire/:id',
 				'article/commentpost/id:([0-9]+)');
-Router::connect('news/post',
+Router::connect('article/post',
 				'article/admin_addpost');
-Router::connect('news/post/:id',
+Router::connect('article/post/:id',
 				'article/admin_addpost/id:([0-9]+)');
-Router::connect('news/post/del/:id',
+Router::connect('article/post/del/:id',
 				'article/admin_delpost/id:([0-9]+)');		
-Router::connect('news/comment/:slug-:id',
+Router::connect('article/comment/:slug-:id',
 				'article/admin_comment/slug:(y|n|s)/id:([0-9]+)');
-Router::connect('news/list',
+Router::connect('article/list',
 				'article/getlist');
-Router::connect('news/conf',
-				'article/admin_config');
+
+Router::connect('article/conf', 'article/admin_config');
 
 
 /***************************************
@@ -251,59 +91,45 @@ Router::connect('calendrier/event',
 				'calendar/event');
 Router::connect('calendrier/:year-:month-:day',
 				'calendar/event/year:([0-9]+)/month:([0-9]+)/day:([0-9]+)');
-
+Router::connect('calendar/participe/:id/:s',
+				'calendar/participe/id:([0-9]+)/s:(0|1)');
 
 /***************************************
 *	Espace Membre
 ***************************************/
-Router::connect('espace-membre',
-				'auth');
-Router::connect('espace-membre/recuperation',
+
+Router::connect('auth/recuperation',
 				'auth/forgotpassword');
-Router::connect('espace-membre/enregistrement',
+Router::connect('auth/enregistrement',
 				'auth/subscribe');
-Router::connect('espace-membre/modification-du-mot-de-passe',
+Router::connect('auth/modification-du-mot-de-passe',
 				'member/change_password');
-/*Router::connect('espace-membre/argh',
-				'member/change_login)');//*/
 				
-Router::connect('espace-membre/deconnection',
+Router::connect('auth/deconnection',
 				'auth/logout');
-Router::connect('espace-membre/validate/:hash',
+Router::connect('auth/validate/:hash',
 				'auth/validate/hash:([' . $slug . ']+)');
 Router::connect('reglement',
 				'auth/cgu');
-Router::connect('reglement-dota',
-				'auth/dota');
 Router::connect('auth/manager/:by-:order',
 				'auth/manager/by:([a-z\-]+)/order:(desc|asc)');
 
-Router::connect('espace-membre/profil-:slug',
-				'member/index/slug:(['. $slug . ']+)');
+
 				
-				
+
 /***************************************
 *	Gestion membres
 ***************************************/
-Router::connect('member/edition-de-:id',
+Router::connect('membre/edition-de-:id',
 				'member/editother/id:([0-9]+)');
-Router::connect('member/mailto-:id',
+Router::connect('membre/mailto-:id',
 				'member/mailto/id:([0-9]+)');			
-Router::connect('member/getmulticompte-:id',
+Router::connect('membre/getmulticompte-:id',
 				'member/getmulticompte/id:([0-9]+)');						
-Router::connect('member/approb_change_login-:id-:stat',
+Router::connect('membre/approb_change_login-:id-:stat',
 				'member/approb_change_login/id:([0-9]+)/stat:([0-1])');			
-				
-
-
-
-
-
-
-
-
-
-
+Router::connect('membre/profil-:slug',
+				'member/index/slug:(['. $slug . ']+)');
 				
 /***************************************
 *	Slider
@@ -317,6 +143,7 @@ Router::connect('sliderpop/efface-:id',
 Router::connect('sliderpop/editer-:id',
 				'sliderpop/edit/id:([0-9]+)');	
 				
+
 /***************************************
 *	Media
 ***************************************/
@@ -349,17 +176,45 @@ Router::connect('forum/admin_repondeur-:id',
 Router::connect('forum/edition-:id',
 				'forum/edit_post/id:([0-9]+)');
 Router::connect('forum/delete-:id',
-				'forum/delete_post/id:([0-9]+)');			
-				
+				'forum/delete_post/id:([0-9]+)');
+
+ 
 /***************************************
-*	Minecraft manager
-***************************************/				
-Router::connect('minecraft/:cmd',
-				'minecraft/cmd:([' . $slug . ']+)');
-				
-/***************************************
-*	Vote
+*	Projet
 ***************************************/
-Router::connect('vote-:id',
-				'vote/out/id:([a-z0-9__\-]+)');
+Router::connect('projet/voir-:id',
+				'projet/voir/id:([0-9]+)');
+Router::connect('projet/modifier-:id',
+				'projet/modifier/id:([0-9]+)');
+Router::connect('projet/proposer-:id',
+				'projet/proposer/id:([0-9]+)');
+Router::connect('projet/supprimer-:id',
+				'projet/supprimer/id:([0-9]+)');
+
+
+Router::connect('projetmanager/voir-:id',
+				'projetmanager/voir/id:([0-9]+)');
+
+
+
+Router::connect('ticket/voir-:id',
+				'ticket/read/id:([0-9]+)');
+Router::connect('ticket/fermer-:id',
+				'ticket/close/id:([0-9]+)');
+
+
+Router::connect('ticket/categorie-:id',
+				'ticket/bycat/id:([0-9]+)');
+
+Router::connect('messenger/live-:id',
+				'messenger/live/id:([' . $slug . ']+)');
+Router::connect('messenger/chat-:id',
+				'messenger/chat/id:([' . $slug . ']+)');
+
+Router::connect('messenger/find-:search',
+				'messenger/find/search:([' . $slug . ']+)');
+Router::connect('messenger/delete-:pid',
+				'messenger/delete/pid:([0-9]+)');
+Router::connect('messenger/read-:id',
+				'messenger/read/id:([' . $slug . ']+)');
 ?>

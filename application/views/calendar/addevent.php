@@ -28,16 +28,10 @@ jQuery(function($){
 	$CKEditor->editor("event", '', $CKEditorConfig);//*/
 
 echo $this->mvc->Form->input('date', 'Date: ', array('class' => 'datepicker', 'autocomplete' => 'off', 'required' => 'required'));
-
-echo $this->mvc->Form->input('label', 'Label ', array(
-	'options' => 
-		array('default' => ' ',
-			'success' => 'new',
-			'notice' => 'notice',
-			'warning' => 'warning',
-			'important' => 'important')));
 	
-echo $this->mvc->Form->input('heure', 'heure: ', array('options' => 
+echo $this->mvc->Form->input('heure', 'heure: ', array(
+	'type' => 'select',
+	'option' => 
 array('0:00' => '0:00',
 '0:30' => '0:30','1:00' => '1:00',
 '1:30' => '1:30','2:00' => '2:00',
@@ -63,7 +57,7 @@ array('0:00' => '0:00',
 '21:30' => '21:30','22:00' => '22:00',
 '22:30' => '22:30','23:00' => '23:00',
 '23:30' => '23:30')));
-echo $this->mvc->Form->input('note', 'Note: ', array('type'=>'textarea', 'editor' => ''));
+echo $this->mvc->Form->input('resume', 'Note: ', array('type'=>'textarea', 'editor' => ''));
 echo $this->mvc->Form->input('', 'Envoyer', array('type'=>'submit'));
 
 /* Im not crazy xD

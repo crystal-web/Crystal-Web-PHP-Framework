@@ -1,4 +1,4 @@
-
+<?php if (count($articleList)): ?>
 <table class="zebra-striped" id="sortTableExample">
 <thead>
 	<tr>
@@ -55,3 +55,11 @@ $(function() {
 		<a href="#" id="del" class="btn danger">OUI</a>
 	</div>
 </div>
+<?php else: ?>
+<div class="widget">		
+	<div class="widget-header"><h3>Aucun article</h3></div>
+	<div class="widget-content">
+	Vous n'avez aucun article pour le moment.
+	</div>
+</div>
+<?php endif; ?>

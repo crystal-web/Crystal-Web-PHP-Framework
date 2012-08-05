@@ -154,13 +154,16 @@ class Router{
 	{
 		if (isSet($_SERVER['REFERER']))
 		{
-		header('Location: '.$_SERVER['REFERER']);
+			header('Location: ' . $_SERVER['REFERER']);
 		}
+		elseif ( isSet( $_SERVER['HTTP_REFERER'] ) )
+		{
+			header('Location: ' . $_SERVER['HTTP_REFERER']);
+		}		
 		else
 		{
-		header('Location: '.__CW_PATH);
+			header('Location: '.__CW_PATH);
 		}
-		
 		die();
 	}
 	

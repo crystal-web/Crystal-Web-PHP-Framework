@@ -1,15 +1,23 @@
 <?php
 /**
-* @title Simple MVC systeme 
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
-* @license http://creativecommons.org/licenses/by-nc-nd/3.0/
+* @license http://creativecommons.org/licenses/by-nd/3.0/
 */
+if (!defined('__APP_PATH'))
+{
+	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
+
+
 class pluginController Extends Controller {
 
 public function index()
 {
-if (!$this->mvc->Acl->isAllowed()) {Router::redirect();}
+if (!$this->mvc->Acl->isAllowed()) {
+	$this->mvc->Session->setFlash('Vous n\'avez pas le droit d\'accès à cette page', 'error');
+	return Router::redirect();
+}
 
 $this->mvc->Page->setPageTitle('Plugin manager')
 				->setBreadcrumb('plugin','Plugin');
@@ -42,7 +50,12 @@ $stat = (isSet($this->mvc->Request->params['stat'])) ? $this->mvc->Request->para
 			}
 			
 			foreach($pluginListNew[$dir]['info'] as $k=>$v){
-			
+				
+				if (mb_detect_encoding($v) != 'UTF-8')
+				{
+					$v = utf8_encode($v);
+				}
+
 				if (get_magic_quotes_gpc()) {
 				$pluginListNew[$dir]['info'][$k] = htmlentities($v, ENT_NOQUOTES, 'utf-8');
 				}
@@ -74,9 +87,11 @@ $stat = (isSet($this->mvc->Request->params['stat'])) ? $this->mvc->Request->para
 
 public function indexUp()
 {
+if (!$this->mvc->Acl->isAllowed()) {
+	$this->mvc->Session->setFlash('Vous n\'avez pas le droit d\'accès à cette page', 'error');
+	return Router::redirect();
+}
 
-if ($this->mvc->Acl->isAllowed())
-{
 $this->mvc->Page->setPageTitle('Plugin manager')
 				->setBreadcrumb('plugin','Plugin');
 
@@ -242,11 +257,7 @@ if (isSet($_FILES['upload_plugin']['name']))
 	
 	$this->mvc->Template->plugin = isset($cache['plugin']) ? $cache['plugin'] : array();
 	$this->mvc->Template->show('plugin/plugin');
-}
-else
-{
-$this->mvc->Session->setFlash('Vous n\'avez pas le droit d\'accès à cette page', 'error');
-}
+
 
 }
 
@@ -258,9 +269,11 @@ $this->mvc->Session->setFlash('Vous n\'avez pas le droit d\'accès à cette page
 */
 public function manager() 
 {
+if (!$this->mvc->Acl->isAllowed()) {
+	$this->mvc->Session->setFlash('Vous n\'avez pas le droit d\'accès à cette page', 'error');
+	return Router::redirect();
+}
 
-if ($this->mvc->Acl->isAllowed())
-{
 		
 	if ( isSet($this->mvc->Request->params['slug']) && !empty($this->mvc->Request->params['slug']) )
 	{
@@ -320,11 +333,6 @@ if ($this->mvc->Acl->isAllowed())
 	$this->mvc->Session->setFlash('Plugin introuvable', 'error');
 	Router::redirect('plugin');
 	}
-}
-else
-{
-$this->mvc->Session->setFlash('Vous n\'avez pas le droit d\'accès à cette page', 'error');
-}
 
 }
 }

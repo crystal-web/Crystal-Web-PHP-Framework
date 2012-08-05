@@ -14,14 +14,15 @@
 	<link rel="alternate" type="application/rss+xml" title="Toutes les actus (RSS)" href="<?php echo Router::url('article/rss'); ?>" />
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 
-	<link rel="icon" type="image/x-icon" href="<?php echo __CW_PATH; ?>/favicon.ico">
-	<link rel="icon" type="image/png" href="<?php echo __CW_PATH; ?>/favicon.png">
+	<link rel="icon" type="image/x-icon" href="<?php echo __CW_PATH; ?>/favicon_32x32.ico">
+	<link rel="icon" type="image/png" href="<?php echo __CW_PATH; ?>/favicon_48x48.png">
 	
 
-	<link rel="stylesheet" href="http://cdn.crystal-web.org/files/css/bootstrap/1.4.0/bootstrap.min.css">
+	<link rel="stylesheet" href="<?php echo __CDN; ?>/files/css/bootstrap/1.4.0/bootstrap.min.css">
 
-	<link rel="stylesheet" type="text/css" href="http://cdn.crystal-web.org/files/css/common.css">
-	<link rel="stylesheet" type="text/css" href="http://www.crystal-web.org/files/css/main.css">
+	<link rel="stylesheet" type="text/css" href="<?php echo __CDN; ?>/files/css/common.css">
+	<link rel="stylesheet" type="text/css" href="<?php echo __CW_PATH; ?>/files/css/base.css">
+	<link rel="stylesheet" type="text/css" href="<?php echo __CW_PATH; ?>/files/css/default.css">
 	
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
@@ -32,135 +33,126 @@
 var CW_PATH = '<?php echo __CW_PATH; ?>';
 --></script>
 </head>
-<body id="top" <?php echo $mvc->Page->getBody(); ?>>
-	<div class="topbar">
-		<div class="fill">
-			<div class="container">
-				<h3><a data-placement="below" class="relpopover" href="<?php echo __CW_PATH; ?>" id="logo" data-content="Retourner a l'accueil en un clin d'oeil" data-original-title="SocialCoding">Crystal-Web<small>.org</small></a></h3>
-				<ul>
-					<li><a href="<?php echo Router::url('article'); ?>">Article</a></li>
-					<li><a href="<?php echo Router::url('faq'); ?>">FAQ</a></li>
-					<li><a href="<?php echo Router::url('contact'); ?>">Contact</a></li>
-				</ul>
-				<?php
-				if (!$mvc->Session->isLogged())
-				{
-				?>
-				<ul class="nav secondary-nav">
-					<li class="dropdown" data-dropdown="dropdown"><a href="#" class="dropdown-toggle">Menu</a>
-					<ul class="menu-dropdown">
-						<li><a href="<?php echo Router::url('auth'); ?>">Connection</a></li>
-						<li><a href="<?php echo Router::url('auth/subscribe'); ?>">Inscription</a></li>
-					</ul>
-					</li>
-				</ul>
-				<?php
-				}
-				else
-				{
-				?>
-				<ul class="nav secondary-nav">
-					<li class="dropdown" data-dropdown="dropdown"><a href="#" class="dropdown-toggle"><?php echo $mvc->Session->user('login'); ?></a>
-					<ul class="menu-dropdown">
-						<li><a href="<?php echo Router::url('auth/logout'); ?>">Déconnection</a></li>
-					</ul>
-					</li>
-				</ul>
-				<?php
-				}
-				?>
-			</div>
-		</div>
-<div class="flippit">
-<a href="https://github.com/crystal-web/CMS-for-Developer-PHP" title="Fork me on gitHub"><img src="http://www.crystal-web.org/media/image/png/github.png" alt="" style="float: right;
-position: absolute;
-right: 80px;
-padding-top: 5px;
-width: 32px;
-margin-bottom: auto;" class="flippthis"></a>
-<a href="http://www.facebook.com/pages/Crystal-Web/245977352158634" title="Follow me on Facebook"><img src="http://www.crystal-web.org/media/image/png/facebook-32.png" alt="" style="float: right;
-position: absolute;
-right: 45px;
-padding-top: 5px;
-width: 32px;
-margin-bottom: auto;" class="flippthis"></a>
-<a href="https://twitter.com/@crystalPHP" title="Follow me on Twitter"><img src="http://www.crystal-web.org/media/image/png/twitter-32.png" alt="" style="float: right;
-position: absolute;
-right: 10px;
-padding-top: 5px;
-width: 32px;
-margin-bottom: auto;" class="flippthis"></a>
-</div>
-	</div>
-<?php if ($mvc->Acl->isGrant())
+<body>
+
+	
+	
+	
+	
+<?php
+if ($mvc->Acl->isGrant())
 {
 	$adminSiderbar = array();
 	$adminSiderbar[] = array(
-					'title' => 'Dashbord',
-					'data' => array(
-						'Alerte'							=> Router::url('alert'),
-						'SysInfo'							=> Router::url('sysinfo'),
-						'Plugin'							=> Router::url('plugin'),
-						'Slider'							=> Router::url('sliderpop'),
-					));
-
+		'title' => 'Dashbord',
+		'data' => array(
+			'Alerte'							=> Router::url('alert'),
+			'SysInfo'							=> Router::url('sysinfo'),
+			'Plugin'							=> Router::url('plugin'),
+			'Slider'							=> Router::url('sliderpop'),
+		));
+$adminSiderbar[] = array(
+		'title' => 'Projets',
+		'data' => array(
+			'Manager'						=> Router::url('projetmanager'),
+		));
+$adminSiderbar[] = array(
+		'title' => 'Gestionnaire d\'article',
+		'data' => array(
+			'Configuration'						=> Router::url('article/conf'),
+			'Liste'								=> Router::url('article/getlist'),
+			'Ecrire'							=> Router::url('article/post'),
+			'Ajout cat&eacute;gorie'							=> Router::url('article/admin_addcat'),
+		));
 
 echo getOperatorSidebar($adminSiderbar);
 }
 ?>
 
+	<div class="container">
+		<div class="content" id="header">		
+
+
+		</div>
+	</div>
+
+<div class="topbar-wrapper" style="z-index: 5;" id="navigateur">
+    <div class="topbar" data-dropdown="dropdown">
+      <div class="topbar-inner">
+        <div class="container">
+          <h3><a href="<?php echo __CW_PATH; ?>" id="logo">DevPHP<small>.me</small></a></h3>
+
+          <ul class="nav">
+
+			<li>
+				<a href="<?php echo __CW_PATH; ?>">
+					Accueil
+				</a>
+			</li>
+			<li>
+				<a href="<?php echo __CW_PATH; ?>">
+					Service
+				</a>
+			</li>
+			<li>
+				<a href="<?php echo Router::url('reference'); ?>">
+					R&eacute;f&eacute;rence
+				</a>
+			</li>
+			<li>
+				<a href="<?php echo Router::url('devis'); ?>">
+					Devis 
+				</a>
+			</li>
+			<li>
+				<a href="<?php echo Router::url('goldenbook'); ?>">
+					Signer notre livre d'or
+				</a>
+			</li>
+		</ul>
+          <?php /*
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">Dropdown</a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Secondary link</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Another link</a></li>
+              </ul>
+            </li>
+          
+
+          <form class="pull-left" action="">
+            <input type="text" placeholder="Search">
+          </form> */ ?>
+          
+          <ul class="nav secondary-nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">Espace client</a>
+              <ul class="dropdown-menu">
+              <?php if (!$mvc->Session->isLogged()): ?>
+                <li><a href="<?php echo Router::url('auth/subscribe'); ?>">Cr&eacute;er un compte</a></li>
+                <li><a href="<?php echo Router::url('auth'); ?>">Me connecter</a></li>
+              <?php else: ?>
+                <li><a href="<?php echo Router::url('projet'); ?>">Mes projets</a></li>
+                <li><a href="<?php echo Router::url('messenger/live'); ?>">Live Tchat</a></li>
+                <li class="divider"></li>
+                <li><a href="<?php echo Router::url('auth/logout'); ?>">Deconnection</a></li>
+              <?php endif; ?>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div><!-- /topbar-inner -->
+    </div><!-- /topbar -->
+  </div>
+
 
 	<div class="container">
-		<div class="content" id="swithcontenu">
-
-			<div class="row" style="margin-top:30px;">
+		<div class="content" id="swithcontenu">		
 			
-			
-				<?php
-				$col = 16;
-				$menu = NULL;
-				/*if (count($mvc->Page->getMenu())>0)
-				{//*/
-				$col = 12;
-				$menu = '<div class="span4"><div class="sidebar">'.PHP_EOL.'<div class="well">';
-	
-					/*$menu .= '
-					<audio style="hidden" id="pl">
-						<source src="http://www.crystal-web.org/media/audio/mp3/dyraz.mp3"></source>
-						<source src="http://www.crystal-web.org/media/audio/ogg/dyraz.ogg"></source>
-					</audio>
-					<div onmouseover="audioElement.play();">
-						<a href="http://dyraz.com">
-							<img src="http://www.crystal-web.org/media/image/png/logo.81.png" alt="Dyraz.com">
-						</a>
-					</div><script type="text/javascript">var audioElement = document.getElementById(\'pl\');
-					</script>';		//*/		
-				
-					foreach ($mvc->Page->getMenu() AS $name => $listUrl)
-					{
-					$menu .= '<h5>'.$name.'</h5><ul>';
-						foreach ($listUrl AS $data)
-						{
-						$menu .= '<li><a href="'.$data[0].'">'.$data[1].'</a></li>';
-						}
-					$menu .= '</ul>';
-
-					}
-				$menu .= '<h5><img src="http://www.crystal-web.org/media/image/png/twitter-32.png" alt="" style="float: left;" class="flippthis">&nbsp;&nbsp;Twitter news</h5><div id="twitterStatus" class="twitter_status"></div>
-				
-				<h5><img src="http://www.crystal-web.org/media/image/png/github.png" alt="" style="float: left;" class="flippthis">&nbsp;&nbsp;SocialCoding</h5>
-				<ul>
-					<li><a href="https://github.com/crystal-web/CMS-for-Developer-PHP">CMS-for-Developer-PHP</a></li>
-				</ul>			
-				<h5>Fil de l\'actu</h5><div id="event"></div>
-				</div>'.PHP_EOL.'</div>
-				
-						</div>';
-				// }
-				?>
-				<!-- Page content -->
-				<div class="span<?php echo $col; ?>">
-				
+			<div class="row">
+				<div class="span16">
 <?php 
 /***************************************
 *	Fil arian
@@ -186,49 +178,135 @@ echo '<li>'.$mvc->Page->getPageTitle().'</li>';
 *	END Fil arian
 ***************************************/			
 ?>
-					
-				<?php
-				$mvc->Plugin->triggerEvents('beforeTitle');
-				?>
-					<div class="page-header">
-						<h1><?php echo $mvc->Page->getPageTitle(); ?></h1>
-					</div>
-				<?php
-				$mvc->Plugin->triggerEvents('afterTitle');
-				
-				echo $mvc->Session->flash();
-				$mvc->Plugin->triggerEvents('beforeRender');
-				echo $mvc->contenu;
+				</div> <!-- End span16 -->
+			</div> <!-- End row -->
+			
+			
+			<div class="row">
+				<div class="span12">			
+<?php
+$mvc->Plugin->triggerEvents('beforeTitle');
+?>
+<div class="page-header">
+	<h1><?php echo $mvc->Page->getPageTitle(); ?></h1>
+</div>
+<?php
+echo $mvc->Session->flash();
+$mvc->Plugin->triggerEvents('afterTitle');
 
-				$mvc->Plugin->triggerEvents('onRender');
+$mvc->Plugin->triggerEvents('beforeRender');
+echo $mvc->contenu;
+
+$mvc->Plugin->triggerEvents('onRender');
+
+
+if (__DEV_MODE)
+{
+	echo '<div class="row"><div class="span">';
+	Log::console(true);
+	echo '</div></div>';
+}//*/
+?>
+				</div> <!--  End span12 -->
 				
-				?>
+				<div class="span4">				
+				
+					<div class="widget">		
+						<div class="widget-header">
+							<i class="icon-check"></i>
+							<h3>Step by step</h3>
+						</div>
+						<div class="widget-content">
+						<ul>
+							<li>
+								<a href="<?php echo __CW_PATH; ?>">
+									Analyse des besoins
+								</a>
+							</li>
+							<li>
+								<a href="<?php echo __CW_PATH; ?>">
+									Design du site
+								</a>
+							</li>					
+							<li>
+								<a href="<?php echo __CW_PATH; ?>">
+									Développement et mise en place du site
+								</a>
+							</li>
+							<li>
+								<a href="<?php echo __CW_PATH; ?>">
+									Hébergement et nom de domaine
+								</a>
+							</li>							
+							<li>
+								<a href="<?php echo __CW_PATH; ?>">
+									Référencement
+								</a>
+							</li>
+							<li>
+								<a href="<?php echo __CW_PATH; ?>">
+									Suivi et maintenance
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div> <!--  End widget -->
+				
+				</div> <!--  End span4 -->
+			</div> <!--  End row -->
+
+
+
+
+
+			<div class="row">
+				<div class="span-one-third">
+					<h3>Votre site pour 0,00 &euro; ?</h3>
+                    <div>
+                    	Pour chaque client venu de votre part, un mois offert et ce sur tout vos produits et service. De plus cette offre est cumulable ! C'est simplement le moyen le plus rapide pour faire des économies.
+					</div>
+					<span class="right">
+						<a href="">En savoir plus</a></span>
 				</div>
 				
-				<?php 
-				echo $menu;
-				?>	
-			</div>
+				<div class="span-one-third">
+					<h3>Besoin de sur mesure ?</h3>
+                    <div>
+                    	Parfait, chez nous votre site est codé en interne, nous connaissons parfaitement notre produit. Projet particulier ? Un challenge a nous donner ? Vous êtes notre client préféré.
+					</div>
+					<span class="right">
+						<a href="">En savoir plus</a>
+					</span>
+				</div>
+				
+				<div class="span-one-third">
+					<h3>Le saviez-vous</h3>
+                    <div>
+                    	Hier, les sites internet était chers, mais c'était hier. Aujourd'hui le prix d'un site internet a chutté, pourtant ceux-ci sont mille fois plus rapide et plus dynamique.
+					</div>
+					<span class="right">
+						<a href="">En savoir plus</a>
+					</span>
+				</div>
+			</div> <!--  End row -->
 
-			<?php 
-			if (!__DEV_MODE)
-			{
-				echo '<div class="row"><div class="span">';
-				Log::console(true);
-				echo '</div></div>';
-			}
-			?>
 
-		</div>
+		</div> <!-- End content -->
+	</div> <!-- End container -->
+	
+	
 
-		<div class="row">
-			<div class="span4 offset6" style="margin-top:18px;margin-bottom:35px;">
-			<div id="shadowing"></div>
+	<div class="container" >
+		<div class="content" style="margin-top: 25px;background-color: white;-webkit-border-radius: 6px 6px 0 0;-moz-border-radius:6px 6px 0 0;border-radius: 6px 6px 0 0;">		
+			<div class="row">
+				<div class="span16" style="text-align:center;">
+
+				<div id="shadowing"></div>
 				<div id="box">
 					<div id="boxheader">
 					Crystal-web.org : Conception et r&eacute;alisation de site web
 						<span id="boxclose" onclick="document.getElementById('box').style.display='none';
-					document.getElementById('shadowing').style.display='none'"> </span>
+					document.getElementById('shadowing').style.display='none'"><i class="icon-remove"></i></span>
 					</div>
 
 					<div id="boxcontent">
@@ -237,22 +315,21 @@ echo '<li>'.$mvc->Page->getPageTitle().'</li>';
 				</div>
 				
 				<p>
-				<a data-placement="above" data-original-title="A propos de Crystal-web.org" data-content="Conception et r&eacute;alisation de site web" class="relpopover" href="#" onclick="document.getElementById('shadowing').style.display='block';document.getElementById('box').style.display='block';">Powered by Crystal-Web Solution</a>
-				
-				<?php  if (__DEV_MODE) { echo '<br>Page générée en '. round(microtime(true) - $debut,5).' secondes '; } ?>
+					<strong>
+						<a data-placement="above" data-original-title="A propos de Crystal-web.org" data-content="Conception et r&eacute;alisation de site web" class="relpopover" href="#" onclick="document.getElementById('shadowing').style.display='block';document.getElementById('box').style.display='block';">Powered by Crystal-Web Solution</a>
+					</strong>
 				</p>
-			</div>
-			
-		</div>
 
+				</div> <!-- End span16 -->
+			</div> <!-- End row -->
+		</div> <!-- End content -->
+	</div> <!-- End container -->
+	
+	<div id="scrollTop" style="position:fixed;bottom: 15px;right: 15px;display:none;">
+		<img src="<?php echo __CW_PATH; ?>/media/arrow-top.gif" title="Haut de page">
 	</div>
-	
-	
-	
-	
-	
-	
-	
+
+<?php /* 	
 <div id="helper-bar" class="fixed-position">
 <div id="helper-bar-frame">
 <div id="helper-bar-content">
@@ -265,7 +342,7 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 ?>
 </div>
 </div>
-</div>
+</div><?php //*/ ?>
 
 
 
@@ -277,6 +354,7 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 	<script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-twipsy.js"></script>
 	<script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-modal.js"></script>	
 	<script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-popover.js"></script>
+	<script type="text/javascript" src="<?php echo __CDN; ?>/files/js/bootstrap/1.4.0/bootstrap-scrollspy.js"></script>
 	<script type="text/javascript">
 	<!-- 
 	$(function () {
@@ -290,8 +368,12 @@ echo '<a href="'.Router::url('media').'"><img src="' . __CDN .'/files/images/ico
 	$('#topbar').dropdown();
 	-->
 	</script>
+	
+
 	<script  type="text/javascript" src="<?php echo __CDN; ?>/files/js/common.js"></script>
-	<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/CrystalPHP.json?callback=twitterCallback2&amp;count=1"></script>	
-</body>
+		
+
+
+  </body>
 </html>
 

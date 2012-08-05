@@ -15,8 +15,6 @@ $('html, body').animate({scrollTop:$('#'+id).position().top-40}, 'slow');
 </script>
 <h3 id="div_id">
 <?php
-$count = count($dateEvent);
-
 if ($count>0)
 {
 $firstEvent = array_keys($dateEvent);
@@ -60,54 +58,137 @@ $nextDayTime = date('\y\e\a\r\:Y\/\m\o\n\t\h\:n\/\d\a\y\:j', $currentTime + 8640
 <table class="zebra-striped">
 	<?php
 $cle = array_keys($dateEvent);
-$cleNo=0;
+
 for($i=0; $i<24; $i++)
 {
-
-	if (isSet($dateEvent[$i.':0']))
+	if (isSet($dateEvent[$i . ':0']))
 	{
-	$cleNo++;
-	$next = (isSet($cle[$cleNo])) ? ' onclick="getThis(\''.preg_replace('#:#','', $cle[$cleNo]).'\');return false;"' : '';
+		echo '<tr>
+			<td class="cal_heure" id="'.$i.'0"><strong>'.$i.'</strong>:00</td>
+			<td>';
+				foreach ($dateEvent[$i . ':0'] AS $k)
+				{
+					echo '<div onclick="$(this).next(\'div\').slideToggle();return false;">' . $k['res'] . '
+						</div><div style="display:none;">' .$k['des'];
+						if ( $this->mvc->Acl->isAllowed('calendar', 'participe') )
+						{
+							echo '<p>
+									<a href="'.Router::url('calendar/participe/id:' . $k['id'] . '/s:0').'">Absent</a>
+									<a href="'.Router::url('calendar/participe/id:' . $k['id'] . '/s:1').'">Pr&eacute;sent</a>
+								</p>';
+						}
+						if ( $this->mvc->Acl->isAllowed('calendar', 'viewparticipe') )
+						{
+							if ( $k['part'] )
+							{
+								if (count($k['part']['y']))
+								{
+									echo '<p><b>Participe:</b> ';
+									$parti = NULL;
+									foreach ($k['part']['y'] AS $kj => $nj)
+									{
+										$parti .= clean($nj->loginmember, 'slug') . ', ';
+									}
+									echo substr($parti, 0, -2) . '</p>';
+									
+								}
+								
+								if (count($k['part']['n']))
+								{
+									echo '<p><b>Participe pas:</b> ';
+									$noparti = NULL;
+									foreach ($k['part']['n'] AS $kj => $nj)
+									{
+										$noparti .= clean($nj->loginmember, 'slug') . ', ';
+									}
+									echo substr($noparti, 0, -2) . '</p>';
+								}
+							}
+						}
+						echo '</div>';
+				}
+		echo '</td>
+		</tr>';
 
-	echo '<tr>
-		<td class="cal_heure" id="'.$i.'0"><strong>'.$i.'</strong>:00</td>
-		<td'.$next.'>
-		'.stripcslashes($dateEvent[$i.':0']).'
-		</td>
-	</tr>';
 	}
 	else
 	{
-	echo '<tr>
-		<td class="cal_heure" id="'.$i.'0"><strong>'.$i.'</strong>:00</td>
-		<td>
-		&nbsp;&nbsp;
-		</td>
-	</tr>';
+		echo '<tr>
+			<td class="cal_heure" id="'.$i.'0"><strong>'.$i.'</strong>:00</td>
+			<td>
+			&nbsp;&nbsp;
+			</td>
+		</tr>';
 	}
 	
-	
-	if (isSet($dateEvent[$i.':30']))
-	{
-	$cleNo++;
-	$next = (isSet($cle[$cleNo])) ? ' onclick="getThis(\''.preg_replace('#:#','', $cle[$cleNo]).'\');return false;"' : '';
-	echo '<tr>
+	/*echo '<tr>
 		<td class="cal_heure" id="'.$i.'30">30</td>
-		<td'.$next.'>
-		'.stripcslashes($dateEvent[$i.':30']).'
+		<td>
+		<div onclick="$(this).children().next(\'div\').slideToggle();return false;">'.stripcslashes($dateEvent[$i.':30']['res']).'
+			<div style="display: none;">' . clean($dateEvent[$i.':30']['des']. '</div>
+		</div>
 		</td>
-	</tr>';
+	</tr>';//*/
+
+	if (isSet($dateEvent[$i . ':30']))
+	{
+		echo '<tr>
+			<td class="cal_heure" id="'.$i.'30">30</td>
+			<td>';
+				foreach ($dateEvent[$i . ':30'] AS $k)
+				{
+					echo '<div onclick="$(this).next(\'div\').slideToggle();return false;">' . $k['res'] . '
+						</div><div style="display:none;">' .$k['des'];
+						if ( $this->mvc->Acl->isAllowed('calendar', 'participe') )
+						{
+							echo '<p>
+									<a href="'.Router::url('calendar/participe/id:' . $k['id'] . '/s:0').'">Absent</a>
+									<a href="'.Router::url('calendar/participe/id:' . $k['id'] . '/s:1').'">Pr&eacute;sent</a>
+								</p>';
+						}
+						if ( $this->mvc->Acl->isAllowed('calendar', 'viewparticipe') )
+						{
+							if ( $k['part'] )
+							{
+								if (count($k['part']['y']))
+								{
+									echo '<p><b>Participe:</b> ';
+									$parti = NULL;
+									foreach ($k['part']['y'] AS $kj => $nj)
+									{
+										$parti .= clean($nj->loginmember, 'slug') . ', ';
+									}
+									echo substr($parti, 0, -2) . '</p>';
+									
+								}
+								
+								if (count($k['part']['n']))
+								{
+									echo '<p><b>Participe pas:</b> ';
+									$noparti = NULL;
+									foreach ($k['part']['n'] AS $kj => $nj)
+									{
+										$noparti .= clean($nj->loginmember, 'slug') . ', ';
+									}
+									echo substr($noparti, 0, -2) . '</p>';
+								}
+							}
+						}
+						echo '</div>';
+				}
+		echo '</td>
+		</tr>';
+
 	}
 	else
 	{
-	echo '<tr>
-		<td class="cal_heure" id="'.$i.'30">&nbsp;&nbsp;30</td>
-		<td>
-		&nbsp;&nbsp;
-		</td>
-	</tr>';
+		echo '<tr>
+			<td class="cal_heure" id="'.$i.'30">30</td>
+			<td>
+			&nbsp;&nbsp;
+			</td>
+		</tr>';
 	}
-
 }
 
 ?>

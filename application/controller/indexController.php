@@ -1,17 +1,22 @@
 <?php
 /**
-* @title Connection
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by-nd/3.0/
-* @description index du site, sorry j'avais pas d'idée
 */
+if (!defined('__APP_PATH'))
+{
+	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
+
+
 
 Class indexController extends Controller{
 
 
 	public function index()
 	{
+		$this->mvc->Page->setLayout('cv');
 		$this->mvc->Page->setPageTitle('Hello world !!');
 		$this->mvc->Template->bonjour = 'Bonjour ami développeur';
 		$this->mvc->Template->paragraphe = 'Vous voici enfin sur la page d\'accueil de votre futur site ^^<br>
@@ -19,18 +24,7 @@ Class indexController extends Controller{
 			Il vous faut, modifier le fichier <strong>/public_html/includes/init.php</strong> qui contient les paramettres de connexion à la base de donnée.<br>
 			D\'ici peu, vous aurez une documentation en ligne. J\'y travail afin que cela soit le plus documenté possible et le plus agréable possible à lire (cette page n\'est pas vraiment un bonne exemple xD)
 			';
-		$this->mvc->Template->show('index/index');
-
+		$this->mvc->Template->show('index/index');		
 	}
-
-	
-	public function log()
-	{
-	$log = new Cache('log');
-	$data = $log->getCache();
-	debug($data);
-	}
-
-
-						
+			
 }

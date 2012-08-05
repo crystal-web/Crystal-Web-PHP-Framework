@@ -7,8 +7,14 @@ private $menu=array();
 private $head;
 private $breadcrumb;
 private $body;
-public $layout;
+private $layout  = 'default';
 
+
+	/**
+	* Definis le layout du site
+	*
+	* @param $layout
+	*/
 	public function setLayout($layout)
 	{
 		if (file_exists(__APP_PATH.DS.'layout'.DS.$layout.'.phtml'))
@@ -17,6 +23,16 @@ public $layout;
 			return true;
 		}
 		return false;
+	}
+	
+	
+	/**
+	 * 
+	 * Retourne le layout du site
+	 */
+	public function getLayout()
+	{
+		return $this->layout;
 	}
 	
 	
@@ -106,14 +122,14 @@ public $layout;
 	
 	public function setHeaderCss($url)
 	{
-		$this->head.= '<link rel="stylesheet" href="'.$url.'">';
+		$this->head.= '<link rel="stylesheet" href="'.$url.'">' . PHP_EOL;
 		return $this;
 	}
 	
 	
 	public function setHeaderJs($url)
 	{
-		$this->head.= '<script type="text/javascript" src="'.$url.'"></script>';
+		$this->head.= '<script type="text/javascript" src="'.$url.'"></script>' . PHP_EOL;
 		return $this;
 	}
 	

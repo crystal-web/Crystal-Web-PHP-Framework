@@ -10,17 +10,25 @@
 
 
 <form action="" method="post">
-<fieldset>
-	<legend>Configuration Général</legend>
+<div class="widget">		
+	<div class="widget-header"><h3>Configuration Général</h3></div>
+	<div class="widget-content">
+	<?php
+	echo $form;
+	?>
+	</div>
+</div>
+
+
+<div class="widget">		
+	<div class="widget-header"><h3>Editorial</h3></div>
+	<div class="widget-content">
 <?php
-echo $form;
-?>
-</fieldset>
-<fieldset>
-	<legend>Editorial</legend>
+echo $editoriel; ?>
+	</div>
+</div>
+
 <?php
-echo $editoriel . 
-$this->mvc->Form->input('submit','Enregister', array('type' => 'submit'));
+echo $this->mvc->Form->input('submit','Enregister', array('type' => 'submit'));
 ?>
-</fieldset>
 </form>

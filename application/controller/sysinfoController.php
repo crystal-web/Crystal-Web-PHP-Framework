@@ -9,16 +9,17 @@ if (!$this->mvc->Acl->isAllowed()){Router::redirect();}
 
 if (PHP_OS != 'Linux'){$this->mvc->Session->setFlash('SysInfo fonctionne uniquement sur un serveur Linux', 'warning'); Router::redirect();}
 
+$uptime = exec("uptime");
+
+
+
 /***************************************
 *	Information général
 ***************************************/
 // Info systeme
-$this->mvc->Template->uptime = exec("uptime");
-$this->mvc->Template->time = (exec("date"));
+
 $uname = explode(" ", exec("uname -a"), 5);
-$this->mvc->Template->system	= (isSet($uname[0])) ? $uname[0] : 'Inconnu';
-$this->mvc->Template->host		= (isSet($uname[1])) ? $uname[1] : 'Inconnu';
-$this->mvc->Template->kernel	= (isSet($uname[2])) ? $uname[2] : 'Inconnu';
+
 
 $total_cpu = 0;
 $cpuinfo = file("/proc/cpuinfo");
@@ -104,6 +105,18 @@ foreach($x AS $k => $v)
 	list($drive, $size, $used, $avail, $percent, $mount) = explode("|", $v);//*/
 	$percent_part = str_replace( "%", "", $percent );
 
+	if ($mount === "/")
+	{
+		$partition['primary'] = array(
+		'drive'		=> $drive,
+		'size'		=> $size,
+		'used'		=> $used,
+		'avail'		=> $avail,
+		'percent'	=> $percent,
+		'mount'		=> $mount,
+		'partPerc'	=> $percent_part
+		);
+	}
 $partition[] = array(
 	'drive'		=> $drive,
 	'size'		=> $size,
@@ -117,6 +130,52 @@ $partition[] = array(
 unset($partition[0]);
 
 // Template
+
+
+if (isset($_GET['get']))
+{
+	switch ($_GET['get'])
+	{
+		case 'cpu':
+		$sys_ticks = trim($uptime);
+		$sys_ticks = explode(' ', $sys_ticks);
+		$uptimeCut = array();
+		$uptimeCut['systime'] = (isSet($sys_ticks[0])) ? $sys_ticks[0] : 'UNDEFINED';
+		$uptimeCut['days'] = (isSet($sys_ticks[2])) ? $sys_ticks[2] : 'UNDEFINED';
+		$uptimeCut['hours'] = (isSet($sys_ticks[5])) ? trim($sys_ticks[5], ',') : 'UNDEFINED';
+		
+		$uptimeCut['avgnow'] = (isSet($sys_ticks[12])) ? trim($sys_ticks[12], ',') : 'UNDEFINED';
+		$uptimeCut['avg5'] = (isSet($sys_ticks[13])) ? trim($sys_ticks[13], ',') : 'UNDEFINED';
+		$uptimeCut['avg15'] = (isSet($sys_ticks[14])) ? trim($sys_ticks[14], ',') : 'UNDEFINED';
+		?>
+		<div style="padding: 30px 10px;
+		  color: #dedede;
+		  font-size: 55px;"><?php echo $uptimeCut['avgnow']; ?><span style="padding-left: 10px;
+		  font-size: 26px;
+		  color: #77AB10;">/<?php echo $total_cpu; ?></span></div>
+		<div style="padding: 0 20px">
+			<div style="float: left"><span><strong><?php echo $uptimeCut['avg5']; ?></strong></span><br />5 mins.</div>
+			<div style="float: right"><span><strong><?php echo $uptimeCut['avg15']; ?></strong></span><br />15 mins.</div>
+		</div>
+		<?php 
+		break;
+		case 'mem':
+		echo '<img alt="" src="http://chart.apis.google.com/chart?chl=' . $memoire['percent_used'] . '&chs=200x110&cht=gm&chco=77AB10,FFFF00|FF0000&chd=t:' . trim($memoire['percent_used'], '%') .'">';
+		break;
+		case 'swa':
+		echo '<img alt="" src="http://chart.apis.google.com/chart?chl=' . $memoire['percent_swap'] . '&chs=200x110&cht=gm&chco=77AB10,FFFF00|FF0000&chd=t:' . trim($memoire['percent_swap'], '%') .'">';
+		break;
+	}
+	die;
+}
+
+
+$this->mvc->Template->uptime = $uptime;
+$this->mvc->Template->time = (exec("date"));
+$this->mvc->Template->system	= (isSet($uname[0])) ? $uname[0] : 'Inconnu';
+$this->mvc->Template->host		= (isSet($uname[1])) ? $uname[1] : 'Inconnu';
+$this->mvc->Template->kernel	= (isSet($uname[2])) ? $uname[2] : 'Inconnu';
+$this->mvc->Template->total_cpu = $total_cpu;
 $this->mvc->Template->partition = $partition;
 $this->mvc->Template->show('sysinfo/index');
 

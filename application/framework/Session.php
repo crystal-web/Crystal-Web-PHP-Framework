@@ -40,13 +40,12 @@ class Session{
 				unset($_SESSION);
 				}
 			}
-		}//*/
-		/*
-		elseif (isSet($_COOKIE['sess']))
+		}
+		
+		if ( !isSet($_SESSION['token']) )
 		{
-			$_SESSION['user'] = $_COOKIE['sess'];
-		}*/
-		$this->makeToken();
+			$this->makeToken();
+		}
 	}
 	
 	/***************************************
@@ -54,18 +53,15 @@ class Session{
 	***************************************/
 	public function makeToken()
 	{
-		if (!isSet($_SESSION['token']))
-		{
-			Log::setLog('Token assigned', 'Session');
-			$_SESSION['token'] = md5(time()*rand()+magicword);
-		}
+		Log::setLog('Token assigned', 'Session');
+		$_SESSION['token'] = md5(time()*rand()+magicword);
 	}
 	
 	public function token()
 	{
 		if (isSet($_GET['token']))
 		{
-		return ($_GET['token'] === $_SESSION['token']) ? true : false;
+			return ($_GET['token'] === $_SESSION['token']) ? true : false;
 		}
 		return false;
 	}

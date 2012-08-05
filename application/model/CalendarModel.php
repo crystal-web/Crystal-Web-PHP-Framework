@@ -6,7 +6,7 @@ Class CalendarModel extends Model{
 			'rule' => '([0-9]{1,2}:(00|30))',
 			'message' => "L'heure n'est pas valide"
 		),
-		'note' => array(
+		'resume' => array(
 			'rule' => 'notEmpty',
 			'message' => "Indiquez l'&eacute;venement"
 		),
@@ -45,16 +45,9 @@ Class CalendarModel extends Model{
 		$req->year = $date[0];
 		$req->month = $date[1];
 		$req->day = $date[2];
-		$req->note = $data->note;
+		$req->resume = $data->resume;
 		$req->heure = $heure[0];
 		$req->minute = $heure[1];
-		$labelArray = array('default' => ' ',
-						'success' => 'new',
-						'notice' => 'notice',
-						'warning' => 'warning',
-						'important' => 'important');
-		$req->label = $data->label;
-		$req->labelword = (isSet($labelArray[$data->label])) ? $labelArray[$data->label] : '';
 		return $this->save($req);
 	}
 
