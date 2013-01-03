@@ -1,8 +1,38 @@
 <?php
+/*##################################################
+ *                             function.inc.php
+ *                            -------------------
+ *   begin                : 2012-03-08
+ *   copyright            : (C) 2012 DevPHP
+ *   email                : developpeur@crystal-web.org
+ *
+ *
+###################################################
+ *
+ *   This program is free softwar		echo nl2br();e; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
 
-/*........ ooO Systeme Ooo ........ */
-
-
+/**
+ * @obsolete
+ */
+function str2slug($str)
+{
+	return clean($str, 'slug');
+} 
+  
 /**
 * Chargement automatique des class
 *
@@ -13,41 +43,33 @@
 */
 function __autoload($class_name)
 {
-$filename = $class_name . '.class.php';
-$filePath = __APP_PATH . DS . 'libs' . DS . $filename;
-    if (file_exists($filePath))
-    {
-    include_once ($filePath);
-    }
-    elseif(__DEV_MODE)
-    {
-    die('Class file not exists '.$filePath);
-    }
-}
 
-
-/**
- * 
- * Chargement des elements du systeme
- */
-function loadSystem()
-{
-	require_once __APP_PATH . DS . 'framework' . DS . 'mvc.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Model.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Dispatcher.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Request.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Router.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Controller.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Page.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Template.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Session.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Form.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'AccessControlList.php';
-	require_once __APP_PATH . DS . 'framework' . DS . 'Plugin.php';
-	// Zone de stockage des données recurentes
-	require_once __APP_PATH . DS . 'framework' . DS . 'Register.php';
+$filePathLibs = __APP_PATH . DS . 'libs' . DS . $class_name.'.class.php';
+$filePathModel = __APP_PATH . DS . 'model' . DS . $class_name.'.php';
+$filePathFramework = __APP_PATH . DS . 'framework' . DS . $class_name . '.php';
+    if (!file_exists($filePathLibs))
+    {
+    	if (!file_exists($filePathModel))
+		{
+			if (!file_exists($filePathFramework))
+			{
+				throw new Exception('Class file not exists <strong>'.$class_name.'</strong>');
+			}
+			else
+			{
+				require_once ($filePathFramework);
+			}
+		}
+		else
+		{
+			require_once ($filePathModel);
+		}
+    }
+	else
+	{
+		require_once ($filePathLibs);
+	}
 }
-loadSystem();
 
 
 /**
@@ -55,19 +77,17 @@ loadSystem();
  * Chargement d'une fonction du dossier function
  * @param string $function
  */
-function loadFunction($function)
-{
-$file = __APP_PATH . DS . 'function' . DS . $function;
+function loadLibrary($libraryName){
+$file = __APP_PATH . DS . 'function' . DS . $libraryName;
 $file .= '.php';
-    if (file_exists($file))
+    if (!file_exists($file))
     {
-    require_once $file;
+		throw new Exception('Library file not exists <strong>'.$libraryName.'</strong>');
     }
-    elseif (__DEV_MODE === true)
-    {
-    debug('File not loaded '.$file);
-    }
+	
+	require_once $file;
 }
+function loadFunction($function) { loadLibrary($function); }
 
 
 /**
@@ -81,17 +101,13 @@ function loadModel($name)
     $name = $name.'Model';
     // L'endroit ou le model est chargé
     $file = __APP_PATH . DS . 'model' . DS . $name . '.php';
-        if (file_exists($file))
+        if (!file_exists($file))
         {
-        require_once $file;
-        return new $name();
+			throw new Exception('Model file not exists <strong>'.$name.'</strong>');
         }
-        else
-       {
-        throw new Exception('File not loaded '.$file);
 
-        return false;
-        }
+		require_once $file;
+	    return new $name();
     }
     
 
@@ -143,10 +159,9 @@ return isSet($libraryList[$lib]) ? $libraryList[$lib] : $libraryList;
 * @author Christophe BUFFET
 * @link http://crystal-web.org
 * @param string $arg|Variable a dumper
-* @param bool $return|Ecris ou renvois
 * @return string
 */
-function cwDebug ($arg=null)
+function cwDebug ()
 {
 	$debug = debug_backtrace ();
 	echo '<p>&nbsp;</p><p><a href="#" onclick="$(this).parent().next(\'ol\').slideToggle(); return false;"><strong>' . $debug [0] ['file'] . ' </strong> l.' . $debug [0] ['line'] . '</a></p>';
@@ -160,9 +175,15 @@ function cwDebug ($arg=null)
 		}
 	}
 	echo '</ol>';
-	echo '<pre class="code">';
-	var_dump ( $var );
-	echo '</pre>';
+	
+    $numargs = func_num_args();
+    $arg_list = func_get_args();
+    for ($i = 0; $i < $numargs; $i++)
+    {
+		echo '<pre class="code">';
+		var_dump ( $arg_list[$i] );
+		echo '</pre>';
+    }
 }
 
 
@@ -176,9 +197,9 @@ function cwDebug ($arg=null)
 * @param bool $return|Ecris ou renvois
 * @return string
 */
-function debug($var) {
-	
-	if (__DEV_MODE) {
+function debug() {
+	if (__DEV_MODE)
+	{ 
 		$debug = debug_backtrace ();
 		echo '<p>&nbsp;</p><p><a href="#" onclick="$(this).parent().next(\'ol\').slideToggle(); return false;"><strong>' . $debug [0] ['file'] . ' </strong> l.' . $debug [0] ['line'] . '</a></p>';
 		echo '<ol style="display:none;">';
@@ -191,11 +212,17 @@ function debug($var) {
 			}
 		}
 		echo '</ol>';
-		echo '<pre class="code">';
-		var_dump ( $var );
-		echo '</pre>';
-	}
+		
 
+	    $numargs = func_num_args();
+	    $arg_list = func_get_args();
+	    for ($i = 0; $i < $numargs; $i++)
+	    {
+			echo '<pre class="code">';
+			var_dump ( $arg_list[$i] );
+			echo '</pre>';
+	    }
+	}
 }
 
 
@@ -241,6 +268,7 @@ function erreur_alerte($errno, $errstr, $errfile, $errline) {
 			break;
 	}
 	
+	$request = Request::getInstance();
 	// On définit l'erreur.
 	$erreur = "Type : " . $type . "
 Message d'erreur : [" . $errno . "]" . $errstr . "
@@ -251,17 +279,18 @@ Fichier : " . $errfile;
 Le rapport d'erreur contient le type de l'erreur, la date, l'ip, et les tableaux. */
 	
 	$info = date ( "d/m/Y H:i:s", time () ) . " :
-    GET:" . print_r ( $_GET, true ) . "POST:" . print_r ( $_POST, true ) . "SERVER:" . print_r ( $_SERVER, true ) . "COOKIE:" . (isset ( $_COOKIE ) ? print_r ( $_COOKIE, true ) : "Undefined") . "SESSION:" . (isset ( $_SESSION ) ? print_r ( $_SESSION, true ) : "Undefined");
+GET:" . print_r ( $_GET, true ) . "POST:" . print_r ( $_POST, true ) . "SERVER:" . print_r ( $_SERVER, true ) . "COOKIE:" . (isset ( $_COOKIE ) ? print_r ( $_COOKIE, true ) : "Undefined") . "SESSION:" . (isset ( $_SESSION ) ? print_r ( $_SESSION, true ) : "Undefined");
 	//"LOG:" . print_r(Log::console(), true);
 	
 
 	$error_array ['date'] = time ();
 	$error_array ['more'] = $info;
 	$error_array ['type'] = $type;
+	$error_array ['controller'] = $request->getController().'.'.$request->getAction();
 	$error_array ['msg'] = "[" . $errno . "] " . $errstr;
 	$error_array ['errline'] = $errline;
 	$error_array ['errfile'] = $errfile;
-	
+//	$error_array ['errlog'] = Log::console();
 	// Lecture du cache
 	$cache_error = new Cache ( 'erreur_alerte' );
 	$error_cache = $cache_error->getCache ();
@@ -300,56 +329,6 @@ if($match==0) return false;
 else return floatval($reg[1]);
 }
 
-/**
- * parse php modules from phpinfo
- *
- * @author code at adspeed dot com
- * @package parsePHP
- * @return array
- */
-
-function parsePHPModules() {
-	ob_start ();
-	phpinfo ( INFO_MODULES );
-	$s = ob_get_contents ();
-	ob_end_clean ();
-	
-	$s = strip_tags ( $s, '<h2><th><td>' );
-	$s = preg_replace ( '/<th[^>]*>([^<]+)<\/th>/', "<info>\\1</info>", $s );
-	$s = preg_replace ( '/<td[^>]*>([^<]+)<\/td>/', "<info>\\1</info>", $s );
-	$vTmp = preg_split ( '/(<h2>[^<]+<\/h2>)/', $s, - 1, PREG_SPLIT_DELIM_CAPTURE );
-	$vModules = array ();
-	for($i = 1; $i < count ( $vTmp ); $i ++) {
-		if (preg_match ( '/<h2>([^<]+)<\/h2>/', $vTmp [$i], $vMat )) {
-			$vName = trim ( $vMat [1] );
-			$vTmp2 = explode ( "\n", $vTmp [$i + 1] );
-			foreach ( $vTmp2 as $vOne ) {
-				$vPat = '<info>([^<]+)<\/info>';
-				$vPat3 = "/$vPat\s*$vPat\s*$vPat/";
-				$vPat2 = "/$vPat\s*$vPat/";
-				if (preg_match ( $vPat3, $vOne, $vMat )) { // 3cols
-					$vModules [$vName] [trim ( $vMat [1] )] = array (trim ( $vMat [2] ), trim ( $vMat [3] ) );
-				} elseif (preg_match ( $vPat2, $vOne, $vMat )) { // 2cols
-					$vModules [$vName] [trim ( $vMat [1] )] = trim ( $vMat [2] );
-				}
-			}
-		}
-	}
-	return $vModules;
-}
-
-
-/**
- * get a module setting
- *
- * @author code at adspeed dot com
- * @package parsePHP
- * @return array
- */
-function getModuleSetting($pModuleName, $pSetting) {
-	$vModules = parsePHPModules ();
-	return $vModules [$pModuleName] [$pSetting];
-}
 
 
 /*........ ooO Date et temps Ooo ........ */
@@ -559,6 +538,13 @@ return  implode(" ", $t);
 
 /*........ ooO Chaine de caractère Ooo ........ */
 
+/**
+ * Inverse de nl2br
+ */
+function nl2null($string)
+{
+	return preg_replace("%\n%", "",  $string);
+}
 
 /**
  * 
@@ -590,6 +576,7 @@ function clean($string, $rules) {
 				return bbcode ( $string );
 				break;
 			case 'slug' :
+				$string = strtolower($string);
 				$string = preg_replace ( '#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $string );
 				$string = preg_replace ( '#\&([A-Za-z]{2})(?:lig)\;#', '\1', $string );
 				$string = preg_replace ( '#\&([A-Za-z])(.*)\;#', '', $string );
@@ -600,7 +587,7 @@ function clean($string, $rules) {
 				//  $string = strtolower($string);
 				$string = trim ( $string, '-' );
 				$string = preg_replace ( '#[^A-Za-z0-9_\-]#', '', $string );
-				return $string;
+				return (strlen($string)) ? $string : /*pour supprimer les liens mort*/ 'empty';
 				break;
 			/***************************************
 			 * Cas particulier
@@ -1114,7 +1101,7 @@ function alt_stat($file)
 * @param string $dir
 * @return void
 */
-function rmdir_recursive($dir)
+function rmdir_recursive($dir, $delDir = false)
 {
 	
     //Liste le contenu du répertoire dans un tableau
@@ -1142,7 +1129,8 @@ function rmdir_recursive($dir)
         }
     }
     //On a bien effacé toutes les entrées du dossier, on peut à présent l'effacer
-    rmdir($dir);
+    
+    if ($delDir) { rmdir($dir); }
 }
 
 
@@ -1215,20 +1203,42 @@ echo '</ul><a class="settingbutton" href="#">   </a></div>';
  */
 function pagination($nb_page)
 {
-$page = (int) (isset($_GET['page'])) ? $_GET['page'] : 1;
+$page = (int) (isset($_GET['page'])) ? clean($_GET['page'], 'num') : 1;
 /***************************************
 *   Pagination
 ***************************************/
+unset($_GET['page']);
+
+$qstring = null;
+foreach($_GET as $key => $val) 
+{ 
+    $qstring .= "&" . $key . "=" . $val;
+} 
+
+
 $html = NULL;
 if ($nb_page > 1)
 {
 $html   =   '<div class="pagination">';
 $html   .=  '<ul>';
+
+	if ($nb_page > 5)
+	{
+		if ($page == 1)
+		{
+			$html   .=  '<li class="prev disabled"><a href="#">Premi&egrave;re</a></li>';
+		}
+		else
+		{
+			$html   .=  '<li class="prev"><a href="?page=1' . $qstring . '">Premi&egrave;re</a></li>';
+		}
+	}
+	
     // Si la page - une est suppérieur a 0
     // Il y a une page
     if ($page-1 > 0)
     {
-        $html   .=  '<li class="prev"><a href="?page='.($page-1).'">Precedent</a></li>';
+        $html   .=  '<li class="prev"><a href="?page='.($page-1) . $qstring . '">Precedent</a></li>';
     }
     // Sinon, il n'y en a pas
     else
@@ -1240,7 +1250,7 @@ $html   .=  '<ul>';
 *   Bloucle simple multi info
 ***************************************/
 
-            for($i=$page-5; $i<$page+5; $i++)
+            for($i=$page-3; $i<$page+3; $i++)
             {
                 if ($i<=$nb_page && $i>0)
                 {
@@ -1250,7 +1260,7 @@ $html   .=  '<ul>';
                     }
                     else
                     {
-                    $html   .=  '<li><a href="?page='.$i.'">'.$i.'</a></li>';
+                    $html   .=  '<li><a href="?page='.$i . $qstring . '">'.$i.'</a></li>';
                     }
                 }
             }
@@ -1262,7 +1272,7 @@ $html   .=  '<ul>';
     // Si la page + une est inférieur ou egal au nombre de page
     if ($page+1 <= $nb_page)
     {
-        $html   .=  '<li class="next"><a href="?page='.($page+1).'">Suivant</a></li>';
+        $html   .=  '<li class="next"><a href="?page='.($page+1) . $qstring . '">Suivant</a></li>';
     }
     // Sinon, il n'y en a pas
     else
@@ -1270,6 +1280,17 @@ $html   .=  '<ul>';
         $html   .=  '<li class="next disabled"><a href="#">Suivant</a></li>';
     }
 
+	if ($nb_page > 5)
+	{
+		if ($page == $nb_page)
+		{
+			$html   .=  '<li class="next disabled"><a href="#">Derni&egrave;re</a></li>';
+		}
+		else
+		{
+			$html   .=  '<li class="next"><a href="?page=' . $nb_page . $qstring . '">Derni&egrave;re</a></li>';
+		}
+	}
 
 $html   .=  '</ul>';
 $html   .=  '</div>';
@@ -1370,6 +1391,160 @@ function array_searchRecursive( $needle, $haystack, $strict=false, $path=array()
 function is_connected()
 {
     return Auth::isAuth();
+}
+
+
+
+function _get_bytes($asString)
+{
+	$val = trim($asString);
+	$last = strtolower($val[strlen($val)-1]);
+	switch($last) {
+		// The 'G' modifier is available since PHP 5.1.0
+		case 'g':
+			$val *= 1024;
+		case 'm':
+			$val *= 1024;
+		case 'k':
+			$val *= 1024;
+	}
+	
+	return $val;
+}
+
+
+function _format_bytes($a_bytes)
+{
+    if ($a_bytes < 1024) {
+        return $a_bytes .' B';
+    } elseif ($a_bytes < 1048576) {
+        return round($a_bytes / 1024, 2) .' KB';
+    } elseif ($a_bytes < 1073741824) {
+        return round($a_bytes / 1048576, 2) . ' MB';
+    } elseif ($a_bytes < 1099511627776) {
+        return round($a_bytes / 1073741824, 2) . ' GB';
+    } elseif ($a_bytes < 1125899906842624) {
+        return round($a_bytes / 1099511627776, 2) .' TB';
+    } elseif ($a_bytes < 1152921504606846976) {
+        return round($a_bytes / 1125899906842624, 2) .' PB';
+    } elseif ($a_bytes < 1180591620717411303424) {
+        return round($a_bytes / 1152921504606846976, 2) .' EB';
+    } elseif ($a_bytes < 1208925819614629174706176) {
+        return round($a_bytes / 1180591620717411303424, 2) .' ZB';
+    } else {
+        return round($a_bytes / 1208925819614629174706176, 2) .' YB';
+    }
+}
+
+
+
+/**
+ * google_pagerank <http://code.seebz.net/p/google-pagerank/>
+ *
+ * Copyright (c) 2010 Sébastien Corne, <http://seebz.net>
+ *
+ * This script is an adaptation of the GooglePR Class made by FloBaoti.
+ * <http://www.phpcs.com/codes/GOOGLE-PAGERANK-CHECKSUM-ALGORITHM_40649.aspx>
+ */
+function google_pagerank($url, $server = 'toolbarqueries.google.com')
+{
+	// Usefulls functions
+	$fStrToNum = create_function('$str, $check, $magic',
+	'
+		$int32Unit = 4294967296; // 2^32
+		$length = strlen($str);
+		for ($i = 0; $i < $length; $i++){
+			$check *= $magic;
+			if ($check >= $int32Unit){
+				$check = ($check - $int32Unit * (int) ($check / $int32Unit));
+				$check = ($check < -2147483648) ? ($check + $int32Unit) : $check;
+			}
+			$check += ord($str{$i});
+		}
+		
+		return $check;
+	');
+	$fHashURL = create_function('$str',
+	'
+		$fStrToNum = "'.$fStrToNum.'";
+		$check1 = $fStrToNum($str, 0x1505, 0x21);
+		$check2 = $fStrToNum($str, 0, 0x1003F);
+		
+		$check1 >>= 2;
+		$check1 = (($check1 >> 4) & 0x3FFFFC0 ) | ($check1 & 0x3F);
+		$check1 = (($check1 >> 4) & 0x3FFC00 ) | ($check1 & 0x3FF);
+		$check1 = (($check1 >> 4) & 0x3C000 ) | ($check1 & 0x3FFF);
+		$t1 = (((($check1 & 0x3C0) << 4) | ($check1 & 0x3C)) <<2 ) | ($check2 & 0xF0F );
+		$t2 = (((($check1 & 0xFFFFC000) << 4) | ($check1 & 0x3C00)) << 0xA) | ($check2 & 0xF0F0000 );
+		
+		return ($t1 | $t2);
+	');
+	$fCheckHash = create_function('$hashNum',
+	'
+		$checkByte = 0; $flag = 0;
+		$hashStr = sprintf("%u", $hashNum) ;
+		$length = strlen($hashStr);
+		for ($i = $length-1; $i >= 0; $i--){
+			$re = $hashStr{$i};
+			if (1 === ($flag % 2)){
+				$re += $re;
+				$re = (int)($re / 10) + ($re % 10);
+			}
+			$checkByte += $re;
+			$flag ++;
+		}
+		$checkByte %= 10;		echo nl2br();
+		if (0 !== $checkByte){
+			$checkByte = 10 - $checkByte;
+			if (1 === ($flag % 2) ){
+				if (1 === ($checkByte % 2)){
+					$checkByte += 9;
+				}
+				$checkByte >>= 1;
+			}
+		}
+		
+		return "7" . $checkByte . $hashStr;
+	');
+	
+	// Checksum calcul
+	$checksum = $fCheckHash($fHashURL($url));
+	
+	// Google request
+	$requestUrl = sprintf(
+		'http://%s/tbr?client=navclient-auto&ch=%s&ie=UTF-8&oe=UTF-8&features=Rank&q=info:%s',
+		$server,
+		$checksum,
+		urlencode($url)
+	);
+
+	if ( ($c = @file_get_contents($requestUrl)) === false )
+	{
+		return false;
+	}
+	elseif( empty($c) )
+	{
+		return -1;
+	}
+	else
+	{
+		return intval(substr($c, strrpos($c, ':')+1));
+	}
+	
+	/* Usage */
+	
+	/*
+$url = "http://php.net/";
+$pr  = google_pagerank($url);
+ 
+if($pr === false) {
+    echo "Erreur";
+} elseif($pr == -1) {
+    echo "N/A";
+} else {
+    echo $pr;
+}
+	 */
 }
 
 ?>

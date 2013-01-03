@@ -20,7 +20,7 @@ class Captcha {
 	* @param string $baseuri : relative or absolute path to folder containing this file on web 
 	* @return IMG Tag */
 	static function generateImgTags() {
-	return "<a href=\"#\"><img alt=\"Clique pour chang&eacute; les couleurs\" title=\"Clique pour chang&eacute; les couleurs\"". " src=\"" . __CW_PATH . "/media.php?pck=".$_SESSION['captcha_akey']."\"". " id=\"captcha\"". " onclick=\"javascript:this.src='" . __CW_PATH . "/media.php?pck=". $_SESSION['captcha_akey']. "&z='+Math.random();return false;\" /></a>\n";
+	return "<a href=\"#\"><img alt=\"".i18n::get('Click the picture to change the color')."\" title=\"".i18n::get('Click the picture to change the color')."\"". " src=\"" . __CW_PATH . "/media.php?pck=".$_SESSION['captcha_akey']."\"". " id=\"captcha\"". " onclick=\"javascript:this.src='" . __CW_PATH . "/media.php?pck=". $_SESSION['captcha_akey']. "&z='+Math.random();return false;\" /></a>\n";
 	}
 
 	/**

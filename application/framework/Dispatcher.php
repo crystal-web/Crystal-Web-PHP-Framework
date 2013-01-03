@@ -1,113 +1,135 @@
 <?php
-
+/*##################################################
+ *                               Dispatcher.php
+ *                            -------------------
+ *   begin                : 2012-03-08
+ *   copyright            : (C) 2012 DevPHP
+ *   email                : developpeur@crystal-web.org
+ *
+ *
+###################################################
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
 class Dispatcher {
 
-protected $mvc;
+private $restricted;
+	public function  __construct()
+	{
+	$this->restricted = array(
+		'loadController', 'loadModel'
+		);
 
-public function  __construct($mvc)
-{
-$this->mvc = $mvc;
-$this->mvc->layout = 'default';
-/**
-* Objet contenant
-*	public $url; 				// URL appellér l'utilisateur
-*	public $page = 1; 			// pour la pagination 
-*	public $prefix = false; 	// Prefixage des urls /prefix/url
-*	public $data = false; 		// Donnée post
-*/
-$this->mvc->Request = new Request();
-
-
-/*
-* Construction de la requete
-*/
-Router::parse($this->mvc->Request->url,$this->mvc->Request);
+	/**
+	* Objet contenant
+	*	public $url; 				// URL appellér l'utilisateur
+	*	public $page = 1; 			// pour la pagination 
+	*	public $prefix = false; 	// Prefixage des urls /prefix/url
+	*	public $data = false; 		// Donnée post
+	*/
+	$Request = Request::getInstance();
 
 
+	/*
+	* Construction de la requete
+	*/
+	Router::parse($Request->url,$Request);
 
 	
-	/*** Si le loader est rcon on ne charge pas tout ***/
-	if (__LOADER != 'rcon')
-	{
-		$controller = $this->loadController();
-		$action = $this->mvc->Request->action;
+		$controller = $this->loadController($Request);
+		$action = $Request->getAction();
 		
-		$this->mvc->Form = new Form($this->mvc);
-		$this->mvc->Session = new Session();
-		$this->mvc->Acl = new AccessControlList($this->mvc);
-		$this->mvc->Plugin	= new Plugin($this->mvc);
-		$this->mvc->Plugin->triggerEvents('onEnabled');
-	}
-	else
-	{
-		$this->mvc->Request->controller = 'rcon';
-		$controller = $this->loadController();
-		$action = $this->mvc->Request->action;
+		$Config = Config::getInstance();
+		$Page = Page::getInstance();
+		$Form = Form::getInstance();
+		$Session = Session::getInstance();
+		$Acl = AccessControlList::getInstance();
+		$Plugin	= Plugin::getInstance();
+		$Plugin->triggerEvents('onEnabled');
 		
-		$this->mvc->Session = new Session();
-		$this->mvc->Acl = new AccessControlList($this->mvc);
-	}	
-	
-	if($this->mvc->Request->prefix){
-		$action = $this->mvc->Request->prefix.'_'.$action;
-	}
+		$Template = Template::getInstance();
+			$Template->setPath(__APP_PATH . DS . 'views'); 
 		
-	/*** Determine si l'argument peut etre appele comme fonction ***/
-	if (is_callable(array($controller, $action)) == false)
-	{
-		$action = 'index';
+		Router::moved('memovedpage', 'page/movedpostion');
+
+		try
+		{
+			i18n::load(Router::$language, $Request->getController());
+		}
+		catch (Exception $e)
+		{
+			$returnValue = preg_replace('#/'.Router::$language.'/#', '/'.i18n::getLanguage().'/', Router::selfURL(true), -1);
+		}
+
+
+		/*** Determine si l'argument peut etre appele comme fonction ***/
+		if (false === is_callable(array($controller, $action)))
+		{
+			$action = 'index';
+		}
+		
+		if (false !== array_search($action, $this->restricted, true))
+		{
+			$action = 'index';
+		}
+		
+		if ($Request->getController() != 'rpc' || $Request->getAction() != 'rpc')
+		{
+			header ( 'Content-Type: text/html; charset=utf-8' );
+		}
+		
+		ob_start();
+			try{
+				call_user_func_array(array($controller,$action),array());
+			}catch(Exception $e){
+				$this->error('Dispatcher: ' . $e->getMessage());
+			}//*/
+		$contenu = ob_get_clean();
+
+	require_once __APP_PATH . DS . 'layout' . DS . $Page->getLayout() . '.phtml';
 	}
 
 
-	ob_start();
-	try
+	/**
+	* Permet de charger le controller en fonction de la requête utilisateur
+	**/
+	private function loadController($Request)
 	{
-		call_user_func_array(array($controller,$action),array($this->mvc));
-	}catch(Exception $e){
-		$this->error($e->getMessage());
-	}
-	$this->mvc->contenu = ob_get_clean();
-	
-	
-	// Pub
-	// $this->mvc->contenu = preg_replace('#<!--PUB-([0-9]*)x([0-9]*)-->#', '<div class="center"><img src="http://placehold.it/$1x$2" alt=""></div>', $mvc->contenu);
-
-	if ($this->mvc->Request->action == 'ajax')
-	{
-		die($this->mvc->contenu);
-	}
-	
-}
-
-
-/**
-* Permet de charger le controller en fonction de la requête utilisateur
-**/
-function loadController()
-{
-	$name = $this->mvc->Request->controller.'Controller'; 
-	$file = __APP_PATH . DS . 'controller' . DS . $name . '.php';
-	if(!file_exists($file)){
-		$name = 'errorController';
-		$this->mvc->Request->action = 'e404';
+		//$Request = Request::getInstance();
+		$name = $Request->controller.'Controller'; 
 		$file = __APP_PATH . DS . 'controller' . DS . $name . '.php';
-		//$this->error('Le controller '.$this->mvc->Request->controller.' n\'existe pas dans '.$file);
-	}
+		if(!file_exists($file)){
+			$name = 'errorController';
+			$Request->action = 'e404';
+			$file = __APP_PATH . DS . 'controller' . DS . $name . '.php';
+		}
 
 		require $file; 
-	
-
-	$controller = new $name($this->mvc); 
-	return $controller;  
-}
+		$controller = new $name(); 
+		return $controller;  
+	}
 
 
 
-/**
-* Permet de générer une page d'erreur en cas de problème au niveau du routing (page inexistante)
-**/
-function error($message, $type='error'){
-	$this->mvc->Session->setFlash($message, $type);
-}
+	/**
+	* Permet de générer une page d'erreur en cas de problème au niveau du routing (page inexistante)
+	**/
+	private function error($message, $type='error'){
+		$Session = Session::getInstance();
+		$Session->setFlash($message, $type);
+	}
 
 }

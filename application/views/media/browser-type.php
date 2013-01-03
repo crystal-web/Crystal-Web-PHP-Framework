@@ -4,10 +4,9 @@ if (count($group))
 	echo '<ul style="margin: 5px 0 5px 0;">';
 	foreach($group AS $k => $d)
 	{
-		echo '<li style="display:inline;padding:5px;margin:5px;"><a href="' . Router::url('media/browser/type:' . $d->type . '/sub:' . $d->subType) . '">' . $d->subType . '</a> ('.$d->countSubType.')</li>';
+		echo '<li style="display:inline;padding:5px;margin:5px;"><a href="' . Router::url('mediamanager/browser/type:' . $d->type . '/sub:' . $d->subType) . '">' . $d->subType . '</a> ('.$d->countSubType.')</li>';
 	}
 	echo '</ul>';
-	
 }
 
 if (count($list))
@@ -22,12 +21,11 @@ if (count($list))
 	{
 		//$d->subType = substr($d->subType, 1);
 		echo '<tr>
-			<td><a href="' . Router::url('media/fileinfo/id:' . $d->id) .'">' . $d->name .'</a></td>
-			<td><a href="' . Router::url('media/browser/type:' . $d->type) . '">' . $d->type . '</a></td>
-			<td><a href="' . Router::url('media/browser/type:' . $d->type . '/sub:' . $d->subType) . '">'.$d->subType.'</a></td>
+			<td><a href="' . Router::url('mediamanager/fileinfo/id:' . $d->id) .'">' . $d->name .'</a></td>
+			<td><a href="' . Router::url('mediamanager/browser/type:' . $d->type) . '">' . $d->type . '</a></td>
+			<td><a href="' . Router::url('mediamanager/browser/type:' . $d->type . '/sub:' . $d->subType) . '">'.$d->subType.'</a></td>
 			</tr>';
 	}
 	echo '</table>';
-	
 }
 ?>

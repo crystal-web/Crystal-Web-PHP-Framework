@@ -10,58 +10,62 @@ if (!defined('__APP_PATH'))
 }
 
 Class contactController extends Controller {
-private $p_destinataire = 'contact@imagineyourcraft.fr';
+private $p_destinataire = NULL;
 public function index()
 {
-$this->mvc->Page->setPageTitle('Contact');
+	$page = Page::getInstance();
+	$request = Request::getInstance();
+	$session = Session::getInstance();
+	$template = Template::getInstance();
+	
+	$page->setPageTitle('Contact');
 
-if (isSet($this->mvc->Request->data->mail))
+if (isSet($request->data->mail))
 {
+	$this->p_destinataire = $this->mvc->config->mailContact;
+	
 	$Captcha = new Captcha();
 	if ($Captcha->checkCaptcha())
 	{
-		$motif = clean($this->mvc->Request->data->motif, 'str');
+		$motif = clean($request->data->motif, 'str');
 		
-		$firstname = clean($this->mvc->Request->data->firstname, 'str');
-		$lastname = clean($this->mvc->Request->data->lastname, 'str');
-		$mail = clean($this->mvc->Request->data->mail, 'str');
-		$message = clean($this->mvc->Request->data->motif, 'str') . '<hr>' . $firstname . ' ' . $lastname;
+		$firstname = clean($request->data->firstname, 'str');
+		$lastname = clean($request->data->lastname, 'str');
+		$mail = clean($request->data->mail, 'str');
+		$message = clean($request->data->message, 'str') . '<hr>' . $firstname . ' ' . $lastname;
 		
 		
 		if (Securite::isMail($mail))
 		{
-			$oMail = new Mail('[P4F-Craft] ' . $motif, $message, $this->p_destinataire, $mail);
+			$oMail = new Mail($motif, $message, $this->p_destinataire, $mail);
 			
 			if ($oMail->sendMailHtml())
 			{
-				$this->mvc->Session->setFlash('Votre message à bien été envoyé');
+				$session->setFlash('Votre message &agrave; bien &eacute;t&eacute; envoy&eacute;');
 				Router::redirect('contact');
 			}
 			else
 			{
-				$this->mvc->Session->setFlash('Erreur interne, l\'e-mail, pourrai ne pas arrivé', 'warning');
+				$session->setFlash('Erreur interne, l\'e-mail, pourrai ne pas arriv&eacute;', 'warning');
 			}
 		}
 		else
 		{
-			$this->mvc->Session->setFlash('Votre adresse e-mail est incorrect', 'warning');			
+			$session->setFlash('Votre adresse e-mail est incorrect', 'warning');
 		}
 		
 	}
 	else
 	{
-	$this->mvc->Session->setFlash('Veuillez corriger les erreurs', 'warning');
+		$session->setFlash('Veuillez corriger les erreurs', 'warning');
 	}
-	
-
 }
 
-
-$this->mvc->Template->captcha_img = Captcha::generateImgTags("..");
-$this->mvc->Template->captcha_hidden = Captcha::generateHiddenTags();
-$this->mvc->Template->captcha_input = Captcha::generateInputTags();
-$this->mvc->Template->motif = (isSet($data->motif)) ? $data->motif : '';
-$this->mvc->Template->show('contact/index');
+$template->captcha_img = Captcha::generateImgTags("..");
+$template->captcha_hidden = Captcha::generateHiddenTags();
+$template->captcha_input = Captcha::generateInputTags();
+$template->motif = (isSet($data->motif)) ? $data->motif : '';
+$template->show('contact/index');
 }
 
 }

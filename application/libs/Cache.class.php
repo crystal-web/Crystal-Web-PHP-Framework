@@ -37,6 +37,10 @@ public $stat;
 	 * @throws Exception
 	 */
 	public function Cache($filename, $toCache = NULL, $type = NULL){
+		if (!is_writable(__APP_PATH . DS . 'cache'))
+		{
+			throw new Exception('Le dossier ' . __APP_PATH . DS . 'cache n\'est pas accessible en &eacute;criture !');
+		}
 	$this->filename = __SQL. '_' .$filename;
 	$this->toCache = $toCache;
 	$this->type = (!empty($type)) ? $type . DS : NULL;
@@ -48,7 +52,7 @@ public $stat;
 	    Log::setLog('Is a directory ' . __APP_PATH . DS . 'cache' . DS . $type, 'Cache');
 	    @mkdir(__APP_PATH . DS . 'cache' . DS . $type);
 	    // Si pas on essaye de le cr�er
-	    $its_ok=chmod(__APP_PATH . DS . 'cache' . DS . $type, '0777');
+	    $its_ok=chmod(__APP_PATH . DS . 'cache' . DS . $type, 0777);
 	        // Si une erreur on return false
 	        if ($its_ok==false){
 	            throw new Exception('Impossible de cr&eacute;er le dossier');
@@ -165,8 +169,8 @@ public $stat;
 	 * @return array
 	 */
 	public function getTime()
-	{	
-		return $this->stat['time'];
+	{
+		return isset($this->stat['time']) ? $this->stat['time'] : false;
 	}
 
 

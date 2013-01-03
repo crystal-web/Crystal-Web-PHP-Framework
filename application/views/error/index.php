@@ -5,15 +5,11 @@
 <?php
 foreach ($alerte AS $k => $data)
 {
-?>
-
-
-<?php
-echo '<p><a href="' . Router::url('error/delete/id:'.$k) . '" class="btn">Supprimer cette erreur</a></p>';
-
-echo '<b>Type : </b>' . $data['type'] . ' ' . $data['msg'].'<br>';
-echo '<b>Ligne : </b>' . $data['errline'] . ' ' . $data['errfile'].'<br>';
-echo '<b>Date : </b>' . dates($data['date'], 'fr_date') . '<br>';
+echo '<p><a href="' . Router::url('error/delete/id:'.$k) . '" class="btn">Supprimer cette erreur</a></p>' .
+	'<b>Controller : </b>' . $data['controller'].'<br>' .
+	'<b>Type : </b>' . $data['type'] . ' ' . $data['msg'].'<br>' .
+	'<b>Ligne : </b>' . $data['errline'] . ' ' . $data['errfile'].'<br>' . 
+	'<b>Date : </b>' . dates($data['date'], 'fr_date') . '<br>';
 ?>
 <div style="margin:20px; margin-top:5px">
 	<div class="quotetitle">
@@ -27,12 +23,10 @@ echo '<b>Date : </b>' . dates($data['date'], 'fr_date') . '<br>';
 echo $data['more'];
 ?>
 			</textarea>
-
 		</div>
 	</div>
 
 </div>
-
 <?php 
 }
 ?>

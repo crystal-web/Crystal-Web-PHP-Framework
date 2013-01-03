@@ -5,10 +5,12 @@ Class autologinPlugin extends PluginManager{
 	public function onEnabled()
 	{
 		Log::setLog('Enabled', 'autologin');
+		$session = Session::getInstance();
+		$request = Request::getInstance();
 		
-		if ($this->mvc->Session->read('autologin'))
+		if ($session->read('autologin'))
 		{
-			if ($this->mvc->Session->read('autologin') > (time() - 5))
+			if ($session->read('autologin') > (time() - 5))
 			{
 				return false;
 			}
@@ -16,7 +18,7 @@ Class autologinPlugin extends PluginManager{
 		
 		
 		
-		if (isSet($_COOKIE['__utmo']) && $this->mvc->Request->controller != 'auth' && !$this->mvc->Session->isLogged())
+		if (isSet($_COOKIE['__utmo']) && $request->getController() != 'auth' && !$session->isLogged())
 		{
 		Log::setLog('Cookie exist', 'autologin');
 		
@@ -25,7 +27,7 @@ Class autologinPlugin extends PluginManager{
 			{
 				Log::setLog('Logique ok', 'autologin');
 				$id = (int) $cok[0];
-				$mMember = loadModel('Member');
+				$mMember = new MemberModel();
 				
 				$prepare = array(
 					'conditions' => array('idmember' => $id)
@@ -45,11 +47,11 @@ Class autologinPlugin extends PluginManager{
 					{
 						if ($this->show)
 						{
-							$this->mvc->Session->setFlash('Relog');
+							$session->setFlash('Relog');
 						}
 						
 						Log::setLog('Wirting session ', 'autologin');
-						$this->mvc->Session->write('user', $search);
+						$session->write('user', $search);
 						
 						$search->ip = Securite::ipX();
 						$search->lastactivitymember =  time();
@@ -65,11 +67,13 @@ Class autologinPlugin extends PluginManager{
 
 	public function onMemberLogin()
 	{
-
-		if ($this->mvc->Session->isLogged())
+		$session = Session::getInstance();
+		$request = Request::getInstance();
+		
+		if ($session->isLogged())
 		{
 			
-			if (isSet($this->mvc->Request->data->connect) or isSet($this->mvc->Request->data->connection_auto))
+			if (isSet($request->data->connect) or isSet($request->data->connection_auto))
 			{
 				Log::setLog('Request autologin ', 'autologin');
 				
@@ -81,15 +85,15 @@ Class autologinPlugin extends PluginManager{
 				
 				if ($this->show)
 				{
-					$this->mvc->Session->setFlash('AutoRelogOk');
-$_SESSION['log'] = Log::console();
+					$session->setFlash('AutoRelogOk');
+					$_SESSION['log'] = Log::console();
 				}
 			}
 			else
 			{
 				if ($this->show)
 				{
-					$this->mvc->Session->setFlash('AutoRelogNop');
+					$session->setFlash('AutoRelogNop');
 				}
 			}
 
@@ -100,14 +104,16 @@ $_SESSION['log'] = Log::console();
 	
 	public function onMemberLogout()
 	{
-		$this->mvc->Session->write('autologin', time());
+		$session = Session::getInstance();
+		
+		$session->write('autologin', time());
 		setcookie('__utmo');
 		setcookie('__utmo', '', 0, '/');
 		unset($_COOKIE['__utmo']);
 		
 		if ($this->show)
 		{
-			$this->mvc->Session->setFlash('Autologout');
+			$session->setFlash('Autologout');
 		}
 	}
 

@@ -1,21 +1,59 @@
-<?php 
-// based on http://www.phpit.net/article/create-bbcode-php/  
-// modified by www.vision.to  
-// please keep credits, thank you   
-// document your changes.  
+<?php
+/*##################################################
+ *                                Model.php
+ *                            -------------------
+ *   begin                : ???
+ *   copyright            : (C) 2012 phpit.net
+ *
+###################################################
+ * 
+ * Based on http://www.phpit.net/article/create-bbcode-php/  
+ * Modified by www.vision.to please keep credits, thank you.
+ * Document your changes.
+ *
+###################################################
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
+
+/**
+ * Supprime le BBCode
+ */
 function stripBBcode($string)
 {
-return preg_replace('#\[(.*)\](.*)\[(.*)\]#', '$2', $string);
+	return preg_replace('#\[(.*)\](.*)\[(.*)\]#', '$2', $string);
 }
 
+
+/**
+ * Convertis le BBCode alias de bbcode_format($str, $picSize)
+ */
 function bbcode($str, $picSize=NULL)
 {
-return bbcode_format($str, $picSize);
+	return bbcode_format($str, $picSize);
 }
 
-function bbcode_format($str, $picSize=NULL) {
 
-$picSize = (empty($picSize)) ? array('w' => 640,'h' => 480) : $picSize;
+/**
+ * Convertis le BBCode
+ */
+function bbcode_format($str, $picSize=NULL)
+{
+
+	$picSize = (empty($picSize)) ? array('w' => 640,'h' => 480) : $picSize;
 
 
 	
@@ -30,9 +68,11 @@ $picSize = (empty($picSize)) ? array('w' => 640,'h' => 480) : $picSize;
 
     $str = preg_replace('#<br>([\s]+)</li>#isU', '</li>', $str);
     $str = preg_replace('#<br>([\s]+)<ul>#isU', '<ul>', $str);
+//(?:/embed/|/v/|/watch\?v=))([\w\-]{10,12})
 
-	
    // $str = htmlentities($str, ENT_QUOTES, 'UTF-8');
+	#\[link:(.*?)\]#
+	#\[link:(.*?)=(.*?)\]#
 	
     $simple_search = array(  
                 //added line break  
@@ -79,30 +119,63 @@ $picSize = (empty($picSize)) ? array('w' => 640,'h' => 480) : $picSize;
 				//added pre class for code presentation  
 				'<pre class="code">$1</pre>',  
 				//added paragraph  
-				'<p>$1</p>',  
+				'<p>$1</p>',
                 );  
   
     // Do simple BBCode's  
-    $str = preg_replace ($simple_search, $simple_replace, $str);  
-  
+    $str = preg_replace ($simple_search, $simple_replace, $str);
+	 
     // Do <blockquote> BBCode  
     $str = bbcode_quote ($str);
 	
+	$str = preg_replace_callback('#\[link:(.*?)\]#','viki', $str);
+	
 	$str = preg_replace_callback('#\[code=css](.+?)\[/code]#si','parse_css',$str);	
 	$str = preg_replace_callback('#\[code=php](.+?)\[/code]#si','php_code',$str);
+	
+    $str = preg_replace('#(^|[\n ]|<a(.*?)>)http://(www\.)?(youtube\.com|youtu\.be)/(embed/|v/|watch\?v=)?([a-zA-Z0-9\-_]{10,12})(&feature=related?)?(.*)(\s|\n|\t)?(</a>)?#im','<div class="video"><object width="340" height="210">' . 
+             '<param name="movie" value="http://www.youtube.com/v/$6?fs=1&ap=%2526fmt%3D18&autoplay=0&rel=0&fs=1&color1=0xffffff&color2=0xffffff&border=0&loop=0&showinfo=0"">' . 
+             '</param><param name="allowFullScreen" value="true">' . 
+             '</param><param name="allowscriptaccess" value="always">' . 
+             '</param><embed src="http://www.youtube.com/v/$6?fs=1&ap=%2526fmt%3D18&autoplay=0&rel=0&fs=1&color1=0xffffff&color2=0xffffff&border=0&loop=0&showinfo=0"type="application/x-shockwave-flash" allowfullscreen="true" width="340" height="210"></embed></object></div>',$str);
+		
 	$str = nl2br($str);
 	$str = preg_replace('#<br \/>.<br \/>#', '<br>', $str);
     return $str;  
 }  
   
 
+$__vikiLink = array();
+function viki($match)
+{
+	global $__vikiLink;
+	
+	$exploded = explode('=', $match[1]);
+	$exploded[0] = clean($exploded[0], 'slug');
+	$__vikiLink[strtolower($exploded[0])] = 0;
+	if (isSet($exploded[1]))
+	{
+		return '<a href="'.Router::url('viki/slug:' . $exploded[0]).'">'.$exploded[1].'</a>';
+	}
+	else
+	{
+		return '<a href="'.Router::url('viki/slug:' . $exploded[0]).'">'.$exploded[0].'</a>';
+	}
+}
 
+/**
+ * Convertion du code PHP en HTML
+ */
 function php_code($code){ //Colorisation de Code PHP
 $str = highlight_string(html_entity_decode($code[1]), true);
 
     return '<br><strong>Script PHP :</strong><div class="scroll">' . highlight_string(html_entity_decode($code[1]), true) . '</div><br>';
 }
 
+
+/**
+ * Convertion du CSS en HTML
+ */
 function parse_css($texte) {
 	$texte[1] = html_entity_decode($texte[1], true);
 	$texte[1] = preg_replace('`((.*)(:)(.*)(;))+`x','<span style="color: navy;">$2</span><span style="color: fuchsia;">$3</span><span style="color: blue;">$4</span><span style="color: fuchsia;">$5</span>', $texte[1]);
@@ -115,7 +188,10 @@ function parse_css($texte) {
 	return '<br><strong>Code CSS</strong> :<br><div class="scroll">' . $texte[1] . '</div><br>';
 }
  
-  
+ 
+/**
+ * Quotation
+ */
 function bbcode_quote($str) {  
     //added div and class for quotes  
     $open = '<blockquote><div class="quote">';  
@@ -144,7 +220,9 @@ function bbcode_quote($str) {
 }
 
 
-
+/**
+ * @deprecated
+ */
 function  bbcode_edit($name, $content=null)
 {
 $textarea = '<div id="nav_form" class="menu_form"> 

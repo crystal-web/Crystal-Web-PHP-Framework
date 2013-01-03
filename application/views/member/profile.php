@@ -1,10 +1,13 @@
-<?php 
+<?php
+require 'tabs.inc.php';
 $son = 'Son';
 $sa = 'Sa';
 $ses = 'Ses';
-if ($this->mvc->Session->isLogged())
+
+
+if ($session->isLogged())
 {
-	if ($info->idmember == $this->mvc->Session->user('id'))
+	if ($info->idmember == $session->user('id'))
 	{
 	$son = 'Mon';
 	$sa = 'Ma';
@@ -12,35 +15,27 @@ if ($this->mvc->Session->isLogged())
 	}
 }
 ?>
-<ul class="tabs">
-  <li class="active"><a href="#default">Profil</a></li>
-  <li><a href="#wall"><?php echo $son; ?> actu</a></li>
-  <?php
-  if ($this->mvc->Session->isLogged()): ?>
-  <li><a href="<?php echo Router::url('member/edit'); ?>">Editer mon profil</a></li>
-  <?php endif; ?>
-  <?php
-  if ($this->mvc->Acl->isAllowed('member', 'editother')): ?>
-  <li><a href="<?php echo Router::url('member/editother/id:' . $info->idmember); ?>">Editer le profil</a></li>
-  <?php endif; ?>
-  
-<li><a href="<?php echo Router::url('member');; ?>">Membre au hasard</a></li>
 
 
-</ul>
 
+
+<div class="pill-content">
+
+	<div class="active" id="default">
 		<h3><a href="<?php echo Router::url('member/index/slug:' . $info->loginmember); ?>">Informations générales</a></h3>
 		<div class="well">
 			<div class="row">
+				
 				<div class="span3">
 				<?php
 				if (!empty($info->avatar)) {
-				echo '<img src="'.__CW_PATH.'/media/avatar/'.$info->avatar.'" alt="' . $info->loginmember . '" width="120" height="120" >';			
+					echo '<img src="'.__CW_PATH.'/media/avatar/'.$info->avatar.'" alt="' . $info->loginmember . '" width="120" height="120" >';			
 				} else { 
-				echo '<img src="'.get_gravatar($info->mailmember).'" alt="' . $info->loginmember . '" width="120" height="120" >'; }
+					echo '<img src="'.get_gravatar($info->mailmember).'" alt="' . $info->loginmember . '" width="120" height="120" >';
+				}
 				?>
-					
 				</div>
+				
 				<div class="span8">
 					<ul>
 						<li><strong>Pseudo:</strong> <?php echo $info->loginmember; 
@@ -49,42 +44,13 @@ if ($this->mvc->Session->isLogged())
 						?></li>
 						<li><strong>Inscription:</strong>	<?php echo dates($info->firstactivitymember, 'fr_date'); ?></li>
 						<li><strong>Dernière visite:</strong>	<?php echo getRelativeTime($info->lastactivitymember); ?></li>
-						
-						<?php
-						if ($forumNbTopic) {
-							echo '<li>Topic sur le forum ' . $forumNbTopic . '</li>';
-						} 
-						if ($forumNbPost) {
-							echo '<li>Post sur le forum ' . $forumNbPost . '</li>';
-						}
-						if ($banlistNb) {
-							echo '<li>Bannis du jeu ' . $banlistNb . '</li>';
-						}
-						if ($iconomy) {
-							echo '<li>Argent du jeu ' . $iconomy . '</li>';
-						}
-						if ($credit) {
-							echo '<li>Credit site ' . $credit . '</li>';
-						}
-
-						if ($votes)
-						{
-							
-							foreach ($votes AS $k => $v)
-							{
-								echo '<li>Vote sur ' . $v->name . ' (' . $v->nbVote . ')</li>';
-							}
-						}
-						?>
+						<li><strong>Grade:</strong>	<?php echo $info->groupmember; ?></li>
 					</ul>
-
 				</div>
+				
 			</div>
 		</div>
-
-<div class="pill-content">
-
-	<div class="active" id="default">
+		
 
 		<h3>Profil</h3>
 		<div class="well">
@@ -128,25 +94,59 @@ function age($naiss)  {
 		<div class="well">
 		<?php echo (!empty($info->bio)) ? clean($info->bio, 'bbcode') : 'Inconnu';?>
 		</div>
+</div>
+<?php if (count($multi) > 1): ?>
+<div id="multi">
+    <h3>Multi-compte</h3>
+    <div class="well">
 
-	</div>
+            <table class="zebra-striped bordered-table condensed-table">
+            <thead>
+                <tr>            
+                    <th>Pseudo</th>
+                    <th>Enregistr&eacute;</th>
+                    <th>Dernière connexion</th>
+                    <th>Approbation</th>
+                </tr>
+            </thead>
+            <tbody>
+            
+            <?php foreach($multi AS $k => $v): ?>
+                <tr>
+                    <td><a href="<?php echo Router::url('member/index/slug:' . $v->loginmember); ?>"><?php echo $v->loginmember; ?></a></td>
+                    <td><?php echo dates($v->firstactivitymember, 'fr_date'); ?></td>
+                    <td><?php echo dates($v->lastactivitymember, 'fr_date'); ?></td>
+                    <td><?php echo $v->validemember; ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+            </table>
+
+    </div>
+</div>
+<?php else: ?>
+<div id="multi">
+    <h3>Multi-compte</h3>
+    <div class="well">
+		Pas de multicompte
+    </div>
+</div>
+<?php endif; ?>
+
 	
 	
 	
-	<div id="wall">
+	
+<div id="wall">
+	<h3>Fil d'actualit&eacute;</h3>
 	<?php 
-	if ($this->mvc->Session->isLogged()):
-		if ($this->mvc->Session->user('id') == $info->idmember):
+	if ($session->isLogged()):
+		if ($session->user('id') == $info->idmember):
 			?>
 			<form method="post">
-				<textarea name="actu" style="margin-top: 0px;
-margin-bottom: 0px;
-height: 60px;
-margin-left: 0px;
-margin-right: 0px;
-width: 688px;"></textarea>
-
-<div class="actions"><input type="submit" id="inputsubmit" value="Poster mon actu" class="btn primary"></div>
+				<textarea name="actu" style="margin-top: 0px;margin-bottom: 0px;height: 60px;margin-left: 0px;margin-right: 0px;width: 688px;"></textarea>
+				
+				<div class="actions"><input type="submit" id="inputsubmit" value="Poster mon actu" class="btn primary"></div>
 			</form>
 			<?php
 		endif;	
@@ -159,8 +159,80 @@ width: 688px;"></textarea>
 	<small class="right">Par <a href="<?php echo Router::url('member/index/slug:' . $v->loginmember); ?>"><?php echo $v->loginmember; ?></a>, <?php echo getRelativeTime($v->time); ?></small></div>
 	
 	<?php endforeach;
+	else:
+		echo '<div class="well">Pas d\'actualit&eacute;</div>';
 	endif;?>
-	</div>	
+</div>
+
+
+
+	
+<?php if($session->isLogged()): ?>
+	<div id="edit">
+		<h3>Editer mon profil</h3>
+		<div class="well">
+
+<form method="post" enctype="multipart/form-data">
+<h3>Avatar</h3>
+<div class="well">
+<?php
+//
+
+
+$t = NULL;
+	if (!empty($infouser->sex))
+	{
+		$c = array('x' => '#ADD8E6', 'y' => '#FFC0CB', 'z' => '#000');
+		$t = 'border: 1px solid '.$c[$infouser->sex] . ';';
+	}
+		
+$ava = '<div style="'.$t.'width: 120;height: 120;background-color: white;text-align: center;margin: auto;">';			
+
+if (isSet($infouser->avatar))
+{
+	if ( $infouser->avatar == '0' OR empty($infouser->avatar) )
+	{
+		$ava .= '<img src="' . get_gravatar($infouser->mailmember) . '" alt="' . clean($infouser->loginmember, 'slug') . '" width="120" height="120">';
+	}
+	else
+	{
+		$ava .= '<img src="' . __CW_PATH . '/media/avatar/' . $infouser->avatar . '?r='.time().'" alt="' . clean($infouser->loginmember, 'slug') . '" width="120" height="120">';
+	}
+}
+else
+{
+		$ava .= '<img src="' . get_gravatar($infouser->mailmember) . '" alt="' . clean($infouser->loginmember, 'slug') . '" width="120" height="120">';
+}
+$ava .= '</div>';
+	echo $form->input('avatar', $ava, array('type' => 'file')); ?>
+</div>
+
+
+<h3>Profil</h3>
+<div class="well">
+    <?php
+    echo $meform;
+    ?>
+</div>
+<h3>Signature</h3>
+<div class="well">
+<?php
+$sign = (isSet($infouser->sign)) ? $infouser->sign : '';
+echo $form->input('sign', 'Votre signature:', array('type' => 'textarea', 'editor' => '', 'value' => clean($sign, 'str'))); ?>
+</div>
+<h3>Biographie</h3>
+<div class="well">
+<?php
+$bio = (isset($infouser->bio)) ? $infouser->bio : '';
+echo $form->input('bio', 'Votre bio:', array('type' => 'textarea', 'editor' => '', 'value' => clean($bio, 'str'))); ?>
+</div>
+<?php
+echo $form->input('submit', 'Enregistrer', array('type' => 'submit', 'class' => 'btn success')); ?>
+</form>
+
+		</div>
+	</div>
+<?php endif; ?>	
 </div>
 
 

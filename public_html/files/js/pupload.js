@@ -7,7 +7,7 @@ var uploader = new plupload.Uploader({
 	flash_swf_url:'./files/js/plupload/plupload.flash.swf',
 	multipart : true,
 	urlstream_upload:true,
-	max_file_size:'200mb',
+	max_file_size:'16mb',
 	});
 	
 

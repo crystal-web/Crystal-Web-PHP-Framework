@@ -1,31 +1,38 @@
 <form method="post">
 
-<fieldset>
-	<legend>Formulaire d'inscription</legend>
+<div class="widget">
+	<div class="widget-header"><h3>Formulaire d'inscription</h3></div>	
+	<div class="widget-content">
 	<?php
-	echo $this->mvc->Form->input('loginmember', 'Pseudo: ').
-	$this->mvc->Form->input('passmember', 'Mot de passe: ', array('type'=>'password')).
-	$this->mvc->Form->input('otherpassword', 'Mot de passe: ', array('help' => 'Confirmation','type'=>'password')).
-	$this->mvc->Form->input('mailmember', 'E-mail: ', array('addon' => '@'));
+	$form = Form::getInstance();
+	echo $form->input('loginmember', i18n::get('Your login')).
+	//$this->mvc->Form->input('passmember', i18n::get('Your password'), array('type'=>'password')).
+	//$this->mvc->Form->input('otherpassword', i18n::get('Your password again'), array('type'=>'password')).
+	$form->input('mailmember', i18n::get('Your address email'), array('addon' => '@')) . 
+	$form->input('othermail', i18n::get('Your address email again'), array('addon' => '@'));
 	?>
+	
 	<div class="clearfix">
-		<label for="captcha">Captcha : </label>
+		<label for="captcha"><span style="float: right;margin: -6px;"><?php echo Captcha::generateImgTags(".."); ?></span></label>
 		<div class="input">
-			<?php echo $captcha_img.$captcha_hidden.$captcha_input; ?>
-			<span class="help-block">Clique pour changé les couleurs</span>
-		</div>
-	</div>		
-
-	<?php
-	echo $this->mvc->Form->input('declare_coche', '', array(
-		'type' => 'checkbox',
-		'option' => array('declare_coche' => '<a href="'.Router::url('auth/cgu').'">J\'ai lu et j\'accepte le réglement</a>')));
-	?>
-	<div class="clearfix">
-		<div class="input">
-			<input type="submit" name="submit" value="Connection" class="btn success">
+		    <span>
+			<?php echo Captcha::generateHiddenTags().Captcha::generateInputTags(); ?>
+			</span>
+			<span class="help-block"><?php echo i18n::get('Click the picture to change the color'); ?></span>
 		</div>
 	</div>
-</fieldset>
+	
+	
+	<div class="clearfix">
+		<div class="input">
+			<input type="submit" name="submit" value="Inscription" class="btn success">
+		</div>
+	</div>
+	
+	
+	</div>
+</div>
+
+
 
 </form> 

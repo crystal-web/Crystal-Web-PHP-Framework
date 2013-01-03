@@ -82,12 +82,15 @@ class Securite
 			}
 			else
 			{
+				if (isSet($_SERVER ['REMOTE_ADDR']))
+				{
 				$ip = $_SERVER ['REMOTE_ADDR'];
+				}
 			}
 		// Sinon on utilise une ancienne methode
 		} else {
 			// getenv � Retourne la valeur d'une variable d'environnement
-			if (getenv( 'HTTP_X_FORWARDED_FOR' ))
+			if (c( 'HTTP_X_FORWARDED_FOR' ))
 			{
 				$ip = getenv( 'HTTP_X_FORWARDED_FOR' );
 			}
@@ -111,7 +114,7 @@ class Securite
 	 * Retourne un tableau dont le premier champ est boolean et le seconde le type
 	 */
 	static function detect_proxy($myIP = false) {
-		
+		noError(true);
 		if (!$myIP)
 		{
 			$myIP = self::ipX();
@@ -151,6 +154,7 @@ class Securite
 		
 		if (isSet($_SERVER['REMOTE_PORT']))
 		{
+			
 		if (
 			in_array($_SERVER['REMOTE_PORT'], array(8080,80,6588,8000,3128,553,554))
 				OR
@@ -226,6 +230,7 @@ class Securite
 				$libProxy = array(true, 'High Anonymous Proxy');
 			}
 		}
+		noError(false);
 		return $libProxy;
 	}
 

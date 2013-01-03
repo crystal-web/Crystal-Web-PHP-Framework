@@ -9,8 +9,16 @@ public function onEnabled()
     // Chargement de l'objet
     $cache = new Cache('starter');
     $oStarter = new Starter($cache->getCache());
-
-
+	$request = Request::getInstance();
+/*
+		$mTop = loadModel('Topsites');
+		$mTop->setSiteslug('devphpme');
+		
+		if ($mTop->isActive())
+		{
+			$mTop->isUnique(Securite::ipX());
+		}//*/
+		
     //var_dump($_SESSION['starter'], $oStarter->debug());
     //if ($oStarter->getStatus() == false)
 
@@ -19,10 +27,11 @@ public function onEnabled()
 		// initialisation
    		$noload = $isAdd = false;
 
-        if (isSet($this->mvc->Request->data->starter))
+		
+        if (isSet($request->data->starter))
         {
             // Retourne un table, si l'adresse est trouve
-            $status = $oStarter->getUserStatus($this->mvc->Request->data->starter);
+            $status = $oStarter->getUserStatus($request->data->starter);
 
             // L'adresse est trouvé, on recherche la valeur du droit
             if (is_array($status))
@@ -32,7 +41,7 @@ public function onEnabled()
             // L'adresse n'est pas connu, on l'enregistre
             else
            {
-            	$isAdd = $oStarter->addMail($this->mvc->Request->data->starter);
+            	$isAdd = $oStarter->addMail($request->data->starter);
             }
             $cache->setCache($oStarter->getParam());
         }
@@ -55,23 +64,20 @@ public function onEnabled()
 
         if (!$_SESSION['starter'] or $noload)
         {
-            // Enclenche la temporisation de sortie
-            //ob_start();
-
-			$this->mvc->Template->textForm  = $oStarter->getDisplayTextForm();
-			$this->mvc->Template->display   = $oStarter->getDisplayTime();
-			$this->mvc->Template->time      = $oStarter->getTime2open();
-			$this->mvc->Template->iso       = date('c', $oStarter->getTime2open());
+        	if (isset($_GET['bypass'])){
+        		$_SESSION['starter'] = true;
+        	}
+			$template = Template::getInstance();
+			$template->setPath(__APP_PATH . DS.'plugin'.DS.'lock'.DS.'views');
 			
-			
-			
-			$this->mvc->Template->isAdd = $isAdd;
-			
-			
-			$this->mvc->Template->setPath(__APP_PATH . DS . 'plugin' . DS . 'lock');
-			$this->mvc->Template->title = $oStarter->getTitle();
-			$this->mvc->Template->message = $oStarter->getMessage();
-			$this->mvc->Template->show('default');
+			$template->textForm  = $oStarter->getDisplayTextForm();
+			$template->display   = $oStarter->getDisplayTime();
+			$template->time      = $oStarter->getTime2open();
+			$template->iso       = date('c', $oStarter->getTime2open());
+			$template->isAdd = $isAdd;
+			$template->title = $oStarter->getTitle();
+			$template->message = $oStarter->getMessage();
+			$template->show('default');
 
             exit();
         }
@@ -86,16 +92,25 @@ public function onEnabled()
  */
 public function locksiteSetting()
 {
-	if (!$this->mvc->Acl->isAllowed())
+
+	$acl = AccessControlList::getInstance();
+	$session = Session::getInstance();
+	$page = Page::getInstance();
+	$request = Request::getInstance();
+	$template = new Template();
+	$template->setPath(__APP_PATH . DS.'plugin'.DS.'lock'.DS.'views');
+	
+	if (!$acl->isAllowed())
 	{
-	$this->mvc->Session->setFlash('Vous n\'avez pas les autorisations nécéssaires', 'error');
-	Router::redirect();
+		$session->setFlash('Vous n\'avez pas les autorisations nécéssaires', 'error');
+		Router::redirect();
 	}
 	
 $cache = new Cache('starter');
 $oStarter = new Starter($cache->getCache());
 
-$menu = isSet($this->mvc->Request->params['menu']) ? $this->mvc->Request->params['menu'] : 'default';
+
+$menu = isSet($request->params['menu']) ? $request->params['menu'] : 'default';
 
 echo '<style>
 ul#locksite li { 
@@ -107,7 +122,7 @@ list-style-type : none;
 }
 </style>';
 
-echo '<ul id="locksite">
+echo '<ul class="tabs">
 	<li><a href="'.Router::url('plugin/manager/slug:lock').'">Accueil</a></li>
 	<li><a href="'.Router::url('plugin/manager/slug:lock/menu:adminmail').'">Ajout de mail admin</a></li>
 	<li><a href="'.Router::url('plugin/manager/slug:lock/menu:sendmail').'">Envoie d\'un e-mail aux adresses enregistrées</a></li></ul>';
@@ -118,25 +133,23 @@ switch ($menu):
 	 */
 	case 'adminmail':
 	
-		if (isSet($this->mvc->Request->data->mail))
+		if (isSet($request->data->mail))
 		{
-			$newmail = $this->mvc->Request->data->mail;
+			$newmail = $request->data->mail;
 			if ($oStarter->addMail($newmail, true))
 			{
 		        /***************************************
 		        *   On enregistre dans le cache
 		        ***************************************/
 		        $cache->setCache($oStarter->getParam());
-				$this->mvc->Session->setFlash('E-mail ajouté pour accès');
+				$session->setFlash('E-mail ajouté pour accès');
 			}
-	
-			//debug($oStarter->getMail());
 		}
 		
-		$this->mvc->Template->mailList = $oStarter->getMail();
-		$this->mvc->Template->adminMail = $oStarter->getMailAdmin();
-		$this->mvc->Template->setPath(__APP_PATH . DS . 'plugin' . DS . 'lock');
-		$this->mvc->Template->show('adminMail');
+		
+		$template->mailList = $oStarter->getMail();
+		$template->adminMail = $oStarter->getMailAdmin();
+		$template->show('adminMail');
 	break;
 
 
@@ -146,15 +159,17 @@ switch ($menu):
 	case 'sendmail':
 		
 		$whait = 2;
-		$this->mvc->Template->whait = $whait;
+
 		
+		$template->whait = $whait;
 		$nbMailParPage = 15;
-		$this->mvc->Template->nbMailParPage = $nbMailParPage;
+		$template->nbMailParPage = $nbMailParPage;
 		
-		if ( $this->mvc->Request->title && $this->mvc->Request->content )
+		
+		if ( isset($request->data->title, $request->data->message) )
 		{
-			$title = clean($this->mvc->Request->title, 'str'); 	
-			$content = clean($this->mvc->Request->content, 'bbcode');
+			$title = clean($request->title, 'str'); 	
+			$content = clean($request->message, 'bbcode');
 
 			$list = $oStarter->getMail();
 			$mail = array();
@@ -163,7 +178,7 @@ switch ($menu):
 				$mail[] = $k;	
 			}
 			
-			$this->mvc->Session->write('lock', array(
+			$session->write('lock', array(
 				'title' => $title,
 				'content' => $content,
 				'currentPage' => 0,
@@ -179,7 +194,7 @@ switch ($menu):
 		
 		if (isSet($_GET['send']))
 		{
-			$params = $this->mvc->Session->read('lock');
+			$params = $session->read('lock');
 			$startIt = ($nbMailParPage * $params['currentPage']);
 			
 			$txt = (time() - $params['time']). ' secondes '.'<br>' .$startIt . ' / ' . $params['total'] . '<ul>';
@@ -191,7 +206,7 @@ switch ($menu):
 				
 				if (isSet($params['mail'][$m]))
 				{
-					$mail_send = new Mail('['.$this->mvc->Page->getSiteTitle().'] '. $params['title'] ,$params['content'], $params['mail'][$m], ADMIN_MAIL);
+					$mail_send = new Mail('['.$page->getSiteTitle().'] '. $params['title'] ,$params['content'], $params['mail'][$m], ADMIN_MAIL);
 			
 					if ($mail_send->sendMailHtml())
 					{
@@ -200,13 +215,13 @@ switch ($menu):
 					else
 					{
 						$txt .= '<li style="color:red;">' . $params['mail'][$m] . '</li>';
-					} 
-					
+					}
+					$txt .= '<li style="color:red;">' . $params['mail'][$m] . '</li>';
 					unset($params['mail'][$m]);
 				}
 				else
 				{
-					$this->mvc->Session->setFlash('Job succes in ' .(time() - $params['time']). ' secondes');
+					$session->setFlash('Job succes in ' .(time() - $params['time']). ' secondes');
 					Router::redirect('plugin/manager/slug:lock/menu:sendmail');
 				}	
 			}
@@ -214,7 +229,7 @@ switch ($menu):
 			$txt .= '</ul>';
 			
 			$params['currentPage']++;
-			$this->mvc->Session->write('lock', $params);
+			$session->write('lock', $params);
 			
 			header('Refresh: '.$whait.';url='.Router::url('plugin/manager/slug:lock/menu:sendmail').'?send='.time());
 			
@@ -230,9 +245,9 @@ switch ($menu):
 		
 		
 		
-		$this->mvc->Template->mailList = $oStarter->getMail();
-		$this->mvc->Template->setPath(__APP_PATH . DS . 'plugin' . DS . 'lock');
-		$this->mvc->Template->show('sendMail');
+		$template->mailList = $oStarter->getMail();
+
+		$template->show('sendMail');
 	break;
 	
 	
@@ -240,20 +255,20 @@ switch ($menu):
 	 *   Par defaut
 	 */
 	default:
-	
+
 	    /***************************************
 	    *   Traitement lors de l'envois du formulaire
 	    ***************************************/
-	    if (isSet($this->mvc->Request->data->time_delay))
+	    if (isSet($request->data->time_delay))
 	    {
 	        /***************************************
 	        *   On affiche le decompteur ?
 	        ***************************************/
-	        if ($this->mvc->Request->data->display_delay == 0) { $oStarter->setDisplayTime(false); }
+	        if ($request->data->display_delay == 0) { $oStarter->setDisplayTime(false); }
 	        else { $oStarter->setDisplayTime(true); }
 	
 	
-	        switch ($this->mvc->Request->data->time_delay)
+	        switch ($request->data->time_delay)
 	        {
 	        /***************************************
 	        *   Maintenance active ?
@@ -271,12 +286,12 @@ switch ($menu):
 	            ***************************************/
 	            if ($_POST['maintain'] == 'inf')
 	            {
-	            $oStarter->setTime2open(0);
-	            $oStarter->setDisplayTime(false);
+		            $oStarter->setTime2open(0);
+		            $oStarter->setDisplayTime(false);
 	            }
 	            else
 	            {
-	            $oStarter->setTime2open(time()+(int) $this->mvc->Request->data->maintain);
+					$oStarter->setTime2open(time()+(int) $request->data->maintain);
 	            }
 	        break;
 	        /***************************************
@@ -301,14 +316,14 @@ switch ($menu):
 	        /***************************************
 	        *   Enregistre le message a afficher
 	        ***************************************/
-	        if (isSet($this->mvc->Request->data->message))
+	        if (isSet($request->data->message))
 	        {//stripcslashes(html_entity_decode(stripspace(
-	        $oStarter->setMessage($this->mvc->Request->data->message);
+	        $oStarter->setMessage($request->data->message);
 	        }
 	
-	        if (isSet($this->mvc->Request->data->textForm))
+	        if (isSet($request->data->textForm))
 	        {
-	        $oStarter->setDisplayTextForm($this->mvc->Request->data->textForm);
+	        $oStarter->setDisplayTextForm($request->data->textForm);
 	        }
 	
 	        /***************************************
@@ -320,65 +335,53 @@ switch ($menu):
 	
 	
 	
-	    $this->mvc->Template->checkNon=null;
-	    $this->mvc->Template->checkTo=null;
-	    $this->mvc->Template->checkSec=null;
-	    $this->mvc->Template->checkDate=null;
+	    $template->checkNon=null;
+	    $template->checkTo=null;
+	    $template->checkSec=null;
+	    $template->checkDate=null;
 	
 	    $time = $oStarter->getTime2open();
-	    $this->mvc->Template->time = $time;
+	    $template->time = $time;
 	    if ($oStarter->getStatus('enabled'))
 	    {
 	    	if ($time == 0)
 	    	{
-	    	$this->mvc->Template->checkSec=' checked="checked"';
+	    		$template->checkSec=' checked="checked"';
 	    	}
 	        elseif ($time < 57600)
 	        {
-	        $this->mvc->Template->checkTo=' checked="checked"';
+	        	$template->checkTo=' checked="checked"';
 	        }
 	        else
 	        {
-	        $this->mvc->Template->checkSec=' checked="checked"';
+	        	$template->checkSec=' checked="checked"';
 	        }
 	
 	    }
 	    else
 	    {
-	    $this->mvc->Template->checkNon=' checked="checked"';
+	    	$template->checkNon=' checked="checked"';
 	    }
 	
 	    //ob_start();
-	$this->mvc->Template->setPath(__APP_PATH . DS . 'plugin' . DS . 'lock');
-	$this->mvc->Template->textForm = $oStarter->getDisplayTextForm();
-	$this->mvc->Template->displayDelay = $oStarter->getDisplayTime();
-	$this->mvc->Template->message = $oStarter->getMessage();
-	$this->mvc->Template->show('admin');
+	//$template->setPath(__APP_PATH . DS . 'plugin' . DS . 'lock' . DS . 'views');
+	$template->textForm = $oStarter->getDisplayTextForm();
+	$template->displayDelay = $oStarter->getDisplayTime();
+	$template->message = $oStarter->getMessage();
+	$template->show('admin');
+	//$template->setPath(__APP_PATH . DS . 'views');
 	break;
 endswitch;
 
 
 
 
-if (isSet($_GET['debug']))
-{
-	debug($oStarter->debug());
-}
+	if (isSet($_GET['debug']))
+	{
+		debug($oStarter->debug());
+	}
 
-// Restore template
-$this->mvc->Template->setPath(__APP_PATH);
 }
 /* end locksiteSetting*/
 
-
 }
-
-
-
-
-
-
-
-
-
-?>

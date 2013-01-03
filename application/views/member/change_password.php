@@ -1,3 +1,22 @@
+<?php
+	$this->mvc->Page->setHeader("
+		<style>
+		ul.inline li { 
+		display : inline;
+		padding : 0 0.5em;
+		}
+		ul.inline {
+		list-style-type : none;
+		}
+		</style>
+	");
+	
+	echo '<ul class="inline">
+		<li><a href="' . Router::url('member/edit') . '">Modifier mon profil</a></li>
+		<li><a href="' . Router::url('member/change_password') . '">Changement de mot de passe</a></li>
+		<li><a href="' . Router::url('member/change_login') . '">Changement de pseudo</a></li>
+	</ul>';
+?>
 <div class="well">
 <p>
 Vous désirez changer de mot de passe ?<br>

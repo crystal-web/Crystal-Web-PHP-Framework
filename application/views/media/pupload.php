@@ -1,5 +1,6 @@
-<?php 
-$this->mvc->Page->setHeader('<style type="text/css">#plupload {  font-family: Arial,Helvetica;  color: #AAA; }  #plupload #droparea {
+<?php
+$page = Page::getInstance();
+$page->setHeader('<style type="text/css">#plupload {  font-family: Arial,Helvetica;  color: #AAA; }  #plupload #droparea {
 	border: 4px dashed #ddd;
 	height: 200px;
 	text-align: center;
@@ -48,47 +49,29 @@ $this->mvc->Page->setHeader('<style type="text/css">#plupload {  font-family: Ar
 	  right: 5px; }
 	#plupload #filelist .del {
 	  color: #FF0000; }
-	#plupload #filelist .progressbar {
-	  position: absolute;
-	  top: 25px;
-	  right: 5px;
-	  width: 150px;
-	  height: 20px;
-	  background-color: #abb2bc;
-	  -moz-border-radius: 25px;
-	  -webkit-border-radius: 25px;
-	  -o-border-radius: 25px;
-	  -ms-border-radius: 25px;
-	  -khtml-border-radius: 25px;
-	  border-radius: 25px;
-	  -moz-box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5);
-	  -webkit-box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5);
-	  -o-box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5);
-	  box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5); }
-	#plupload #filelist .progress {
-	  position: absolute;
-	  border: 1px solid #4c8932;
-	  height: 18px;
-	  width: 10%;
-	  background: url(progress.jpg) repeat;
-	  -webkit-animation: progress 2s linear infinite;
-	  -moz-border-radius: 25px;
-	  -webkit-border-radius: 25px;
-	  -o-border-radius: 25px;
-	  -ms-border-radius: 25px;
-	  -khtml-border-radius: 25px;
-	  border-radius: 25px; }@-webkit-keyframes progress {  from {
+	@-webkit-keyframes progress {  from {
 	background-position: 0 0; }  to {
-	background-position: 54px 0; } }audio { width: 200px;}</style>'); ?>
-	
-	
+	background-position: 54px 0; } }audio { width: 200px;}
+ul.inline li { 
+display : inline;
+padding : 0 0.5em;
+}
+ul.inline {
+list-style-type : none;
+}
+</style>
+');
+?>
+<ul class="inline">
+	<li><a href="<?php echo Router::url('mediamanager/browser'); ?>"><?php echo i18n::get('Browser'); ?></a></li>
+</ul>
 	
 	<div id="plupload">
 	<div id="droparea">
 	
-	<p>Déposez vos fichiers ici</p><span class="or">ou</span>
+	<p><?php echo i18n::get('Drop your files here'); ?></p><span class="or"><?php echo i18n::get('or'); ?></span>
 	
-	<a href="#" id="browse">Parcourir</a>
+	<a href="#" id="browse"><?php echo i18n::get('Browse'); ?></a>
 	</div>
 
 	
@@ -98,22 +81,18 @@ $this->mvc->Page->setHeader('<style type="text/css">#plupload {  font-family: Ar
 	switch ($v->type)
 	{
 	case 'image':
-		list($v->width, $v->height, $v->type, $v->attr) = getimagesize(__CW_PATH . '/media/' . $v->mime . '/' . $v->name);
+		list($v->width, $v->height, $v->type, $v->attr) = getimagesize(__CW_PATH . '/media/upload/' . $v->folder . '/' . $v->name);
 		if (preg_match('#gif#', $v->name))
 		{
 		?>
-		<a href="<?php echo  __CW_PATH . '/media/' . $v->mime . '/' . $v->name; ?>" onclick="window.open(this.href, 'pop<?php echo $v->id;?>','menubar=no, status=no, scrollbars=yes, width=<?php echo $v->width;?>, height=<?php echo $v->height;?>');return false;"><img src="<?php echo  __CW_PATH . '/media/' . $v->mime . '/' . $v->name; ?>" alt=""></a>
+		<a href="<?php echo  __CW_PATH . '/media/upload/' . $v->folder . '/' . $v->name; ?>" onclick="window.open(this.href, 'pop<?php echo $v->id;?>','menubar=no, status=no, scrollbars=yes, width=<?php echo $v->width;?>, height=<?php echo $v->height;?>');return false;"><img src="<?php echo  __CW_PATH . '/media/upload/' . $v->folder . '/' . $v->name; ?>" alt=""></a>
 		<?php
 		}
 		elseif (preg_match('#(png|jpe?g)#', $v->name))
 		{
 		?>
-		<a href="<?php echo  __CW_PATH . '/media/' . $v->mime . '/' . $v->name; ?>" onclick="window.open(this.href, 'pop<?php echo $v->id;?>','menubar=no, status=no, scrollbars=yes, width=<?php echo $v->width;?>, height=<?php echo $v->height;?>');return false;"><img src="<?php echo  __CW_PATH . '/media.php?thumb=/'.$v->mime.'/' . $v->name; ?>" alt=""></a>
+		<a href="<?php echo  __CW_PATH . '/media/upload/' . $v->folder . '/' . $v->name; ?>" onclick="window.open(this.href, 'pop<?php echo $v->id;?>','menubar=no, status=no, scrollbars=yes, width=<?php echo $v->width;?>, height=<?php echo $v->height;?>');return false;"><img src="<?php echo  __CW_PATH . '/media.php?thumb=/upload/' . $v->folder.'/' . $v->name; ?>" alt=""></a>
 		<?php
-		}
-		else
-		{
-		echo 'no matching ext';
 		}
 	break;
 	case 'audio':
@@ -126,7 +105,7 @@ $this->mvc->Page->setHeader('<style type="text/css">#plupload {  font-family: Ar
 	<div class="input-prepend">
 	<span class="add-on">URL: </span>	
 	<input type="text" value="<?php echo __CW_PATH . '/media/' . $v->mime . '/' . $v->name; ?>" >	
-	<a href="<?php echo $v->id; ?>" class="btn del">Supprimer</a>
+	<a href="<?php echo $v->id; ?>" class="btn del"><?php echo i18n::get('Delete'); ?></a>
 	</div>
 	</div></div></form><?php endforeach; ?>
 
@@ -142,4 +121,4 @@ $this->mvc->Page->setHeader('<style type="text/css">#plupload {  font-family: Ar
 
 	<script type="text/javascript" src="<?php echo __CDN; ?>/files/js/plupload/plupload.html5.js"></script>
 
-	<script type="text/javascript" src="<?php echo __CW_PATH; ?>/files/js/pupload.js"></script>
+	<script type="text/javascript" src="<?php echo Router::url('mediamanager/plupload'); ?>"></script>

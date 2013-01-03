@@ -6,10 +6,14 @@ jQuery(function($){
 	
 	var elem = $(this); 
 		if(confirm('Voulez vous vraiment supprimer ce fichier ?')){
-		$.get(CW_PATH + "/media/ajax",{action:'delete',id:elem.attr('href')});
+			$.getJSON(CW_PATH + "/mediamanager/rpc",{action:'delete',id:elem.attr('href')}, 
+			function(json) {
+		    	if (json.error)
+		    	{
+		    		alert(json.message);
+		    	} else { window.open("<?php echo Router::url('mediamanager/browser'); ?>", "_self"); }
+		    });
 		}
-
-		window.open(CW_PATH + "/media/browser", "_self");
 	return false; 
 	});
 })
@@ -17,10 +21,9 @@ jQuery(function($){
 </script>
 <?php $stat = alt_stat($fileaddr); ?>
 <table class="condensed-table bordered-table zebra-striped">
-
 <tr>
 	<td>Download:</td>
-	<td><a href="<?php echo __CW_PATH . '/media/'.$fileinfo->mime . '/'. $fileinfo->name; ?>">Fichier</a> <?php echo _format_bytes(filesize($fileaddr)); ?></td>
+	<td><a href="<?php echo __CW_PATH . '/media/upload/'.$fileinfo->folder . '/'. $fileinfo->name; ?>">Fichier</a> <?php echo _format_bytes(filesize($fileaddr)); ?></td>
 </tr>
 <tr>
 	<td>Nom:</td>
@@ -28,7 +31,7 @@ jQuery(function($){
 </tr>
 <tr>
 	<td>Type:</td>
-	<td><a href="<?php echo Router::url('media/browser/type:' . $fileinfo->type . '/sub:' . $fileinfo->subType); ?>"><?php echo $fileinfo->mime; ?></a></td>
+	<td><a href="<?php echo Router::url('mediamanager/browser/type:' . trim($fileinfo->type, '/') . '/sub:' . trim($fileinfo->subType, '/') ); ?>"><?php echo $fileinfo->mime; ?></a></td>
 </tr>
 
 
@@ -59,8 +62,39 @@ jQuery(function($){
 	<td><?php echo $stat['perms']['octal1'] . '<br>' .$stat['perms']['human']; ?></td>
 </tr>
 <tr>
-<?php if ($stat['filetype']['is_writable']): ?>
-	<td colspan="2"><a href="<?php echo $fileinfo->id; ?>" class="del">Détruire le fichier</a></td>
+<?php if ($stat['filetype']['is_writable']): 
+	switch ($fileinfo->mime)
+	{
+		case 'text/html':
+			echo '<td><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+			echo '<td><a href="' .  Router::url('mediamanager/edit/id:' . $fileinfo->id) . '">'.i18n::get('Edit file').'</a></td>';
+		break;
+		case 'text/plain':
+			echo '<td><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+			echo '<td><a href="' .  Router::url('mediamanager/edit/id:' . $fileinfo->id) . '">'.i18n::get('Edit file').'</a></td>';
+		break;
+		case 'image/png':
+			echo '<td><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+			echo '<td><a href="' .  Router::url('mediamanager/edit/id:' . $fileinfo->id) . '">'.i18n::get('Edit file').'</a></td>';
+		break;
+		case 'image/jpeg':
+			echo '<td><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+			echo '<td><a href="' .  Router::url('mediamanager/edit/id:' . $fileinfo->id) . '">'.i18n::get('Edit file').'</a></td>';
+		break;
+		case 'image/jpg':
+			echo '<td><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+			echo '<td><a href="' .  Router::url('mediamanager/edit/id:' . $fileinfo->id) . '">'.i18n::get('Edit file').'</a></td>';
+			break;
+		case 'image/gif':
+			echo '<td><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+			echo '<td><a href="' .  Router::url('mediamanager/edit/id:' . $fileinfo->id) . '">'.i18n::get('Edit file').'</a></td>';
+		break;
+		default:
+			echo '<td colspan="2"><a href="' . $fileinfo->id . '" class="del">'.i18n::get('Delete file').'</a></td>';
+		break;
+	}
+	
+	?>
 <?php else: ?>
 	<td colspan="2">Le fichier ne peut pas être détruit</td>
 <?php endif; ?>

@@ -33,6 +33,7 @@ $(function() {
 <?php }
 else
 {
-$this->mvc->Session->setFlash('Aucun message');
+	$session = Session::getInstance();
+	$session->setFlash('Aucun message');
 }
 ?>

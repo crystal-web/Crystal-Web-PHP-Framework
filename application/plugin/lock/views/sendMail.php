@@ -1,6 +1,4 @@
 <?php
-
-
 $nbMail = count($mailList);
 ?>
 
@@ -16,12 +14,12 @@ echo ' Envois de'.$s.' e-mail'.$s.' possible en ' . $tempsPourEnvois . ' seconde
 </div>
 <form method="post">
 <?php 
-
-echo	$this->mvc->Form->input('title', 'Titre: ').
-		$this->mvc->Form->input('content', 'Message: ', array('type' => 'textarea',
+$form = Form::getInstance();
+echo	$form->input('title', 'Titre: ').
+		$form->input('message', 'Message: ', array('type' => 'textarea',
 																'editor' => array()
 																)).
-		$this->mvc->Form->input('submit', 'Envoyer', array('type'=>'submit'));
+		$form->input('submit', 'Envoyer', array('type'=>'submit'));
 ?>
 
 </form>

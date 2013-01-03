@@ -3,11 +3,12 @@
 	<legend>Formulaire de contact</legend>
 	<form method="post">
 	<?php
-	echo $this->mvc->Form->input('firstname', 'Prénom').
-	$this->mvc->Form->input('lastname', 'Nom').
-	$this->mvc->Form->input('mail', 'Adresse e-mail').
-	$this->mvc->Form->input('motif', 'Objet').
-	$this->mvc->Form->input('message', 'Votre mesage', array('type' => 'textarea', 'editor' => '')).
+	$form = Form::getInstance();
+	echo $form->input('firstname', 'Prénom').
+	$form->input('lastname', 'Nom').
+	$form->input('mail', 'Adresse e-mail').
+	$form->input('motif', 'Objet').
+	$form->input('message', 'Votre mesage', array('type' => 'textarea', 'editor' => 'bbcode')).
 	'<div class="clearfix">
 		<label for="captcha">Captcha : </label>
 		<div class="input">
@@ -15,7 +16,7 @@
 			<span class="help-block">Clique pour changé les couleurs</span>
 		</div>
 	</div>'.
-	$this->mvc->Form->input('submit', 'Envoyer', array('type' => 'submit', 'class' => 'btn primary' ));
+	$form->input('submit', 'Envoyer', array('type' => 'submit', 'class' => 'btn primary' ));
 	?>
 	
 	</form>

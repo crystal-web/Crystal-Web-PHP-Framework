@@ -1,18 +1,39 @@
 <?php
-/**
- * 
- * @author Crystal-Web.org | DevPHP
+/*##################################################
+ *                                 Model.php
+ *                            -------------------
+ *   begin                : 2012-03-08
+ *   copyright            : (C) 2012 DevPHP
+ *   email                : developpeur@crystal-web.org
  *
- */
+ *
+###################################################
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
+
 abstract class Model extends PDO{
 	
 	
 	
 	//static $connections = array ();
-	public $count = 0;
+	public static $count = 0;
 	public $table = false;
 
-	public $pdo;
+	protected $pdo;
 	public static $primaryConnection;
 	
 	public $lastError = false;
@@ -20,9 +41,13 @@ abstract class Model extends PDO{
 	public $id;
 	public $errors;
 	public $sql; // Contient la requête
+	public static $sqlList = array();
 	
+	public function getAllRequest()
+	{
+		return self::$sqlList;
+	}
 	
-
 	public function __construct() {
 		if (!isset(self::$primaryConnection)) {
 		$this->connect();
@@ -35,13 +60,20 @@ abstract class Model extends PDO{
 		// Nom de la table
 		if ($this->table === false) {
 			$this->tableAs = preg_replace ( '#Model#', '', get_class ( $this ) );
-			$this->table = __SQL . '_' . $this->tableAs;
+			$this->setTable($this->tableAs);
 		}
 		$this->errors = array ();
-
 	}
 	
+	public function setTable($table)
+	{
+		$this->table = __SQL . '_' . $table;
+	}
 	
+	public function getTable()
+	{
+		return $this->table;
+	}
 	public function connect($db_driver=NULL, $db_hostname=NULL, $db_username=NULL, $db_password=NULL, $db_database=NULL, $db_prefix = null)
 	{
 	
@@ -62,46 +94,79 @@ abstract class Model extends PDO{
 		$this->table = $this->tableAs;
 		}
 	
+		
+		switch (strtolower($db_driver)){
+			case 'mysql':
+				$DB_connect='mysql:host='.$db_hostname.';port=3306;dbname='.$db_database;
+			break;
+			case 'pgsql':
+				$DB_connect='pgsql:host='.$db_hostname.' port=4444 dbname='.$db_database;
+			break;
+			case 'sqlite':
+				$DB_connect='sqlite:'.$db_hostname;
+			break;	
+			case 'oci':
+				$DB_connect='OCI:'.$db_hostname;
+			break;
+		}
+		
 		try {
-			switch (strtolower($db_driver)){
-				case 'mysql':
-					$DB_connect='mysql:host='.$db_hostname.';port=3306;dbname='.$db_database;
-				break;
-				case 'pgsql':
-					$DB_connect='pgsql:host='.$db_hostname.' port=4444 dbname='.$db_database;
-				break;
-				case 'sqlite':
-					$DB_connect='sqlite:'.$db_hostname;
-				break;	
-				case 'oci':
-					$DB_connect='OCI:'.$db_hostname;
-				break;
-			}			
-
 			$pdoConnect = new PDO($DB_connect, $db_username, $db_password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 			$pdoConnect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			//$this->pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_WARNING);	
 			
-
-				if (!isset(self::$primaryConnection)) {
-				self::$primaryConnection = $pdoConnect;
-				$this->pdo = $pdoConnect;
-				}
-				else
-				{
-				$this->pdo = $pdoConnect;
-				}
-			
-			
+			if (!isset(self::$primaryConnection)) {
+			self::$primaryConnection = $pdoConnect;
+			$this->pdo = $pdoConnect;
+			}
+			else
+			{
+			$this->pdo = $pdoConnect;
+			}
 			
 		} catch(PDOException $e){
-			if(__DEV_MODE){
-			throw new Exception ($e->getMessage() .' ' . get_class ( $this )); 
-			}else{
-			throw new Exception ('Impossible de se connecter à la base de donnée'); 
+		
+			switch ($e->getCode())
+			{
+				case '1040':
+					$page = new Page();
+					$page->setLayout('alert');
+					$contenu = 'D&eacute;sol&eacute;, nous sommes victime de notre succ&egrave;s. Trop de connexion sont d&eacute;j&agrave; ouverte. R&eacute;&eacute;say&eacute; plus tard.';
+					require_once __APP_PATH . DS . 'layout' . DS . $page->getLayout() . '.phtml';
+					die;
+				break;
+				case '1044':
+					$page = new Page();
+					$page->setLayout('alert');
+					$contenu = 'Impossible de se connecter &agrave; la base de donn&eacute;e';
+					if (DB_DATABASE == 'password' || DB_DATABASE == 'databasename' || DB_USERNAME == 'username')
+					{
+						$contenu .= '<br><small>Il doit y avoir un fichier init.php dans ' . __SITE_PATH . DS . 'includes, que vous n\'avez pas modifier</small>';
+					}
+					require_once __APP_PATH . DS . 'layout' . DS . $page->getLayout() . '.phtml';
+					die;
+				break;
+				case '1045':
+					$page = new Page();
+					$page->setLayout('alert');
+					$contenu = 'Impossible de se connecter &agrave; la base de donn&eacute;e';
+					if (DB_DATABASE == 'password' || DB_DATABASE == 'databasename' || DB_USERNAME == 'username')
+					{
+						$contenu .= '<br><small>Il doit y avoir un fichier init.php dans ' . __SITE_PATH . DS . 'includes, que vous n\'avez pas modifier</small>';
+					}
+					require_once __APP_PATH . DS . 'layout' . DS . $page->getLayout() . '.phtml';
+					die;
+				break;
+				case '2A000':
+					if (__DEV_MODE)
+					{
+						throw new Exception("Syntax Error: " . $e->getMessage(), $e->getCode());
+					}
+				break;
+				default:
+					throw new Exception ($e->getMessage() .' ' . get_class ( $this ), $e->getCode()); 
+				break;
 			}
 		}
-	
 	}
 	
 	
@@ -208,7 +273,7 @@ abstract class Model extends PDO{
 				$sql .= '*';
 			}
 			
-			$sql .= ' FROM ' . $this->table . ' as ' . $this->tableAs . ' ';
+			$sql .= ' FROM `' . $this->table . '` as `' . $this->tableAs . '` ';
 			
 			// Liaison simple
 			if (isset ( $req ['join'] )) {
@@ -252,12 +317,12 @@ abstract class Model extends PDO{
 								debug ( $v );
 							}
 							$v = '"' . mysql_escape_string ( $v ) . '"';
-							$cond[] = $k.' LIKE ' .$v;
+							$cond[] = '`'.$k.'` LIKE ' .$v;
 						}
 						else
 						{
 							$v = (int) $v;
-							$cond[] = $k.'=' .$v;
+							$cond[] = '`'.$k.'`=' .$v;
 						}
 						
 					}
@@ -297,15 +362,15 @@ abstract class Model extends PDO{
 			if (isset ( $req ['limit'] )) {
 				$sql .= ' LIMIT ' . $req ['limit'];
 			}
-			$this->sql = $sql;
+			self::$sqlList[] = $this->sql = $sql;
 			$pre = $this->pdo->prepare ( $sql );
-			$this->count ++; 
+			self::$count++; 
 //			debug($this->sql);
-			$pre->execute ();
-		} catch ( PDOException $e ) {
+			$pre->execute();
+		} catch ( Exception $e ) {
 			if ($e->getCode () == '42S02') {
 				if (method_exists ( $this, 'install' )) {
-					$this->install ();
+					$this->install();
 				}
 			}
 		}
@@ -316,7 +381,7 @@ abstract class Model extends PDO{
 	/**
 	 * Alias permettant de retrouver le premier enregistrement
 	 */
-	public function findFirst($req)
+	public function findFirst($req = array())
 	{
 		return current ( $this->find ( $req ) );
 	}
@@ -328,12 +393,20 @@ abstract class Model extends PDO{
 	{
 		$res = $this->findFirst ( array ('fields' => 'COUNT(' . $this->primaryKey . ') as count', 'conditions' => $conditions ) );
 		
-		return $res->count;
+		return isset($res->count) ? $res->count : 0;
 	}
 	
-	public function count()
+	public function count($conditions = false)
 	{
-		$res = $this->findFirst ( array ('fields' => 'COUNT(' . $this->primaryKey . ') as count') );
+		if ( !$conditions )
+		{
+			$res = $this->findFirst ( array ('fields' => 'COUNT(' . $this->primaryKey . ') as count') );
+		} else {
+			$res = $this->findFirst ( array (
+				'fields' => 'COUNT(' . $this->primaryKey . ') as count',
+				'conditions' => $conditions
+				) );
+		}
 		
 		return ($res) ? $res->count : 0;
 	}
@@ -366,8 +439,8 @@ abstract class Model extends PDO{
 		// Comme on ne eu pas faire DELETE cle textuelle, on ajout des "
 		$id = is_int($id) ? $id : '"'.$id.'"';
 		$sql = "DELETE FROM `{$this->table}` WHERE `{$this->table}`.`{$this->primaryKey}` = $id";
-		$this->sql = $sql;
-		$this->count ++;
+		self::$sqlList[] = $this->sql = $sql;
+		self::$count++;
 		return $this->pdo->query ( $sql );
 	}
 	
@@ -380,6 +453,11 @@ abstract class Model extends PDO{
 	 */
 	public function save($data)
 	{
+		if (!is_object($data))
+		{
+			throw new ErrorException('Model: $data n\'est pas un objet', 107, 0, __FILE__, __LINE__);
+		}
+		
 		try {
 			$key = $this->primaryKey;
 			$fields = array ();
@@ -405,25 +483,21 @@ abstract class Model extends PDO{
 				$sql = 'INSERT INTO ' . $this->table . ' SET ' . implode ( ',', $fields );
 				$action = 'insert';
 			}
-			$this->sql = $sql;
+			self::$sqlList[] = $this->sql = $sql;
 			
 			$pre = $this->pdo->prepare ( $sql );
 			// debug($sql);
-			$this->count ++;
+			self::$count++;
 			$bool = $pre->execute ( $d );
 			if ($action == 'insert') {
-				$this->id = $this->pdo->lastInsertId ();
+				$this->setLastInsertId();
 			}
 		
-		} catch ( PDOException $e ) {
+		} catch ( Exception $e ) {
 			$this->lastError = $e->getMessage() . ' for ' . get_class ( $this ) . ' in ' . $this->table;
 			
-			if (__DEV_MODE)
-			{
-			debug($this->lastError);
-			}
-			
 			if ($e->getCode() == '42S02') {
+				
 				if (method_exists ( $this, 'install' )) {
 					$this->install ();
 					return $this->save ( $data );
@@ -433,35 +507,71 @@ abstract class Model extends PDO{
 		return isSet($bool) ? $bool : false;
 	}
 	
-	/*
-	 * Pour les accros de PDO
-	 */
-	public function query($sql)
-	{
-		$this->count ++;
-		$this->sql = $sql;
-		
-		$pre = $this->pdo->prepare ( $sql );
-		// debug($sql);
-		return $pre->execute ();
-	}
+    /*
+     * Pour les accros de PDO
+     */
+    public function query($sql, $fetch = false)
+    {
+    	try {
+	        self::$count++;
+	        self::$sqlList[] = $this->sql = $sql;
+	        
+	        $pre = $this->pdo->prepare ( $sql );
+	        // debug($sql);
+	        if ($fetch)
+	        {
+	            $pre->execute();
+	            return $pre->fetchAll ( PDO::FETCH_OBJ );
+	        } else { return $pre->execute(); }
+    	} catch(PDOException $e) {
+    		Log::setLog('Query call: ' . $e->getMessage(), get_class($this));
+    	}
+    }
 	
 	
 	/**
 	 * 
+	 * Alias pour getLastInsertId()
 	 * Retourne le dernier ID apres un insert
+	 * @deprecated
 	 */
 	public function getLastId()
 	{
 		return $this->id;
 	}
 	
+	/**
+	 * 
+	 * Retourne le dernier ID apres un insert
+	 */
+	public function getLastInsertId()
+	{
+		return $this->id;
+	}
+	
+	/**
+	 * 
+	 * Enregistre le dernier ID apres un insert
+	 */
+	public function setLastInsertId()
+	{
+		$this->id = $this->pdo->lastInsertId();
+	}
 	
 	/*
 	 * Construit l'arbre des table Avec un objetct ou un array
 	 */
-	public function debug($query)
+	public function debug($query = NULL)
 	{
+		
+		if (is_null($query))
+		{
+			debug(self::$sqlList);
+			debug($this->sql);
+			debug($this->lastError);
+			return false;
+		}
+		
 		// Cast pour forcé le type a tableau
 		$req = ( array ) $query;
 		
@@ -525,4 +635,12 @@ width: 940px;height:250px;">
 		return $html . '</table></div>';
 	}
 
+}
+
+
+class cwModel extends Model{
+	function getNbQuery()
+	{
+		return self::$count;
+	}
 }

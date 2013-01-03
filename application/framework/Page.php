@@ -1,15 +1,74 @@
 <?php
-class Page {
+/*##################################################
+ *                                 Page.php
+ *                            -------------------
+ *   begin                : 2012-03-08
+ *   copyright            : (C) 2012 DevPHP
+ *   email                : developpeur@crystal-web.org
+ *
+ *
+###################################################
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
+class Page extends Config{
 
-private $siteTitle=NULL;
-private $pageTitle=NULL;
-private $menu=array();
+private $siteTitle = NULL;
+private $siteSlogan = NULL;
+private $pageTitle = NULL;
+private $menu = array();
 private $head;
 private $breadcrumb;
 private $body;
 private $layout  = 'default';
 
-
+	/**
+	* @var Singleton
+	* @access private
+	* @static
+	*/
+	private static $_instance = null;
+	 
+	
+	/**
+	* Méthode qui crée l'unique instance de la classe
+	* si elle n'existe pas encore puis la retourne.
+	*
+	* @param void
+	* @return Singleton
+	*/
+	public static function getInstance() {
+		if(is_null(self::$_instance)) {
+			self::$_instance = new Page();  
+		}
+		return self::$_instance;
+	}
+	
+	public static function setInstance($instance) {
+		self::$_instance = $instance;
+	}
+	
+	public function Page()
+	{
+		$config = $this->getConfig();
+		$this->setLayout($config->layout);
+		$this->setSiteTitle($config->siteName);
+		$this->setSiteSlogan($config->siteSlogan);
+	}
+	
 	/**
 	* Definis le layout du site
 	*
@@ -81,6 +140,26 @@ private $layout  = 'default';
 		return $this->pageTitle;
 	}
 	
+	/**
+	* Definis le slogan du site
+	*
+	* @param string $slogan
+	*/
+	public function setSiteSlogan($slogan)
+	{
+		$this->siteSlogan = $slogan;
+	}
+	
+	
+	/**
+	* Renvois le slogan du site
+	*
+	* @return string $slogan
+	*/
+	public function getSiteSlogan()
+	{
+		return $this->siteSlogan;
+	}
 	
 	/**
 	* 
@@ -116,7 +195,7 @@ private $layout  = 'default';
 	
 	public function setHeader($source)
 	{
-		$this->head.= $source;
+		$this->head.= nl2null($source);
 		return $this;
 	}
 	
@@ -125,14 +204,12 @@ private $layout  = 'default';
 		$this->head.= '<link rel="stylesheet" href="'.$url.'">' . PHP_EOL;
 		return $this;
 	}
-	
-	
+		
 	public function setHeaderJs($url)
 	{
 		$this->head.= '<script type="text/javascript" src="'.$url.'"></script>' . PHP_EOL;
 		return $this;
 	}
-	
 	
 	public function setBreadcrumb($url, $name)
 	{
@@ -150,6 +227,7 @@ private $layout  = 'default';
 		$this->body = $body;
 		return $this;
 	}
+	
 	public function getBody()
 	{
 		return $this->body;

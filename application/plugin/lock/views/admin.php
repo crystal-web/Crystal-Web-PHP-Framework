@@ -122,13 +122,14 @@
 <tr>
     <td colspan="2">
 <?php
-echo $this->mvc->Form->input('textForm', 'Texte du boutton', array('value' => $textForm)); ?>
+$form = Form::getInstance();
+echo $form->input('textForm', 'Texte du boutton', array('value' => $textForm)); ?>
     </td>
 </tr>
 <tr>
     <td colspan="2">
 <?php
-echo $this->mvc->Form->input('message', '', array('type' => 'textarea', 'editor' => array('params'=> array('model'=>'htmlfull')), 'value' => $message));
+echo $form->input('message', '', array('type' => 'textarea', 'editor' => array('params'=> array('model'=>'htmlfull')), 'value' => $message));
 ?>
 
     </td>

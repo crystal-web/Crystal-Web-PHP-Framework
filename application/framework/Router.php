@@ -1,17 +1,34 @@
 <?php
+/*##################################################
+ *                                Router.php
+ *                            -------------------
+ *   begin                : 2012-03-08
+ *   copyright            : (C) 2012 DevPHP
+ *   email                : developpeur@crystal-web.org
+ *
+ *
+###################################################
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
 class Router{
 
 	static $routes = array(); 
-	static $prefixes = array(); 
-
-	/**
-	* Ajoute un prefix au Routing
-	**/
-	static function prefix($url,$prefix){
-		self::$prefixes[$url] = $prefix; 
-	}
-
-
+	static $language = 'fr';
+	static $multilingue = false;
 	/**
 	* Permet de parser une url
 	* @param $url Url � parser
@@ -19,8 +36,18 @@ class Router{
 	**/
 	static function parse($url,$request){
 		$url = trim($url,'/'); 
+		
+		$url = explode('/', $url);
+		if (strlen($url[0]) == 2)
+		{
+			self::$language = $url[0];
+			array_shift($url);
+		}
+		
+		$url = implode('/', $url);
+		
 		$match = FALSE;
-		if(empty($url)){
+		if(empty($url)){ 
 			//Router::$routes[0]['url']; // DEL: 2012-02-15
 			$url = 'index';				 // ADD: 2012-02-15
 		}else{
@@ -31,26 +58,23 @@ class Router{
 					$url = $v['origin'];
 					foreach($match as $k=>$v){
 						$url = str_replace(':'.$k.':',$v,$url); 
-					} 
+					}
+
 					$asMatch = true; 
 				}
 			}
 		}
 		
 		$params = explode('/',$url);
-		if(in_array($params[0],array_keys(self::$prefixes))){
-			$request->prefix = self::$prefixes[$params[0]];
-			array_shift($params); 
+		if (strlen($params[0]) == 2)
+		{
+			self::$language = $params[0];
+			array_shift($params);
 		}
 		$request->controller = $params[0];
 		$request->action = isset($params[1]) ? $params[1] : 'index';
-		foreach(self::$prefixes as $k=>$v){
-			if(strpos($request->action,$v.'_') === 0){
-				$request->prefix = $v;
-				$request->action = str_replace($v.'_','',$request->action);  
-			}
-		}
-		$request->params = $match;//array_slice($params,2);
+		$request->params = $match;
+		Log::setLog(print_r($request, true));
 		return true; 
 	}
 
@@ -62,7 +86,7 @@ class Router{
 		$r = array();
 		$r['params'] = array();
 		$r['url'] = $url;  
-
+		
 		$r['originreg'] = preg_replace('/([a-z0-9]+):([^\/]+)/','${1}:(?P<${1}>${2})',$url);
 		$r['originreg'] = str_replace('/*','(?P<args>/?.*)',$r['originreg']);
 		$r['originreg'] = '/^'.str_replace('/','\/',$r['originreg']).'$/'; 
@@ -117,7 +141,7 @@ class Router{
    
 	//$url = preg_replace('#[^A-Za-z0-9-\/:]#', '', $url);
     $url = str_replace('--', '-', $url);
-    $url = strtolower($url);
+    //$url = strtolower($url);
     $url = trim($url, '-');//*/
 	
 		foreach(self::$routes as $v){
@@ -129,19 +153,23 @@ class Router{
 			}
 		}
 		
-		foreach(self::$prefixes as $k=>$v){
-			if(strpos($url,$v) === 0){
-				$url = str_replace($v,$k,$url); 
-			}
-		}
-		return __CW_PATH.'/'.$url; 
+		return (self::$multilingue) ? __CW_PATH.'/'.self::$language.'/'.$url :  __CW_PATH.'/'.$url; 
 	}
 	
-	
-	static function redirect($url=null)
+	static function moved($controller, $touri)
 	{
-	header('Location: '.self::url($url));
-	 /* On tue le script, sinon il poursuit et les evenement de type flash n s'effectue pas */
+		$request = Request::getInstance();
+		if ($request->getController() == $controller)
+		{
+			Router::redirect($touri, true);
+		}
+	}
+	
+	static function redirect($url=null, $moved = false)
+	{
+		if ($moved) { header("Status: 301"); }
+		header('Location: '.self::url($url));
+	 /* On tue le script, sinon il poursuit et les evenement de type flash ne s'effectue pas */
 	die();
 	}
 
@@ -166,6 +194,19 @@ class Router{
 		}
 		die();
 	}
+
+	static function getReferer()
+	{
+		if (isSet($_SERVER['REFERER']))
+		{
+			return $_SERVER['REFERER'];
+		}
+		elseif ( isSet( $_SERVER['HTTP_REFERER'] ) )
+		{
+			return $_SERVER['HTTP_REFERER'];
+		}		
+		return false;
+	}
 	
 	static function error($type)
 	{
@@ -173,11 +214,8 @@ class Router{
 		{
 			case 404:
 			header("HTTP/1.0 404 Not Found");
-			// Chargement du controller error404
-			
 			break;
 		}
-
 	}
 	
 	
@@ -188,7 +226,7 @@ class Router{
 		}
 		else
 		{
-			$serverrequri =    $_SERVER['REQUEST_URI'];
+			$serverrequri = $_SERVER['REQUEST_URI'];
 		}
 		
 		$s = empty($_SERVER["HTTPS"]) ? '' : ($_SERVER["HTTPS"] == "on") ? "s" : "";
@@ -203,11 +241,35 @@ class Router{
 	}
 	
 	
-	static function refresh($sec = 0)
+	static function refresh($sec = 0, $url = false)
 	{
 		$sec = (int) $sec;
-		header('Refresh: ' . $sec . ';url=' . Router::selfURL());
+        if ($url)
+        {
+            header('Refresh: ' . $sec . ';url=' . Router::url($url));
+        } else {header('Refresh: ' . $sec . ';url=' . Router::selfURL());}
+		
 		if ($sec == 0) { die; }
+	}
+	
+	
+	static function urlLanguage($lng)
+	{
+		if (!self::$multilingue) {
+			return self::webroot($url);
+		}
+		$params = explode('/',trim(self::selfURL(false), '/'));
+		if (strlen($params[0]) == 2)
+		{
+			 $params[0] = $lng;
+			 $url = implode('/', $params);
+		}
+		else
+		{
+			$url = $lng . '/' . trim(implode('/', $params), '/');
+		}
+		
+		return self::webroot($url);
 	}
 }
 

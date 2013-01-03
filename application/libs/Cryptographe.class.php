@@ -109,4 +109,38 @@ class Cryptographe
         	eval('?>'.gzuncompress(base64_decode($gzphpcode)));
         }
         
+        
+        
+        public function login_generator()
+        {
+        	
+        	
+        $voyelles = array ('a', 'e', 'i', 'o', 'u' );
+        shuffle($voyelles)-1;
+        $nb_voyelles = count($voyelles);
+        
+		$consonnes = array ('b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'bl', 'bs', 'xl', 'xk', 'xd', 'ch', 'ck', 'cl', 'cm', 'cn', 'cp', 'cr', 'ct', 'cv', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'dj', 'dg', 'dl', 'dm', 'dn', 'dp', 'dr', 'zd', 'z', 'x', 'fd', 'ff', 'fl', 'fm', 'fp', 'fr', 'ft', 'xt', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'gb', 'gd', 's', 'gh', 'gl', 'gm', 'gn', 'gp', 'gr', 'gs', 'gt', 'zl', 'zb', 'xp', 'kl', 'kr', 'kt', 'll', 'lb', 'lc', 'lck', 'ld', 'lch', 'lf', 'lg', 'lk', 'lm', 'ln', 'lp', 'lr', 'ls', 'lt', 'lv', 'lqu', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'mm', 'mb', 'mc', 'md', 'mg', 'mk', 'ml', 'mn', 'mp', 'mr', 'ms', 'mt', 'z', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'nn', 'nc', 'nd', 'nf', 'ng', 'nj', 'nk', 'nl', 'nr', 'ns', 'nt', 'nz', 'nqu', 't', 'qu', 'pf', 'pp', 'ph', 'pj', 'y', 'pl', 'pm', 'pn', 'ps', 'pt', 'v', 'b', 'c', 'd', 'f', 'g', 'j', 'xb', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'rb', 'rc', 'rd', 'rf', 'rg', 'rk', 'rl', 'rm', 'rn', 'rp', 'rqu', 'rr', 'rs', 'rv', 'ss', 'sb', 'sc', 'sd', 'squ', 'sl', 'sm', 'sn', 'sp', 'st', 'sv', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'tt', 'tch', 'tf', 'br', 'tm', 'tr', 'ts', 'r', 'tz', 'zn', 'zp', 'vl', 'vl', 'gu', 'zt', 'vr', 'gh', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p' );
+		shuffle($consonnes);
+		$nb_consones = count($consonnes)-1;
+		
+		$consonnes_start = array ('b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'x', 'z', 'y', 'qu', 'gu', 'gh', 'bl', 'gh', 'br', 'ch', 'cl', 'cr', 'dr', 'fl', 'fr', 'ph', 'gl', 'gr', 'h', 'kr', 'kl', 'pr', 'pl', 'v', 'sc', 't', 'squ', 'sl', 'sm', 'sp', 'st', 'tch', 'tr', 'ts', 'vr', 'vl', 'b', 'c', 'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's' );
+		shuffle($consonnes_start);
+		
+		$consonnes_end=array('b','c','d','ff','tch','ch','ck','l','m','n','ppe','r','s','t','ve','x','z','y','que','gue','gh','ct','on','an','a','o','e','en','lle','rre','sse','ne','mme','ffe','tte','ine');
+		shuffle($consonnes_end);
+		
+		
+		//$tmp = $consonnes_start[0] . $voyelles[rand(0,$nb_voyelles)] . $consonnes[rand(0,$nb_consones)] .$voyelles[rand(0,$nb_voyelles)] . $consonnes_end[0];
+		
+		
+		$tmp =$voyelles[rand(0,$nb_voyelles)] . $consonnes_start[0] . $voyelles[rand(0,$nb_voyelles)] . $consonnes[rand(0,$nb_consones)] . $consonnes_end[0];
+		
+		$patterns		= array('/quu/','/ik/','/ak/','/uc/','/aa/','/uu/','/ii/','/iy/','/ckr/','/xki/','/xka/','/xku/','/xko/');
+		$replacements	= array('cku','ick','ack','uck','a','u','i', 'y','kr','sky', 'ska','sku','sko');
+		preg_replace($patterns, $replacements, $tmp);
+
+        	return $tmp;
+        	
+        	
+        }
     }

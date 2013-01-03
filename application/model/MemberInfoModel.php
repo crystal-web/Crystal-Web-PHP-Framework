@@ -45,9 +45,18 @@ Class MemberInfoModel extends Model{
 			$data->id = $id->id;
 		}
 
-		unset($data->day);
-		unset($data->month);
-		unset($data->year);
+
+		if (isSet($data->day) AND isSet($data->month) AND isSet($data->year))
+		{
+			if (checkdate($data->month, $data->day, $data->year))
+			{
+				$data->birthday = mktime(1,1,1,$data->month, $data->day, $data->year);
+			}
+			unset($data->day);
+			unset($data->month);
+			unset($data->year);
+		}
+		
 		return $this->save($data);
 		
 	}

@@ -1,11 +1,59 @@
 <?php
+/*##################################################
+ *                                 Form.php
+ *                            -------------------
+ *   begin                : 2012-03-08
+ *   copyright            : (C) 2012 DevPHP
+ *   email                : developpeur@crystal-web.org
+ *
+ *
+###################################################
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+###################################################*/
 class Form{
 	
 	public $mvc; 
 	public $errors; 
 	const errorDisplay = 'block';			//block ou inline
 	
-	public function __construct($mvc){
+	
+	/**
+	* @var Singleton
+	* @access private
+	* @static
+	*/
+	private static $_instance = null;
+	 
+	
+	/**
+	* Méthode qui crée l'unique instance de la classe
+	* si elle n'existe pas encore puis la retourne.
+	*
+	* @param void
+	* @return Singleton
+	*/
+	public static function getInstance($mvc='ToDel') {
+		if(is_null(self::$_instance)) {
+			self::$_instance = new Form($mvc);  
+		}
+		return self::$_instance;
+	}
+	
+	public function __construct($mvc='ToDel'){
 		$this->mvc = $mvc; 
 	}
 	
@@ -20,6 +68,19 @@ class Form{
 		$error = false; 
 		$value = $classError = ''; 
 		$name = trim($name);
+		$request = Request::getInstance();
+		
+		//Changement pour le systeme d'option
+		if ( isSet($options['options']) )
+		{
+			$options['option'] = $options['options'];
+			unset($options['options']);
+			if (!is_array($options['option']))
+			{
+				throw new Exception("Valeur de array(option) n'est pas un array()", 1);
+			}
+		}
+		
 		/**
 		 * Ajoute la valeur d'erreur textuelle au champ en erreur
 		 */
@@ -32,13 +93,13 @@ class Form{
 		/**
 		 * Ajoute la valeur de champ a value si elle exist
 		 */
-		if(!isset($this->mvc->Request->data->$name) && isSet($options['value']))
+		if(!isset($request->data->$name) && isSet($options['value']))
 		{
 			$value = $options['value']; 
 		}
-		elseif(isset($this->mvc->Request->data->$name))
+		elseif(isset($request->data->$name))
 		{
-			$value = clean($this->mvc->Request->data->$name, 'str'); 
+			$value = clean($request->data->$name, 'str'); 
 		}
 		
 		
@@ -85,7 +146,7 @@ class Form{
 		 */
 		foreach($options as $k=>$v)
 		{
-			if($k!='type' && $k!='addon' && $k!='default' && $k!='options')
+			if($k!='type' && $k!='addon' && $k!='default' && $k!='options' && $k!='option' && $k!='value')
 			{
 			$attr .= " $k=\"$v\""; 
 			}
@@ -152,13 +213,13 @@ class Form{
 		$html .= '<input type="hidden" name="'.$name.'[]" value="0">';
 
 		
-		$html .= '<ul class="inputs-list" id="'.$name.'">';
+		$html .= '<ul class="inputs-list" id="input'.$name.'">';
 			foreach($options['option'] AS $k=>$v)
 			{
 				$sel = NULL;
-            	if (isSet($this->mvc->Request->data->$name))
+            	if (isSet($request->data->$name))
             	{
-					foreach($this->mvc->Request->data->$name AS $ke=>$va)
+					foreach($request->data->$name AS $ke=>$va)
 					{
 						if ($va == $k)
 		            	{
@@ -168,11 +229,12 @@ class Form{
             	}
             	
 			 $html .= '<li>
-                  <label><input type="checkbox" name="'.$name.'[]" id="'.clean($name . $k, 'slug').'" value="'.$k.'" '.$sel.'>
-                  <span>'.$v.'</span></label>
+			 <input type="checkbox" name="'.$name.'[]" id="'.clean($name . $k, 'slug').'" value="'.$k.'" '.$sel.'>
+                  <label>'.$value.'
+                  </label>
                 </li>'; 
 			}
-		$html .= '</ul>';
+		$html .= '</ul><span>'.$v.'</span>';
 		
 		}
 		

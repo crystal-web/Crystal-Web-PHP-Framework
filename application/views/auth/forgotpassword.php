@@ -1,39 +1,21 @@
-<?php
-if (isSet($errors_forgotpassword))
-{
-	if (count($errors_forgotpassword))
-	{
-		?>
-		<div class="alert-message block-message error fade in" data-alert="alert" >
-			<a class="close" href="#">&times;</a>
-			<p><?php foreach ($errors_forgotpassword AS $v){echo $v;} ?></p>
-			<div class="alert-actions">
-				<a class="btn small" href="<?php echo Router::url('auth/subscribe'); ?>">Pas encore de compte ?</a>
-			</div>
-		</div>
-		<?php
-	}
-}
-
-?>
 <form action="<?php echo Router::url('auth/forgotpassword'); ?>" method="post">
-<fieldset>
-	<legend>Retrouver mes identifiants</legend>
-	
-	<div class="clearfix">
-		<label for="web">E-mail: </label>
-		<div class="input">
-			<div class="input-prepend">
-				<span class="add-on">@</span>
-				<input type="text"name="mailmember" placeholder="moi@domain.com">
+<div class="widget">
+	<div class="widget-content">
+		<div class="clearfix">
+			<label for="web"><?php echo i18n::get('Your email address'); ?>: </label>
+			<div class="input">
+				<div class="input-prepend">
+					<span class="add-on">@</span>
+					<input type="text"name="mailmember" placeholder="moi@domain.com">
+				</div>
+			</div>
+		</div>
+							
+		<div class="clearfix">
+			<div class="input">
+				<input type="submit" name="submit" class="btn success">
 			</div>
 		</div>
 	</div>
-						
-	<div class="clearfix">
-		<div class="input">
-			<input type="submit" name="submit" value="Connection" class="btn success">
-		</div>
-	</div>
-</fieldset>
+</div>
 </form>
