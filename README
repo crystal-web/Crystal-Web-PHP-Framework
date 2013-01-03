@@ -8,18 +8,18 @@
 Information:
 -----------
 Open-Source depuis le 11 février 2012
-Version: 12.04		(YY.MM)
+Version: 13.01		(YY.MM)
 Auteur: Christophe BUFFET
-Description: Système MVC permettant au développeurs PHP de réaliser
+Description: SystÃ¨me MVC permettant au dÃ©veloppeurs PHP de rÃ©aliser
 	des sites web, rapidement et efficacement.
 
-Nécessite: PHP 5, une base de donnée et mod_rewrite on
+Nécessite: PHP 5, une base de donnÃ©e et mod_rewrite on
 
 Installation:
 ------------
 
-ATTENTION public_html/ correspond à la racine du site, le dossier peut être renommé si nécéssaire
-Si vous ne disposez pas d'un dossier public_html ou www. Renommé application/ et indiqué le nouveau nom dans index.php ligne 19 define ('__APP_PATH', dirname(__SITE_PATH) . DS . 'application');
+ATTENTION public_html/ correspond Ã  la racine du site, le dossier peut Ãªtre renommé si nÃ©cÃ©ssaire
+Si vous ne disposez pas d'un dossier public_html ou www. RenommÃ© application/ et indiquÃ© le nouveau nom dans index.php ligne 23 define ('__APP_PATH', dirname(__SITE_PATH) . DS . 'application');
 
 
 Modifier le fichier /includes/init.php
@@ -34,13 +34,6 @@ Le script doit générer les tables SQL automatiquement.
 
 En cas d'erreur, merci de prendre contact
 
-Note:
------
-
-Certaine partie du code sont encore en développement, notament /application/libs/Config.class.php,
-qui permettra de faire un systeme de configuration basique via la base de donnée et un tableau sérializé
-
-
 Information de license:
 ----------------------
 
@@ -50,11 +43,11 @@ http://creativecommons.org/licenses/by/2.0/fr/
 
 ---------------------------------------------------
 
-Soyer honnête, si vous utilisez le script de quelqu'un, indiqué qui est le propriètaire.
+Soyer honnÃ¨te, si vous utilisez le script de quelqu'un, indiquÃ© qui est le propriÃ©taire.
 Dans le cas contraire, vous risquez de tuer le partage et les ressources open-sources, qui font la richesse de l'internet actuelle.
 
 
 Projet soutenu par: 
 ------------------
 
-ImagineYourCraft.com - Serveur MineCraft hautement modé.
+http://ImagineYourCraft.com - Serveur MineCraft hautement modÃ©.
