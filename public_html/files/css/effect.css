@@ -1,0 +1,8 @@
+.blur{display:inline-block;color:#ddd;text-shadow:0 0 6px #aaa;-ms-filter:progid:DXImageTransform.Microsoft.Blur(pixelradius=2);filter:progid:DXImageTransform.Microsoft.MotionBlur(strength=1,direction=310) progid:DXImageTransform.Microsoft.Blur(pixelradius=2);}
+.flipH{display:inline-block;-moz-transform:scale(-1,1);-o-transform:scale(-1,1);-webkit-transform:scale(-1,1);transform:scale(-1,1);-ms-filter:"progid:DXImageTransform.Microsoft.Matrix(M11=-1, M12=0, M21=0, M22=1, SizingMethod='auto expand')";filter:progid:DXImageTransform.Microsoft.Matrix(M11=-1,M12=0,M21=0,M22=1,SizingMethod="auto expand");}
+.flipV{display:inline-block;-moz-transform:scale(1,-1);-o-transform:scale(1,-1);-webkit-transform:scale(1,-1);transform:scale(1,-1);-ms-filter:"progid:DXImageTransform.Microsoft.Matrix(M11=1, M12=0, M21=0, M22=-1, SizingMethod='auto expand')";filter:progid:DXImageTransform.Microsoft.Matrix(M11=1,M12=0,M21=0,M22=-1,SizingMethod="auto expand");}
+.flippthis {clear: both}
+.flippthis {display: block;-webkit-transition: .3s all linear;-moz-transition: .3s all linear;-ms-transition: .3s all linear;-o-transition: .3s all linear;transition: .3s all linear;-webkit-transition: .3s all linear;-moz-transition: .3s all linear;-ms-transition: .3s all linear;-o-transition: .3s all linear;transition: .3s all linear}
+.flippthis:hover {-webkit-transform: rotate(360deg);-moz-transform: rotate(360deg);-ms-transform: rotate(360deg);-o-transform: rotate(360deg);transform: rotate(360deg);-webkit-transform: rotate(360deg);-moz-transform: rotate(360deg);-ms-transform: rotate(360deg);-o-transform: rotate(360deg);transform: rotate(360deg)}
+
+.affix{position:fixed!important;top:0px;}
