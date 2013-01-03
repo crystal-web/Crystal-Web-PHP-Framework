@@ -5,20 +5,19 @@
          /___/                                                 /___/  
 
 
-Information:
------------
-Open-Source depuis le 11 f�vrier 2012
+## Information:
+
+Open-Source depuis le 11 février 2012
 Version: 13.01		(YY.MM)
 Auteur: Christophe BUFFET
 Description: Système MVC permettant au développeurs PHP de réaliser
 	des sites web, rapidement et efficacement.
 
-N�cessite: PHP 5, une base de donnée et mod_rewrite on
+Nécessite: PHP 5, une base de donnée et mod_rewrite on
 
-Installation:
-------------
+## Installation:
 
-ATTENTION public_html/ correspond à la racine du site, le dossier peut être renomm� si nécéssaire
+ATTENTION public_html/ correspond à la racine du site, le dossier peut être renommé si nécéssaire
 Si vous ne disposez pas d'un dossier public_html ou www. Renommé application/ et indiqué le nouveau nom dans index.php ligne 23 define ('__APP_PATH', dirname(__SITE_PATH) . DS . 'application');
 
 
@@ -30,24 +29,22 @@ Chmod en 777 est requis pour public_html/files/tmp
 Chmod en 777 est requis pour public_html/media
 
 
-Le script doit g�n�rer les tables SQL automatiquement.
+Le script doit générer les tables SQL automatiquement.
 
 En cas d'erreur, merci de prendre contact
 
-Information de license:
-----------------------
+## Information de license:
 
 Christophe BUFFET <developpeur@crystal-web.org> 
 Creative Commons By
 http://creativecommons.org/licenses/by/2.0/fr/
 
----------------------------------------------------
+* * *
 
 Soyer honnète, si vous utilisez le script de quelqu'un, indiqué qui est le propriétaire.
 Dans le cas contraire, vous risquez de tuer le partage et les ressources open-sources, qui font la richesse de l'internet actuelle.
 
 
-Projet soutenu par: 
-------------------
+## Site réalisé avec Crystal-Web: 
 
 http://ImagineYourCraft.com - Serveur MineCraft hautement modé.
