@@ -33,7 +33,6 @@ Class Config
 	{
 		// Génére un fichier de configuration par defaut
 		$config = new stdClass();
-	
 		$config->siteName = 'Crystal-Web CMF';
 		$config->siteSlogan = 'Et si notre partage faisait l\'&eacute;volution ?';
 		// HTTP or HTTPS ??

@@ -30,31 +30,26 @@ $slug = 'A-Za-z0-9_\-';
 
 Router::connect('rpc-:cmd', 'rpc/cmd:([0-9a-z]+)');
 
-Router::connect('database/structure/:table', 'database/structure/table:([' . $slug . ']+)');
-Router::connect('database/dump/:table', 'database/dump/table:([' . $slug . ']+)');
-Router::connect('database/optimize/:table', 'database/optimize/table:([' . $slug . ']+)');
+/***************************************
+*	Plugins
+***************************************/
+Router::connect('plugin/:slug-:stat', 'plugin/slug:([a-z0-9\-]+)/stat:([0-1])');
+Router::connect('plugin/:slug-setting', 'plugin/manager/slug:([a-z0-9\-]+)');
+Router::connect('plugin/:slug-setting-:menu', 'plugin/manager/slug:([a-z0-9\-]+)/menu:([a-z0-9\-]+)');
 
 /***************************************
 *	Error
 ***************************************/
+Router::connect('alert', 'error');
+Router::connect('alert/del-:id', 'error/delete/id:([0-9a-z]+)');
+Router::connect('alert/delele', 'error/delete');
 
-
-Router::connect('alert',
-				'error');
-Router::connect('alert/del-:id',
-				'error/delete/id:([0-9a-z]+)');
-Router::connect('alert/delele',
-				'error/delete');
-				
 /***************************************
 *	Contact
 ***************************************/
-Router::connect('nous-contacter',
-				'contact');
-Router::connect('nous-contacter/read',
-				'contact/read');
-Router::connect('nous-contacter/read-:id',
-				'contact/read/id:([0-9]+)');
+Router::connect('nous-contacter', 'contact');
+Router::connect('nous-contacter/read', 'contact/read');
+Router::connect('nous-contacter/read-:id', 'contact/read/id:([0-9]+)');
 
 /***************************************
 *	Espace Membre
