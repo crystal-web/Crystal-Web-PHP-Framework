@@ -31,8 +31,7 @@ class Securite
 	 * @deprecated
 	 * @param String $string
 	 */
-	static function html($string)
-	{
+	static function html($string) {
 		// S�curisation des variable HTML
 		$string = htmlentities($string, ENT_QUOTES, 'UTF-8');
 		return $string;
@@ -44,23 +43,22 @@ class Securite
 	 * Déprotége le code
 	 * @deprecated
 	 */
-	static function unhtml($string)
-	{
+	static function unhtml($string) {
 	return html_entity_decode($string);
 	}
 	
 	// Cryptage irr�versible
 	static function Hcrypt ($str){
-	return str_rot13(base64_encode(md5(magicword.$str)));
+		return str_rot13(base64_encode(md5(magicword.$str)));
 	}
 	
 	
 	// Fonctions de cryptage simple
-	static function crypt ($str){
-	return str_rot13(base64_encode($str));
+	static function crypt ($str) {
+		return str_rot13(base64_encode($str));
 	}
 	static function decrypt ($str){
-	return base64_decode(str_rot13($str));
+		return base64_decode(str_rot13($str));
 	}	
 
 	
@@ -72,39 +70,27 @@ class Securite
 		// On test si $_SERVER exist
 		if (isSet($_SERVER)) {
 			
-			if (isSet( $_SERVER ['HTTP_X_FORWARDED_FOR'] ))
-			{
+			if (isSet( $_SERVER ['HTTP_X_FORWARDED_FOR'] )) {
 				$ip = $_SERVER ['HTTP_X_FORWARDED_FOR'];
-			}
-			elseif (isSet( $_SERVER ['HTTP_CLIENT_IP'] ))
-			{
+			} elseif (isSet( $_SERVER ['HTTP_CLIENT_IP'] )) {
 				$ip = $_SERVER ['HTTP_CLIENT_IP'];
-			}
-			else
-			{
-				if (isSet($_SERVER ['REMOTE_ADDR']))
-				{
+			} else {
+				if (isSet($_SERVER ['REMOTE_ADDR'])) {
 				$ip = $_SERVER ['REMOTE_ADDR'];
 				}
 			}
 		// Sinon on utilise une ancienne methode
 		} else {
 			// getenv � Retourne la valeur d'une variable d'environnement
-			if (c( 'HTTP_X_FORWARDED_FOR' ))
-			{
+			if (c( 'HTTP_X_FORWARDED_FOR' )) {
 				$ip = getenv( 'HTTP_X_FORWARDED_FOR' );
-			}
-			elseif (getenv( 'HTTP_CLIENT_IP' ))
-			{
+			} elseif (getenv( 'HTTP_CLIENT_IP' )) {
 				$ip = getenv( 'HTTP_CLIENT_IP' );
-			}
-			else
-			{
+			} else {
 				$ip = getenv( 'REMOTE_ADDR' );
 			}
 			
 		}
-		
 		return trim($ip);
 	}
 	
@@ -115,8 +101,7 @@ class Securite
 	 */
 	static function detect_proxy($myIP = false) {
 		noError(true);
-		if (!$myIP)
-		{
+		if (!$myIP) {
 			$myIP = self::ipX();
 		}
 		
@@ -143,22 +128,19 @@ class Securite
 		$libProxy = array(false, 'No');
 	 
 		
-		foreach($scan_headers as $i)
-		{
-			if (isSet($_SERVER[$i]))
-			{
+		foreach($scan_headers as $i) {
+			if (isSet($_SERVER[$i])) {
 				if($_SERVER[$i]) { $flagProxy = true; }
 			}
 		}
 		
 		
-		if (isSet($_SERVER['REMOTE_PORT']))
-		{
+		if (isSet($_SERVER['REMOTE_PORT'])) {
 			
 		if (
 			in_array($_SERVER['REMOTE_PORT'], array(8080,80,6588,8000,3128,553,554))
-				OR
-			@fsockopen($_SERVER['REMOTE_ADDR'], 80, $errno, $errstr, 30)
+				// Supprimé prend trop de temps
+				// OR @fsockopen($_SERVER['REMOTE_ADDR'], 80, $errno, $errstr, 1)
 				)
 			{
 				$flagProxy = true;
@@ -221,12 +203,10 @@ class Securite
 				)
 			{
 				$libProxy = array(true, 'Anonymous Proxy');
-			}
+			} else {
 			// High Anonymous Proxy            
 			// REMOTE_ADDR = proxy IP
-			// HTTP_X_FORWARDED_FOR = not determined                    
-			else
-			{
+			// HTTP_X_FORWARDED_FOR = not determined    				
 				$libProxy = array(true, 'High Anonymous Proxy');
 			}
 		}
@@ -239,19 +219,15 @@ class Securite
 	 * Intérroge le cache pour savoir si une ip est bloqué
 	 * @param String $ip
 	 */
-	static function isLockIp($ip=NULL)
-	{
+	static function isLockIp($ip=NULL) {
 	$ip=(empty($ip)) ? Securite::ipX() : $ip;
 
 	$oCache = new Cache('iplock');
 	$tableIpLock = $oCache->getCache();
 	
-		if (array_key_exists($ip, $tableIpLock))
-		{
+		if (array_key_exists($ip, $tableIpLock)) {
 		return true;
-		}
-		else
-		{
+		} else {
 		return false;
 		}
 	}
@@ -264,8 +240,7 @@ class Securite
 	 * Qui sera utilisé
 	 * @param String $ip
 	 */
-	static function toLockIp($ip=NULL)
-	{
+	static function toLockIp($ip=NULL) {
 		$ip=(empty($ip)) ? Securite::ipX() : $ip;
 	
 		$oCache = new Cache('iplock');
@@ -281,24 +256,17 @@ class Securite
 	 * Retourne un Array contenant les informations du site référent
 	 * Dans le cas ou celui-ci n'hexiste pas, les champ sont NULL
 	 */
-	static function referer()
-	{
+	static function referer() {
 	$part = array(0=>"scheme","host","port","user","pass","path","query","fragment");
 	$result = array_flip($part);
-		if(isset($_SERVER['HTTP_REFERER']))
-		{
+		if(isset($_SERVER['HTTP_REFERER'])) {
 		$parse_url = parse_url($_SERVER['HTTP_REFERER']);
-			if(get_magic_quotes_gpc() == 1)
-			{
-				while(list($key,$val) = each($parse_url))
-				{
+			if(get_magic_quotes_gpc() == 1) {
+				while(list($key,$val) = each($parse_url)) {
 					$result["$key"] = $val;
 				}
-			}
-			else
-			{
-				while(list($key,$val) = each($parse_url))
-				{
+			} else {
+				while(list($key,$val) = each($parse_url)) {
 					$result["$key"] = addslashes($val);
 				}
 			}
@@ -312,8 +280,7 @@ class Securite
 	 * Test si une adresse e-mail est correct
 	 * @param string $string
 	 */
-	static function isMail($string)
-	{
+	static function isMail($string) {
 		Log::setLog('Check if @ existe in mail', 'Securite');
 		// Charge la librairie des email jetable
 		$mail = library ( 'mailjetable' );
@@ -324,8 +291,7 @@ class Securite
 			/*
 			 * Recherche dans la librairie des mails jetables
 			 */
-			if (( bool ) array_search ( $serveur, $mail ))
-			{
+			if (( bool ) array_search ( $serveur, $mail )) {
 				Log::setLog('Mail has jetable', 'Securite');
 				return false;
 			}
@@ -333,11 +299,19 @@ class Securite
 			/*
 			 * Demande a filter_var si c'est une adresse mail
 			 */
-			if (! filter_var ( $string, FILTER_VALIDATE_EMAIL ))
-			{
+			if (! filter_var ( $string, FILTER_VALIDATE_EMAIL )) {
 				Log::setLog('Filter var respon no mail', 'Securite');
 				return false;
 			}
+
+            /*
+             * Une chaine suppérieur a 255 caractère n'est pas une adresse mail
+             * ou le propriétaire est un spammer
+             */
+            if (strlen($string) >= 255) {
+                Log::setLog('Mail addresse too long', 'Securite');
+                return false;
+            }
 		Log::setLog('Ok it\'s mail', 'Securite');
 		return true;
 	}

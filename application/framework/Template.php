@@ -1,123 +1,131 @@
 <?php
-/*##################################################
- *                               Template.php
- *                            -------------------
- *   begin                : 2012-03-08
- *   copyright            : (C) 2012 DevPHP
- *   email                : developpeur@crystal-web.org
- *
- *
-###################################################
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
-###################################################*/
+/**
+ * @author Christophe BUFFET <developpeur@crystal-web.org>
+ * @license Creative Commons By
+ * @license http://creativecommons.org/licenses/by-nd/3.0/
+ */
+if (!defined('__APP_PATH')) {
+    echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
 
 class Template {
- 
- /**
-   * @var Singleton
-   * @access private
-   * @static
-   */
-   private static $_instance = null;
- 
- 
-   /**
-    * Méthode qui crée l'unique instance de la classe
-    * si elle n'existe pas encore puis la retourne.
-    *
-    * @param void
-    * @return Singleton
-    */
-   public static function getInstance($mvc='ToDel') {
- 
-	if(is_null(self::$_instance)) {
-		self::$_instance = new Template($mvc);  
-	}
- 
-	return self::$_instance;
-   }
-	
-	public function __construct($mvc="ToDel")
-	{
-		$this->mvc = $mvc;
-	}
 
-	
-	/*
-	* @Variables array
-	* @access private
-	*/
-	private $vars = array ();
-	
-	/*
-	* @Variables string
-	* @access private
-	*/
-	private $path = NULL;
-	
-	
-	public function setPath($path /* path to view */)
-	{
-		$this->path = $path;
-	}
-	
-	/**
-	 *
-	 * @set undefined vars
-	 * @param string $index
-	 * @param mixed $value
-	 * @return void
-	 */
-	public function __set($index, $value) {
-		$this->vars [$index] = $value;
-	}
-	
-	public function __get($index)
-	{
-		/* Est logique ? */
-		$index = clean($index, 'str');
-		return isSet($this->vars[$index]) ? $this->vars[$index] : false;
-	}
-	
-	function show($name) {
-		
-		$path = $this->path . DS . $name . '.php';
-		
-		if (file_exists ( $path ) == false) {
-			throw new Exception ( 'Template not found in ' . $path ); 
-			return false;
-		}
-		 
-		// Load variables
-		foreach ( $this->vars as $key => $value ) {
-			if (is_array ( $value )) {
-				$$key = $value;
-			} elseif (is_object ( $value )) {
-				$$key = $value;
-			} else {
-				$$key = stripslashes ( $value );
-			}
-		}
-		
-		include ($path);
-	}
-	
-	public function getVars() {
-		return $this->vars;
-	}
+    /**
+     * @var Template
+     * @access private
+     * @static
+     */
+    private static $_instance = null;
+    private static $_isMobile = false;
+
+    /**
+     * Méthode qui crée l'unique instance de la classe
+     * si elle n'existe pas encore puis la retourne.
+     *
+     * @param void
+     * @return Template
+     */
+    public static function getInstance() {
+        if(is_null(self::$_instance)) {
+            self::$_instance = new Template();
+        }
+        return self::$_instance;
+    }
+
+    public function isMobile($boolean){
+        self::$_isMobile = (bool) $boolean;
+    }
+
+    /*
+    * @Variables array
+    * @access private
+    */
+    private $vars = array ();
+
+    /*
+    * @Variables string
+    * @access private
+    */
+    private $path = NULL;
+
+
+    /**
+     * Indique le path vers le dossier des templates
+     *
+     * @param string $path
+     */
+    public function setPath($path /* path to view */) {
+        // UPDATE pour la portabilité
+        $this->path = preg_replace('#/#', DIRECTORY_SEPARATOR, $path);
+    }
+
+    /**
+     *
+     * @set undefined vars
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function __set($index, $value) {
+        $this->vars [$index] = $value;
+    }
+
+    /**
+     * Action par défaut lorsque template est appelé comme un stdClass
+     *
+     * @param string $index
+     * @return mixed parsed
+     */
+    public function __get($index) {
+        $index = clean($index, 'str');
+        return isSet($this->vars[$index]) ? $this->vars[$index] : false;
+    }
+
+    /**
+     * Indique quel template est utilisé, on y inclus l'ensemble des variables défini
+     *
+     * @return void
+     */
+    function show($name) {
+        $name = preg_replace('#/#', DIRECTORY_SEPARATOR, $name);
+
+        $path = $this->path . DS . $name . '.php';
+
+        if (self::$_isMobile && file_exists($this->path . DS . $name . '.mobi.php')) {
+            $path = $this->path . DS . $name . '.mobi.php';
+        }
+
+
+        if (file_exists ( $path ) == false) {
+            throw new Exception ( 'Template not found in ' . $path );
+            return false;
+        }
+
+        // Load variables
+        foreach ( $this->vars as $key => $value ) {
+            if (is_array ( $value )) {
+                $$key = $value;
+            } elseif (is_object ( $value )) {
+                $$key = $value;
+            } else {
+                $$key = stripslashes ( $value );
+            }
+        }
+
+        if (isset($_GET['debug']) && $_GET['debug'] == 'isdev') {
+            cwDebug($this->vars);
+        }
+
+        include ($path);
+    }
+
+    /**
+     * Permet de récupérer les variables déclaré
+     *
+     * @return array
+     */
+    public function getVars() {
+        return $this->vars;
+    }
 
 }

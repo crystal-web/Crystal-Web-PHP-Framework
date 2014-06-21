@@ -32,26 +32,145 @@
 /**
  * Supprime le BBCode
  */
-function stripBBcode($string)
-{
-	return preg_replace('#\[(.*)\](.*)\[(.*)\]#', '$2', $string);
+function stripBBcode($string) {
+	return preg_replace('|[[\/\!]*?[^\[\]]*?]|si', '', $string);
 }
 
+function mynl2br($text) {
+   return strtr($text, array("\r\n" => '<br>', "\r" => '<br>', "\n" => '<br>'));
+}
 
 /**
  * Convertis le BBCode alias de bbcode_format($str, $picSize)
  */
-function bbcode($str, $picSize=NULL)
-{
+function bbcode($str, $picSize=NULL) {
+	return xCode($str);
 	return bbcode_format($str, $picSize);
 }
 
+function xCode($texte) {
+			$in = $out = array();
+			$in[]	= '#\[(spoiler|hide)\](.*)\[\/(spoiler|hide)]#Usi';					$out[]	= '<div class="spoiler"><button class="teaser btn btn-small">Spoiler</button><div class="contenu well">$2</div></div>';
+
+			
+			// Gras
+			$in[]	= '#\[b\](.*)\[/b\]#Usi';							$out[]	= '<span class="bbCode-bold">$1</span>';
+			// Italic
+			$in[]	= '#\[i\](.*)\[/i\]#Usi';							$out[]	= '<span class="bbCode-italic">$1</span>';
+			// Barré
+			$in[]	= '#\[s\](.*)\[/s\]#Usi';							$out[]	= '<span class="bbCode-strike">$1</span>';
+			// Surligné
+			$in[]	= '#\[o\](.*)\[/o\]#Usi';							$out[]	= '<span class="bbCode-overline">$1</span>';
+			// Sousligné
+			$in[]	= '#\[u\](.*)\[/u\]#Usi';							$out[]	= '<span class="bbCode-underline">$1</span>';
+			// Couleur
+			$in[]	= '#\[color=(.*)\](.*)\[/color\]#Usi';			$out[]	= '<span style="color:$1">$2</span>';
+			$in[]	= '#\[couleur=(.*)\](.*)\[/couleur\]#Usi';			$out[]	= '<span style="color:$1">$2</span>';
+			// Taille
+			$in[]	= '#\[taille=([1-6])\](.*)\[/taille\]#Usi';			$out[]	= '<font size="$1">$2</font>';
+			$in[]	= '#\[size=([1-6])\](.*)\[/size\]#Usi';			$out[]	= '<font size="$1">$2</font>';
+			
+			// Position
+			$in[]	= '#\[position=(left|center|right|justify)\](.*)\[/position\]#Usi';
+					$out[]	= '<p style="text-align: $1;">$2</p>';
+			$in[]	= '#\[align=(left|center|right|justify)\](.*)\[/align\]#Usi';
+					$out[]	= '<p style="text-align: $1;">$2</p>';
+					
+			// Police		
+			$in[]	= '#\[police=(.*)\](.*)\[/police\]#Usi';
+					$out[]	= '<span style="font-family:\'$1\';">$2</span>';
+			$in[]	= '#\[font=(.*)\](.*)\[/font\]#Usi';
+					$out[]	= '<span style="font-family:\'$1\';">$2</span>';
+							
+			// Citation
+			$in[]	= '#\[quote\](.*)\[/quote\]#Usi';					$out[]	= '<blockquote>$1</blockquote>';
+			// Citation avec auteur
+			$in[]	= '#\[quote=(.*)\](.*)\[/quote\]#Usi';				$out[]	= '<blockquote>$2<small><em>$1</em></small></blockquote>';
+
+			$in[]	= '#\[btn=(.*)\](.*)\[/btn\]#Usi';					$out[]	= '<span class="$1">$2</span>';
+			$in[]	= '#\[icone\](.*)\[/icone\]#Usi';					$out[]	= '<i class="$1"></i>';
+			
+			// Image
+			$in[]	= '#\[url=http://www.hostingpics.net\]\[img\](.*)\[/img\]\[/url\]#Usi';
+				$out[]	= '[img]$1[/img]';
+			$in[]	= '#\[img\](.*)\[/img\]#Usi';						$out[]	= '<img src="$1">';
+			
+			// Lien
+			$in[]	= '#\[url\](.*)\[/url\]#Usi';						$out[]	= '<a href="$1" rel="nofollow">$1</a>';
+			$in[]	= '#\[url=(.*)\](.*)\[/url\]#Usi';					$out[]	= '<a href="$1" rel="nofollow">$2</a>';
+			
+			$in[]	= '#\[youtube\]([a-zA-Z0-9\-_]{10,12})\[/youtube\]#Usi';
+				$out[]	= '<div>' . 
+							'<object width="680" height="420">' . 
+								'<param name="movie" value="http://www.youtube.com/v/$1">' . 
+								'<param name="wmode" value="transparent">' . 
+								'<embed src="http://www.youtube.com/v/$1" type="application/x-shockwave-flash" wmode="transparent" width="680" height="420">' .
+							'</object>' . 
+						'</div>';
+
+			
+			// Smiley
+			$in[]	= '#(:\))#';										$out[]	= '<img src="/assets/images/smiley/1.gif">';
+			$in[]	= '#(\'8\))#';										$out[]	= '<img src="/assets/images/smiley/2.gif">';
+			$in[]	= '#(:D:)#';										$out[]	= '<img src="/assets/images/smiley/3.gif">';
+			$in[]	= '#(:\()#';										$out[]	= '<img src="/assets/images/smiley/4.gif">';
+			$in[]	= '#(:P)#';											$out[]	= '<img src="/assets/images/smiley/5.gif">';
+			$in[]	= '#(:calin:)#';									$out[]	= '<img src="/assets/images/smiley/6.gif">';
+			$in[]	= '#(:\'D)#';										$out[]	= '<img src="/assets/images/smiley/7.gif">';
+			$in[]	= '#(o_O)#';										$out[]	= '<img src="/assets/images/smiley/8.gif">';
+			$in[]	= '#(;\):)#';										$out[]	= '<img src="/assets/images/smiley/9.gif">';
+			$in[]	= '#(X\()#';										$out[]	= '<img src="/assets/images/smiley/10.gif">';
+			$in[]	= '#(8D)#';											$out[]	= '<img src="/assets/images/smiley/11.gif">';
+			$in[]	= '#(:\$)#';										$out[]	= '<img src="/assets/images/smiley/12.gif">';
+			$in[]	= '#(:satan:)#';									$out[]	= '<img src="/assets/images/smiley/13.gif">';
+			$in[]	= '#(:crotte:)#';									$out[]	= '<img src="/assets/images/smiley/14.gif">';
+			$in[]	= '#(:magik:)#';									$out[]	= '<img src="/assets/images/smiley/15.gif">';
+			
+			$in[]	= '#(^|[\n ]|<a(.*?)>)(http|https)://(www\.)?(youtube\.com|youtu\.be)/(embed/|v/|watch\?v=)?([a-zA-Z0-9\-_]{10,12})(&feature=related?)?(.*)(\s|\n|\t)?(</a>)?#im';
+				$out[]	= '<div>' . 
+						'<object width="680" height="420">' . 
+							'<param name="movie" value="http://www.youtube.com/v/$6">' . 
+							'<param name="wmode" value="transparent">' . 
+							'<embed src="http://www.youtube.com/v/$7" type="application/x-shockwave-flash" wmode="transparent" width="680" height="420">' .
+						'</object>' . 
+						'</div>';
+
+
+	//$texte = preg_replace($in,$out,$texte);
+	/*$count = count($in)-1;
+    for($i=0;$i<$count;$i++) {
+        $texte = preg_replace($in[$i],$out[$i],$texte);
+    }
+    $texte = mynl2br($texte);
+	echo $texte;//*/
+
+    $count = count($in);
+    for($i=0;$i<$count;$i++) {
+        $texte = preg_replace($in[$i],$out[$i],$texte);
+    }
+	// Liste a puce
+    $texte  = str_replace(
+        array('[list]', '[/list]', '[*]'), 
+        array('<ul>', '</li></ul>', '</li><li>'),
+        $texte);//*/
+    $texte = preg_replace('#<br>([\s]+)</li>#isU', '</li>', $texte);
+    $texte = preg_replace('#<br>([\s]+)<ul>#isU', '<ul>', $texte);
+	
+    $texte = mynl2br($texte);
+	// Correction du sur-espace
+	$texte = preg_replace('#p><br>#', 'p>', $texte);
+	$texte = preg_replace('#<br><p#', '<p', $texte);
+	
+	$texte = replace_twitter_user_names($texte);
+
+	
+	return $texte;	
+}
 
 /**
  * Convertis le BBCode
  */
-function bbcode_format($str, $picSize=NULL)
-{
+function bbcode_format($str, $picSize=NULL) {
 
 	$picSize = (empty($picSize)) ? array('w' => 640,'h' => 480) : $picSize;
 
@@ -62,27 +181,26 @@ function bbcode_format($str, $picSize=NULL)
         array('[list]', '[/list]', '[*]'), 
         array('<ul>', '</li></ul>', '</li><li>'),
         $str);//*/
-		
-    $str = preg_replace('#<ul>(.*)</li>#isU', '<ul>', $str);	// On supprime le </li> au début
-
-
     $str = preg_replace('#<br>([\s]+)</li>#isU', '</li>', $str);
     $str = preg_replace('#<br>([\s]+)<ul>#isU', '<ul>', $str);
-//(?:/embed/|/v/|/watch\?v=))([\w\-]{10,12})
 
-   // $str = htmlentities($str, ENT_QUOTES, 'UTF-8');
-	#\[link:(.*?)\]#
-	#\[link:(.*?)=(.*?)\]#
-	
+
     $simple_search = array(  
                 //added line break  
-                '/\[br\]/is',  
+    //            '/\[br\]/is',  
                 '/\[b\](.*?)\[\/b\]/is',  
                 '/\[i\](.*?)\[\/i\]/is',  
-                '/\[u\](.*?)\[\/u\]/is',  
+                '/\[u\](.*?)\[\/u\]/is',
+                '/\[o\](.*?)\[\/o\]/is',
+                '/\[s\](.*?)\[\/s\]/is',
+                
+				'/\[taille=([1-6])\](.*?)\[\/taille\]/is',
+				
+                // url
                 '/\[url\=(.*?)\](.*?)\[\/url\]/is',  
-                '/\[url\](.*?)\[\/url\]/is',  
-                '/\[align\=(left|center|right)\](.*?)\[\/align\]/is',  
+                '/\[url\](.*?)\[\/url\]/is',
+                
+                '/\[(align|position)\=(left|center|right|justify)\](.*?)\[\/(align|position)\]/is',  
                 '/\[img\](.*?)\[\/img\]/is',  
                 '/\[mail\=(.*?)\](.*?)\[\/mail\]/is',  
                 '/\[mail\](.*?)\[\/mail\]/is',  
@@ -95,18 +213,23 @@ function bbcode_format($str, $picSize=NULL)
               '/\[code\](.*?)\[\/code\]/is',  
                 //added paragraph  
               '/\[p\](.*?)\[\/p\]/is',  
-                );  
+                );
   
     $simple_replace = array(  
 				//added line break  
-               '<br>',  
-                '<strong>$1</strong>',  
-                '<em>$1</em>',  
-                '<u>$1</u>',  
-				// added nofollow to prevent spam  
+     //          '<br>',  
+                '<span class="bold">$1</span>',  
+                '<span class="italic">$1</span>',  
+                '<span class="underline">$1</span>',
+                '<span class="overline">$1</span>',
+                '<span class="strike">$1</span>',
+                
+				'<h$1 class="bbcode">$2</h$1>',
+				
+				// url
                 '<a href="$1" rel="nofollow" title="$2 - $1" target="_blank">$2</a>',  
                 '<a href="$1" rel="nofollow" title="$1" target="_blank">$1</a>',  
-                '<div style="text-align: $1;">$2</div>',  
+                '<div class="text-$2">$3</div>',  
 				//added alt attribute for validation  
                 '<img src="$1" alt="" style="max-width: '.$picSize['w'].'px;max-height: '.$picSize['h'].'px;overflow: hidden;"/>',  
                 '<a href="mailto:$1">$2</a>',  
@@ -123,42 +246,51 @@ function bbcode_format($str, $picSize=NULL)
                 );  
   
     // Do simple BBCode's  
-    $str = preg_replace ($simple_search, $simple_replace, $str);
-	 
+    $str = preg_replace($simple_search, $simple_replace, $str);
+	$str = replace_twitter_user_names($str);
+	
     // Do <blockquote> BBCode  
-    $str = bbcode_quote ($str);
+    $str = bbcode_quote($str);
 	
 	$str = preg_replace_callback('#\[link:(.*?)\]#','viki', $str);
 	
 	$str = preg_replace_callback('#\[code=css](.+?)\[/code]#si','parse_css',$str);	
 	$str = preg_replace_callback('#\[code=php](.+?)\[/code]#si','php_code',$str);
 	
-    $str = preg_replace('#(^|[\n ]|<a(.*?)>)http://(www\.)?(youtube\.com|youtu\.be)/(embed/|v/|watch\?v=)?([a-zA-Z0-9\-_]{10,12})(&feature=related?)?(.*)(\s|\n|\t)?(</a>)?#im','<div class="video"><object width="340" height="210">' . 
+	
+	$str = preg_replace('#(^|[\n ]|<a(.*?)>)http://(www\.)?(youtube\.com|youtu\.be)/(embed/|v/|watch\?v=)?([a-zA-Z0-9\-_]{10,12})(&feature=related?)?(.*)(\s|\n|\t)?(</a>)?#im','<div class="video">' . 
+	'<object width="680" height="420">' . 
+		'<param name="movie" value="http://www.youtube.com/v/$6">' . 
+		'<param name="wmode" value="transparent">' . 
+		'<embed src="http://www.youtube.com/v/$6" type="application/x-shockwave-flash" wmode="transparent" width="680" height="420">' .
+	'</object>' . 
+	'</div>', 
+	$str);
+    /*$str = preg_replace('#(^|[\n ]|<a(.*?)>)http://(www\.)?(youtube\.com|youtu\.be)/(embed/|v/|watch\?v=)?([a-zA-Z0-9\-_]{10,12})(&feature=related?)?(.*)(\s|\n|\t)?(</a>)?#im','<div class="video"><object width="680" height="420">' . 
              '<param name="movie" value="http://www.youtube.com/v/$6?fs=1&ap=%2526fmt%3D18&autoplay=0&rel=0&fs=1&color1=0xffffff&color2=0xffffff&border=0&loop=0&showinfo=0"">' . 
              '</param><param name="allowFullScreen" value="true">' . 
              '</param><param name="allowscriptaccess" value="always">' . 
-             '</param><embed src="http://www.youtube.com/v/$6?fs=1&ap=%2526fmt%3D18&autoplay=0&rel=0&fs=1&color1=0xffffff&color2=0xffffff&border=0&loop=0&showinfo=0"type="application/x-shockwave-flash" allowfullscreen="true" width="340" height="210"></embed></object></div>',$str);
-		
+             '</param><param name="WMODE" value="Transparent">' . 
+             '</param><embed src="http://www.youtube.com/v/$6?fs=1&ap=%2526fmt%3D18&autoplay=0&rel=0&fs=1&color1=0xffffff&color2=0xffffff&border=0&loop=0&showinfo=0&wmode=opaque"type="application/x-shockwave-flash" allowfullscreen="true" width="680" height="420"></embed></object></div>',$str);//*/
+	
+	$str = preg_replace('#div>(\n|\r|\t)<div#', 'div><div', $str);
 	$str = nl2br($str);
-	$str = preg_replace('#<br \/>.<br \/>#', '<br>', $str);
+//	$str = preg_replace('#<br \/>.<br \/>#', '<br>', $str);
+//	$str = preg_replace('#div><br><div#', 'div><div', $str);
     return $str;  
 }  
   
 
 $__vikiLink = array();
-function viki($match)
-{
+function viki($match) {
 	global $__vikiLink;
 	
 	$exploded = explode('=', $match[1]);
 	$exploded[0] = clean($exploded[0], 'slug');
 	$__vikiLink[strtolower($exploded[0])] = 0;
-	if (isSet($exploded[1]))
-	{
+	if (isSet($exploded[1])) {
 		return '<a href="'.Router::url('viki/slug:' . $exploded[0]).'">'.$exploded[1].'</a>';
-	}
-	else
-	{
+	} else {
 		return '<a href="'.Router::url('viki/slug:' . $exploded[0]).'">'.$exploded[0].'</a>';
 	}
 }

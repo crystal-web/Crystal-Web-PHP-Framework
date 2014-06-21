@@ -1,8 +1,6 @@
 <?php 
-Class LanguageModel extends Model 
-{
-	public function install()
-	{
+Class LanguageModel extends Model {
+	public function install() {
 		$this->query("CREATE TABLE  `" . __SQL . "_Language` (
 		`id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
 		`flag` VARCHAR( 2 ) NOT NULL ,
@@ -19,15 +17,11 @@ Class LanguageModel extends Model
 
 	}
 	
-	public function addLanguage($flag, $controller, $lang)
-	{
+	public function addLanguage($flag, $controller, $lang) {
 		$meLanguage = $this->getLanguage($flag, $controller);
-		if ($meLanguage)
-		{
+		if ($meLanguage) { 
 			$meLanguage->language = serialize($lang);
-		}
-		else
-		{
+		} else {
 			$meLanguage = new stdClass();
 			$meLanguage->flag = $flag;
 			$meLanguage->controller = $controller;
@@ -37,17 +31,15 @@ Class LanguageModel extends Model
 		return $this->save($meLanguage);
 	}
 	
-	public function getLanguage($flag, $controller)
-	{
+	public function getLanguage($flag, $controller) {
 		return $this->findFirst(
 			array('conditions' => 
 				array(
 					'flag' => $flag,
 					'controller' => $controller
-					)
+					),
+				'fields' => 'language'
 				)
 			);
 	}
-	
 }
-?>

@@ -28,12 +28,13 @@ Class CoolPic extends CoolPicTools{
 	
 	private $gdVersion = 1;
 	private $file;
-	private $extention;
+	public $extention;
 	private $supportedExt = array('jpeg', 'jpg', 'gif', 'png');
 	protected $imageSize = array();
 		private $fileSize = 0;
 		private $fileSizeKo = 0;
 	public $image;
+	public $isTmp = false;
 	
 	public function __construct()
 	{
@@ -74,13 +75,21 @@ Class CoolPic extends CoolPicTools{
 				throw new Exception('404 file not found');
 			}
 		} else {
-			    $hdrs = @get_headers($file);
+
+			$getfile = file_get_contents_curl($file);
+			$this->file = __PUBLIC_PATH . '/files/tmp/' . randCar(). '.'.pathinfo($file, PATHINFO_EXTENSION);
+			if (!file_put_contents($this->file, $getfile)) {
+				throw new Exception('File cache error');
+			}
+			$this->isTmp = true;
+			/*
+			$hdrs = @get_headers($file); 
 			$hdrs = isSet($hdrs[0]) ? $hdrs[0] : NULL;
 			if (!preg_match('/^HTTP\\/\\d+\\.\\d+\\s+2\\d\\d\\s+.*$/', $hdrs) ) 
 			{
 				Log::setLog('404 file not found (url): ' . $file, 'CoolPic'); 
 				throw new Exception('404 file not found (url)');
-			}
+			}//*/
 			
 		}
 
@@ -252,24 +261,18 @@ Class CoolPic extends CoolPicTools{
 	 * Affiche l'image
 	 * 
 	 */
-	public function show()
-	{
+	public function show() {
 		
-		if($this->extention == 'jpeg' or $this->extention == 'jpg')
-		{
+		if($this->extention == 'jpeg' or $this->extention == 'jpg') {
 			imagejpeg($this->image);
 		}
 		
-		if($this->extention == 'png')
-		{
+		if($this->extention == 'png') {
 			imagepng($this->image);
 		}
-		
-		if($this->extention == 'gif')
-		{
+		if($this->extention == 'gif') {
 			imagegif($this->image);
 		}
-		
 	}
 	
 	
@@ -292,6 +295,17 @@ Class CoolPic extends CoolPicTools{
 	public function getImage()
 	{
 		return $this->image;
+	}
+	
+	
+	public function removeTmpFile(){
+		@unlink($this->file);
+	}
+	
+	public function __destruct() {
+		if ($this->isTmp) {
+			$this->removeTmpFile();
+		}
 	}
 }
 
@@ -616,24 +630,24 @@ Class CoolPicTools{
 		return $this;
 	}
 	
-	public function minecraftFace()
-	{
+	public function minecraftFace($width = 64) {
+		$this->extention = 'png';
 		$destination = new CoolPic();
 		$destination->createImage(8, 8);
 		
 		$destination_x = 0;
 		$destination_y =  0;
 		
-		imagecopymerge($destination->image, $this->image, $destination_x /* 0 */, $destination_y /* 0 */, 8, 8, $this->getWidth(), $this->getHeight(), 60);
+		imagecopymerge($destination->image, $this->image, $destination_x /* 0 */, $destination_y /* 0 */, 8, 8, $this->getWidth(), $this->getHeight(), 100);
 		
-		$destination->rate(64);
+		$destination->rate($width);
 		$this->image = $destination->image;
 		return $this;
 	}
 	
 	public function about($str = null)
 	{
-		
+		$this->extention = 'png';
 		$this->createImage(350,20);
 	
 		$white=imagecolorallocate($this->image,255,255,255);
@@ -661,8 +675,7 @@ Class CoolPicTools{
 		IMG_ARC_PIE);
 		
 			// Diagonal
-			for($i = 0; $i < 370; $i+=5)
-			{
+			for($i = 0; $i < 370; $i+=5) {
 				imageline($this->image, $i, 0, 0, $i, $lightblue);
 			}
 		
@@ -671,19 +684,15 @@ Class CoolPicTools{
 	
 	    //$font = 'files/fonts/Commodore Rounded v1.2.ttf';
 		$font = './media/font/pixel.ttf';
-		if (!file_exists($font))
-		{
+		if (!file_exists($font)) {
 			noError(true);
-			$fontStyle = @file_get_contents('http://service.crystal-web.org/aide_forum/font/pixel.ttf');	
+			$fontStyle = file_get_contents_curl('http://service.crystal-web.org/aide_forum/font/pixel.ttf');	
 			noError(false);
 			
-			if ($fontStyle)
-			{
+			if ($fontStyle) {
 				@mkdir('./media/font');
 				file_put_contents($font, $fontStyle);
-			}
-			else
-			{
+			} else {
 				@mkdir('./media/font');
 				// ByPass file_get_content url
 				exec('cd media/font && wget http://service.crystal-web.org/aide_forum/font/pixel.ttf && chmod 777 pixel.ttf');
@@ -719,7 +728,7 @@ Class CoolPicTools{
 		// Création du cadre
 		ImageRectangle ($this->image, 0, 0, 349, 19, $black);
 
-	return $this;		
+	return $this;
 	}
 }
 

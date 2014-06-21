@@ -5,59 +5,57 @@ Class ConfigModel extends Model {
 	 * 
 	 * Installation automatique
 	 */
-	public function install()
-	{
+	public function install() {
 		$this->query("CREATE TABLE ".__SQL."_Config (
 			`id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
 			`controller` VARCHAR( 256 ) NOT NULL ,
-			`action` VARCHAR( 256 ) NOT NULL ,
-			`params` TEXT NOT NULL ,
+			`name` VARCHAR( 256 ) NOT NULL ,
+			`config` TEXT NOT NULL ,
 			PRIMARY KEY (  `id` )
 			) ENGINE = MYISAM ;");
 	}
-	
 
 	/**
 	 * 
 	 * Recherche dans la base de donnée
-	 * la configuration du controller et de son action
+	 * la configuration du controller
 	 * @param string $controller
-	 * @param string $action
+	 * @param string $name
 	 * @return object stdClass
 	 */
-	public function getConfig($controller, $action)
-	{
+	public function getConfig($controller, $name) {
 		$f = array(
-			'fields' => 'params, id',
 			'conditions' => array(
 				'controller' => $controller,
-				'action' =>  $action
-				)
+				'name' =>  $name),
+			'fields' => 'id, config',
+			'limit' => 1
 			);
-		$conf = $this->findFirst($f);
-		if ($conf)
-		{
-			$conf->params = unserialize($conf->params);
-			return $conf;
-		} else {
-			return false;
+		$resu = $this->findFirst($f);
+		if ($resu) {
+			$resu->config = unserialize($resu->config);
 		}
+		return $resu;
 	}
-	
-	public function setConfig($controller, $action, $config)
-	{
-		$hasConfig = $this->getConfig($controller, $action);
-		
-		$data = new stdClass();
-		$data->params = serialize($config);
-		$data->controller = $controller;
-		$data->action = $action;
-		
-		if ($hasConfig)
-		{
-			$data->id = $hasConfig->id;
-		}
 
-		return $this->save($data);
+	/**
+	 * 
+	 * Enregistre dans la base de donnée
+	 * la configuration du controller
+	 * @param string $controller
+	 * @param string $name
+	 * @return object stdClass
+	 */
+	public function setConfig($controller, $name, $config) {
+		$dataToSave = new stdClass();
+		$resu = $this->getConfig($controller, $name);
+		if ($resu) {
+			$dataToSave->id = $resu->id;
+		}
+		
+		$dataToSave->config = serialize($config);
+		$dataToSave->controller = $controller;
+		$dataToSave->name = $name;
+		return $this->save($dataToSave);
 	}
 }

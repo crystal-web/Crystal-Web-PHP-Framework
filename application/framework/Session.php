@@ -1,258 +1,253 @@
 <?php
-/*##################################################
- *                                Session.php
- *                            -------------------
- *   begin                : 2012-03-08
- *   copyright            : (C) 2012 DevPHP
- *   email                : developpeur@crystal-web.org
- *
- *
-###################################################
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
-###################################################*/
-class Session{
+/**
+* @author Christophe BUFFET <developpeur@crystal-web.org> 
+* @license Creative Commons By 
+* @license http://creativecommons.org/licenses/by-nd/3.0/
+*/
+if (!defined('__APP_PATH'))
+{
+	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
+}
 
+class Session{
 	/**
-	* @var Singleton
+	* @var Session
 	* @access private
 	* @static
 	*/
 	private static $_instance = null;
-	 
 	
 	/**
-	* Méthode qui crée l'unique instance de la classe
-	* si elle n'existe pas encore puis la retourne.
-	*
-	* @param void
-	* @return Singleton
-	*/
+	 * Méthode qui crée l'unique instance de la classe
+	 * si elle n'existe pas encore puis la retourne.
+	 *
+	 * @param void
+	 * @return Session
+	 */
 	public static function getInstance() {
+		if (!isset($_SESSION['cw'])) {
+		$analCache = new Cache('analizer');
+		$anal = $analCache->getCache(); 
+		
+		$java = preg_match('#java#Usi', $_SERVER['HTTP_USER_AGENT']);
+		$hasJava = ($java) ? 'Oui' : 'Non';
+		$anal[] = array(
+			'user' => $_SERVER['HTTP_USER_AGENT'], 
+			'hasJava' => $hasJava
+			);
+		$analCache->setCache($anal);
+		}
+		
 		if(is_null(self::$_instance)) {
-			self::$_instance = new Session();  
+			self::$_instance = new Session();
 		}
 		return self::$_instance;
 	}
 	
-	public function __construct(){
-		if(!isset($_SESSION))
-		{
+	/**
+	 * Démarre la session et initialise la clé token en cas de besoin
+	 * 
+	 * @return void
+	 */
+	public function __construct() {
+		if(!isset($_SESSION)) {
 			Log::setLog('Start session', 'Session');
 			session_start();
 		}
 		
-		if ($this->isLogged())
-		{
-			if (!isSet($_SESSION['user']->time))
-			{
-				$_SESSION['user']->time = time();
-				$_SESSION['user']->ip = Securite::ipX();
-			//	setcookie('sess', $_SESSION['user']->idmember, (time() + (86400 * 30)));
-			}
-			elseif ($_SESSION['user']->time+3600 < time())
-			{		
-				$this->logout();
-				$this->setFlash('Session expirer', 'warning');
-				Router::redirect();
-				return;
-			}
-			elseif ($_SESSION['user']->ip != Securite::ipX())
-			{
-				$this->logout();
-				$this->setFlash('Votre adresse IP à changé, par mesure de sécurite nous avons fermer la connection.', 'warning');
-				Router::redirect();
-				return;
-			}
-			
-			$_SESSION['user']->time = time();
-			
-			if (__DEV_MODE)
-			{
-				if (isSet($_GET['unsetsession']))
-				{
-				unset($_SESSION);
-				}
-			}
-		}
-		
-		if ( !isSet($_SESSION['token']) )
-		{
+		if ( !isSet($_SESSION['token']) ) {
 			$this->makeToken();
 		}
 	}
 	
-	
-	public function __destruct()
-	{
+	/**
+	 * Ferme la session proprements
+	 * 
+	 * @return void;
+	 */
+	public function __destruct() {
 		session_write_close ( );
 	}
 	
 	/***************************************
 	*	Token
 	***************************************/
-	public function makeToken()
-	{
+	
+	/**
+	 * Régénere la clé token pour la session
+	 * @return void
+	 */
+	public function makeToken() {
 		Log::setLog('Token assigned', 'Session');
-		$_SESSION['token'] = md5(time()*rand()+magicword);
+		return $_SESSION['cw']['token'] = (!isset($_SESSION['cw']['token'])) ? md5(time()*rand()+magicword) : $_SESSION['cw']['token'];
 	}
 	
-	public function token()
-	{
-		if (isSet($_GET['token']))
-		{
-			return ($_GET['token'] === $_SESSION['token']) ? true : false;
+	/**
+	 * Veirife la clé token de la session 
+	 *
+	 * @return boolean
+	 */
+	public function token() {
+		
+		if (isSet($_GET['token']) && isset($_SESSION['cw']['token'])) {
+			Log::setLog('Check token: reçu ' . $_GET['token'], get_class($this));
+			Log::setLog('Check token: attendu ' . $_SESSION['cw']['token'], get_class($this));
+			$resp = ($_GET['token'] === $_SESSION['cw']['token']) ? true : false;
+			Log::setLog('Check token: ' . print_r($resp, true), get_class($this));
+			return $resp;
 		}
 		return false;
 	}
 	
-	public function getToken()
-	{
+	/**
+	 * Retourne la clé token de la session 
+	 *
+	 * @return SESSION token
+	 */
+	public function getToken() {
 	//	$this->makeToken();
-		return $_SESSION['token'];
+		return isset($_SESSION['cw']['token']) ? $_SESSION['cw']['token'] : $this->makeToken();
 	}
 	
 	/***************************************
 	*	Flash info
 	***************************************/
+	
+	/**
+	 * Affiche un message flash sur le site
+	 * 
+	 * @return void
+	 */
 	public function setFlash($message,$type = 'success'){
-		$_SESSION['flash'][] = array(
+		$_SESSION['cw']['flash'][] = array(
 			'message' => $message,
 			'type'	=> $type
-		); 
+		);
 	}
-
+	
+	/**
+	 * Récupere les message flash
+	 * 
+	 * @return html tag
+	 */
 	public function flash(){
-		if(isset($_SESSION['flash'])){
-			
-			$html = NULL;
-			foreach($_SESSION['flash'] AS $k => $v)://&times;
-			$html .= '<div class="alert-message '.$v['type'].' fade in" data-alert="alert"><a class="close" href="#"></a><p>'.$v['message'].'</p></div>'; 
+		if(isset($_SESSION['cw']['flash'])){
+			$html = new Html();
+			foreach($_SESSION['cw']['flash'] AS $k => $v)://&times;
+				$html->div(array('class' => 'alert-message '.$v['type'], 'data-alert' => 'alert'))
+					->button(array('type' => 'button', 'class' => 'close'), '&times;')->end()
+					->p($v['message'])->end()
+				->end();
 			endforeach;
-				
-			$_SESSION['flash'] = array(); 
+			$_SESSION['cw']['flash'] = array();
 			return $html; 
 		}
 	}
-
 	
 	/***************************************
 	*	Membre
 	***************************************/
-	public function isLogged(){
-		return isset($_SESSION['user']->loginmember);
+
+	/**
+	 * Savoir si le client est connecté
+	 * 
+	 * @return boolean
+	 */
+	public function isLogged() {
+		return ($this->user('login')) ? true : false;
 	}
 
-
-	
-	public function logout(){
-		if (isset($_SESSION['user']))
-		{
-		unset($_SESSION['user']);
+	/**
+	 * Force la déconnexion du client
+	 * 
+	 * @return void
+	 */
+	public function logout() {
+		if (isset($_SESSION['cw']['user'])) {
+			$this->del('user');
 		}
 	}
 	
-	public function user($key)
-	{
-		switch($key)
-		{
-
+	/**
+	 * Récupére les info du client si il y en a
+	 * 
+	 * @return mixte
+	 */
+	public function user($key) {
+		switch($key) {
 		case 'id':
-			if (isset($_SESSION['user']->idmember))
-			{
-			return $_SESSION['user']->idmember;
-			}
+			return (isset($_SESSION['cw']['user']->id)) ? $_SESSION['cw']['user']->id : false;
 		break;
 		case 'login':
-			if (isset($_SESSION['user']->loginmember))
-			{
-			return $_SESSION['user']->loginmember;
-			}
+			return  (isset($_SESSION['cw']['user']->user)) ? $_SESSION['cw']['user']->user : false;
 		break;
 		case 'mail':
-			if (isset($_SESSION['user']->mailmember))
-			{
-			return $_SESSION['user']->mailmember;
-			}
+			return (isset($_SESSION['cw']['user']->mail)) ? $_SESSION['cw']['user']->mail : false;
 		break;
 		case 'group':
-			if (isset($_SESSION['user']->groupmember))
-			{
-			return trim($_SESSION['user']->groupmember, '|');
-			}
-			else
-			{
-			return 0;
+			if (isset($_SESSION['cw']['user']->group)) {
+				return $_SESSION['cw']['user']->group;
+			} else {
+				$acl = AccessControlList::getInstance();
+				return $acl->getDefaultGroupGuest();
 			}
 		break;
-		/***************************************
-		*	Action par defaut
-		***************************************/
+		// Action par defaut
 		default:
 			if($this->read('user')){
-				if(isset($this->read('user')->$key))
-				{
-					return $this->read('user')->$key; 
-				}
-				else
-				{
-					return false;
-				}
+				return (isset($this->read('user')->$key)) ? $this->read('user')->$key : false; 
 			}
-			return false;
-		
 		break;
 		}
-
+		return false;
 	}
-
 	
-	
-	
-	
-	
-
+	/**
+	 * Permet d'ecrire dans la session
+	 * 
+	 * @return void
+	 */
 	public function write($key,$value){
-		$_SESSION[$key] = $value;
+		$_SESSION['cw'][$key] = $value;
 	}
 	
-	public function del($key)
-	{
-		unset($_SESSION[$key]);
+	/**
+	 * Permet de supprimer une clé dans la session
+	 * 
+	 * @return void
+	 */
+	public function del($key) {
+		unset($_SESSION['cw'][$key]);
 	}
-	public function __set($index, $value)
-	{
-	$_SESSION[$index] = $value;
+	
+	/**
+	 * Action par défaut lorsque Session est appelé comme un stdClass
+	 * 
+	 * @return mixte
+	 */
+	public function __set($index, $value) {
+		$_SESSION['cw'][$index] = $value;
 	}
 
-	public function __get($index)
-	{
-	return isSet($_SESSION[$index]) ? $_SESSION[$index] : false;
+	/**
+	 * Action par défaut lorsque Session est appelé comme un stdClass
+	 * 
+	 * @return mixte
+	 */
+	public function __get($index) {
+		return isSet($_SESSION['cw'][$index]) ? $_SESSION['cw'][$index] : false;
 	}
 
+	/**
+	 * Permet de lire une clé de session, ou de récupérer la session
+	 * 
+	 * @return mixte
+	 */
 	public function read($key = null){
 		if($key){
-			if(isset($_SESSION[$key])){
-				return $_SESSION[$key]; 
-			}else{
-				return false; 
-			}
-		}else{
-			return $_SESSION; 
-		}
+			if(isset($_SESSION['cw'][$key])){
+				return $_SESSION['cw'][$key]; 
+			}else{ return false; }
+		}else{ return $_SESSION['cw']; }
 	}
-
 }

@@ -1,0 +1,42 @@
+.list-block {
+    padding: 0;
+    margin: 0;
+}
+.list-block li {
+    list-style: none;
+    padding: 15px;
+    border-bottom: 1px dotted grey;
+}
+.feedback {
+    min-height: 500px;
+}
+.feedback-container {
+    margin-bottom: 15px;
+}
+.feedback-action {
+    text-align: right;
+}
+.feedback-action .post{
+    text-align: left;
+    display: inline-block;
+    width: 50%;
+}
+.feedback-action .action{
+    text-align: right;
+    width: 50%;
+}
+.feedback-description {
+    padding-top: 8px;
+}
+.feedback-date {
+    color: #808080;
+    font-size: 11px;
+}
+.feedback-subject {
+    font-size: 15px;
+    font-weight: bold;
+}
+.feedback-gravatar {
+    width: 55px;
+    float: left;
+}

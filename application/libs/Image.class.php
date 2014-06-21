@@ -276,31 +276,23 @@ public function show()
  */
 public function save($name2save=null)
 {
-	if (!is_null($name2save))
-	{
+	if (!is_null($name2save)) {
 		$this->name2save = $this->dir.'/'.$name2save;
 		Log::setLog('Set save file to ' .$this->name2save, 'Image');
 	}
 	
-	if($this->show)
-	{
+	if($this->show) {
 		@header('Content-Type: '.$this->mime);
 	}
 
-	
-	
-	
 	// Si on aucun redimensionnement n'est demandé
-	if(!$this->to_width && !$this->to_height)
-	{
+	if(!$this->to_width && !$this->to_height) {
 		// On donne la taille original
 		$this->to_width = $this->image_width;
 		$this->to_height = $this->image_height;
 		Log::setLog('Save with this size '.$this->to_width.'/'.$this->to_height, 'Image');
-	}
 	// Si on connais la largeur et pas la hauteur
-	elseif (is_numeric($this->to_width) && $this->to_height==false)
-	{
+	} elseif (is_numeric($this->to_width) && $this->to_height==false) {
 		// On attribue le ratio
 		$ratio = ( $this->to_width/$this->image_width );
 		Log::setLog('Calcul ratio '.$ratio, 'Image');
@@ -309,9 +301,7 @@ public function save($name2save=null)
 		Log::setLog('Save with this size '.$this->to_width.'/'.$this->to_height, 'Image');
 
 	// Si on connais la hauteur et pas la largeur
-	}
-	elseif (is_numeric($this->to_height) && $this->to_width==false)
-	{
+	} elseif (is_numeric($this->to_height) && $this->to_width==false) {
 
 		// On attribue le ratio
 		$ratio = ( $this->to_height/$this->image_height );
@@ -323,8 +313,7 @@ public function save($name2save=null)
 
 	
 	
-	switch($this->ext)
-	{
+	switch($this->ext) {
 		case 'jpeg':
 		$image = imagecreatefromjpeg($this->file);
 		Log::setLog('imagecreatefromjpeg', 'Image');
@@ -360,32 +349,27 @@ public function save($name2save=null)
 	Creation du logo sur l'image retravailler
 	***/
 	
-	if ($this->logo!=false)
-	{
+	if ($this->logo!=false) {
 	// Le logo est la source
 
-		if($this->logo['ext']=='jpeg' or $this->logo['ext']=='jpg')
-		{
+		if($this->logo['ext']=='jpeg' or $this->logo['ext']=='jpg') {
 			$source = imagecreatefromjpeg($this->logo['file']);
 			Log::setLog('Load logo form jpg', 'Image');
 		}
 
-		if($this->logo['ext']=='png')
-		{
+		if($this->logo['ext']=='png') {
 			$source = imagecreatefrompng($this->logo['file']);
 			Log::setLog('Load logo form png', 'Image');
 		}
 
-		if($this->logo['ext']=='gif')
-		{
+		if($this->logo['ext']=='gif') {
 			$source = imagecreatefromgif($this->logo['file']);
 			Log::setLog('Load logo form gif', 'Image');
 		}
 
 		// On veut placer le logo en bas à droite, on calcule les coordonnées où on doit placer le logo sur la photo
 		
-		switch ($this->logo['position'])
-		{
+		switch ($this->logo['position']) {
 		case 'down_right':
 		$destination_x = $this->to_width - $this->logo['width'];
 		$destination_y = $this->to_height - $this->logo['height'];
@@ -417,87 +401,69 @@ public function save($name2save=null)
 	}
 
 	
-	if (!is_null($this->name2save))
-	{
+	if (!is_null($this->name2save)) {
 	//$info=explode(".", $this->name2save);
 	$info=pathinfo($this->name2save,PATHINFO_EXTENSION);
 
-		if($info=='jpeg' or $info=='jpg')
-		{
+		if($info=='jpeg' or $info=='jpg') {
 			imagejpeg($new_image, $this->name2save, $this->quality);
-			Log::setLog('Save form jpg', 'Image');
+			Log::setLog('Save form jpg at ' . $this->name2save, 'Image');
 		}
-		if($info=='png')
-		{
+		
+		if($info=='png') {
 			imagepng($new_image, $this->name2save);
-			Log::setLog('Save form png', 'Image');
+			Log::setLog('Save form png at ' . $this->name2save, 'Image');
 		}
-		if($info=='gif')
-		{
+		if($info=='gif') {
 			imagegif($new_image, $this->name2save);
-			Log::setLog('Save form gif', 'Image');
+			Log::setLog('Save form gif at ' . $this->name2save, 'Image');
 		}
 		
 		chmod($this->name2save, 0777);
 		Log::setLog('ChMod file "' . $this->name2save.'"', 'Image');
 		
-	}
-	else
-	{
+	} else {
 
-		if($this->ext=='jpeg' or $this->ext=='jpg')
-		{
+		if($this->ext=='jpeg' or $this->ext=='jpg') {
 			
-			if (!$this->show)
-			{
+			if (!$this->show) {
 				ob_start();
 				imagejpeg($new_image, $this->name2save, $this->quality);
 				$jpegString = ob_get_contents();
 				ob_end_clean();
 				return 'data:image/jpeg;base64,' . base64_encode($jpegString);
-			}
-			else
-			{
+			} else {
 				imagejpeg($new_image, $this->name2save, $this->quality);
 			}
 		}
 		
-		if($this->ext=='png')
-		{
-			if (!$this->show)
-			{
+		if($this->ext=='png') {
+			if (!$this->show) {
 				ob_start();
 				imagepng($new_image, $this->name2save);
 				$pngString = ob_get_contents();
 				ob_end_clean();
 				return 'data:image/png;base64,' . base64_encode($pngString);
-			}
-			else
-			{
+			} else {
 				imagepng($new_image, $this->name2save);
 			}
 			
 		}
 		
-		if($this->ext=='gif')
-		{
-			if (!$this->show)
-			{
+		if($this->ext=='gif') {
+			if (!$this->show) {
 				ob_start();
 				imagegif($new_image, $this->name2save);
 				$gifString = ob_get_contents();
 				ob_end_clean();
 				return 'data:image/gif;base64,' . base64_encode($gifString);
-			}
-			else
-			{
+			} else {
 				imagegif($new_image, $this->name2save);
 			}
 		}		
 	}
 
-	if ($this->logo!=false)
-	{
+	if ($this->logo!=false) {
 		imagedestroy($source);
 	}
 	

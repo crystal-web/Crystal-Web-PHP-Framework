@@ -29,45 +29,53 @@ $('#modalText').html('<p>Supprimer la question ?</p>');
 		<a href="#" id="del" class="btn danger">OUI</a>
 	</div>
 </div>
-<div id="faq" class="well">
-
+<div id="faq">
 <?php
-$tok=null;
+$tok=null;/*
 if ($acl->isAllowed('faq','manager')){
 ?>
-<form method="post" action="<?php echo Router::url('faq/manager'); ?>?token=<?php echo $session->getToken(); ?>">
-<?php
 
-echo $form->input('question', 'Question').
-$form->input('reponse', 'Réponse', array('type' => 'textarea', 'editor' => '')).
-$form->input('submit', 'Ajouter', array('type' => 'submit', 'class' => 'btn primary'));
-
-?>
-</form>
 <?php
 $tok = $session->getToken();
-}
+}//*/
+?>
+<div class="accordion acc-home" id="accordion3">
+<?php
 	if (count($faq)):
-	
-	loadFunction('bbcode');
-	
-	foreach($faq AS $k => $v) : 
-	
+		$c = NULL;
+	foreach($faq AS $k => $v) :
+		if ($v->catname != $c) {
+			$c = $v->catname;
+			echo '<div class="headline"><h3>' .clean($v->catname, 'str'). '</h3></div>';
+		}
+		if (!is_null($v->question)) {
 	?>
-	<h5 id="quest_<?php echo $v->id; ?>">Q : <?php echo clean($v->question, 'str'); ?>
-	
-	<?php 
-	if ($acl->isAllowed('faq', 'manager')){
-		echo '<span><a href="#" title="Supprimer la question" class="toolTip" data-controls-modal="delfaq" data-backdrop="true" data-keyboard="true" onclick="delFaq(\''.Router::url('faq/manager/id:'.$v->id).'?token='.$tok.'\');"><img src="'.__CDN.'/files/images/icons/status.png"></a></span>';
-	}
-	?>
-	</h5>
-	<div class="faq" id="reponse_quest_<?php echo $v->id; ?>">R : 
-<?php echo clean($v->reponse, 'bbcode'); ?>
-	</div>
-<?php endforeach;
+<div class="accordion-group">
+  <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion3" href="#collapse<?php echo $k; ?>">
+      <?php echo clean($v->question, 'str'); ?>
+    </a>
+  </div>
+  <div id="collapse<?php echo $k; ?>" class="accordion-body collapse" style="height: 0px;">
+    <div class="accordion-inner">
+      <?php echo clean($v->reponse, 'bbcode'); ?>
+    </div>
+  </div>
+</div><!--/accordion-group-->
+<?php 
+		}
+	endforeach;
+?>
+
+
+            </div><!--/accardion-->
+<?php
 	else:
-	$session->setFlash('Pas encore de réponse dans la FAQ');
+        ?>
+            <div class="well well-small">
+                Aucune question-r&eacute;ponse
+            </div>
+        <?php
 	endif;
 ?>
 </div>

@@ -1,5 +1,4 @@
 <?php
-
 class Upload{
 private $file;					// Fichier uploader $_FILES['name']
 private $tmp = './files/tmp/';	// Dossier temporaire
@@ -84,6 +83,8 @@ public $log=array();			// log ;-)
 	public function __construct($file, $strict=true)
 	{
 		$this->strictMode = $strict;
+		$this->tmp = __APP_PATH . DS . 'tmp' . DS ;
+		
 		$this->file = $file;
 		$this->tmp_file = basename($this->file['name']);
 		$this->tmp_file = clean($this->tmp_file, 'str'); 
@@ -399,21 +400,24 @@ public $log=array();			// log ;-)
 	 */
 	public function getUploadPath(){return $this->tmp . $this->tmp_file;}
 	
-	
+	 
 	/**
 	 * 
 	 * Retourne le nom du fichier uploader
 	 */
 	public function getFileName() {return $this->tmp_file; }
 
-
-	public function __destruct()
-	{
-		Log::setLog( 'Effacement du tampon', 'Upload');
-		if (file_exists($this->tmp . $this->tmp_file) && !is_dir($this->tmp .$this->tmp_file))
-		{
+	
+	public function removeFile() {
+		if (file_exists($this->tmp . $this->tmp_file) && !is_dir($this->tmp .$this->tmp_file)) {
+			Log::setLog( 'Effacement du tampon', 'Upload');
 			@unlink($this->tmp .$this->tmp_file);
 		}
+	}
+	
+	public function __destruct()
+	{
+		$this->removeFile();
 	}
 	
 	

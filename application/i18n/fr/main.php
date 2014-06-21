@@ -4,6 +4,7 @@
 *	Chargé de façon initial
 *************************************/
 $LANG['No statistics currently'] = 'Pas de statistique pour le moment';
+
 /*************************************
 *    Database
 *************************************/
@@ -35,7 +36,7 @@ $LANG['Permission denied'] = 'Permission refus&eacute;';
 /*************************************
 *    Captcha
 *************************************/
-$LANG['Click the picture to change the color'] = 'Cliquez sur l\'image pour changer la couleur';
+$LANG['Click the picture to change the color'] = 'Clique pour changer les couleurs';
 $LANG['Your email address'] = $LANG['Your address email'] = 'Votre adresse email';
 $LANG['Your address email again'] = 'Votre adresse email encore';
 $LANG['Your login or password was incorrect'] = 'Votre pseudo ou mot de passe est incorrect';

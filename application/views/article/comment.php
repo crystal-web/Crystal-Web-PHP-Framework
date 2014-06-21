@@ -1,0 +1,14 @@
+<table>
+    <thead>
+    <tr>
+        <th>Commentaire</th>
+        <th>Valide</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>

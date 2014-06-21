@@ -16,10 +16,15 @@ foreach($pluginList AS $k => $v): ?>
 				<?php echo isSet($v['info']['name']) ? $v['info']['name'] : 'Sans nom ('.$k.')'; ?><br>
 				<?php echo isSet($v['info']['setting']) ? '<a href="' .Router::url('plugin/manager/slug:' . $k) . '">Manager</a>' . ' | ' : ''; ?> <?php 
 				
-				if ($v['enable'])
+				if ($v['enable']) {
 					echo 'Action : <a href="'.Router::url('plugin/slug:'.$k.'/stat:0').'">Désactiver</a>';
-				else
-					echo 'Action : <a href="'.Router::url('plugin/slug:'.$k.'/stat:1').'">Activer</a>'; ?>
+                } else {
+					echo 'Action : <a href="'.Router::url('plugin/slug:'.$k.'/stat:1').'">Activer</a>';
+                }
+                if (isset($v['info']['require'])){
+                    echo '<br>N&eacute;cessite : ' . $v['info']['require'];
+                }
+                ?>
 			</td>
 			<td>
 				<p>

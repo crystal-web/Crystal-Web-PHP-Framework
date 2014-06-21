@@ -27,13 +27,23 @@
 class Plugin
 {
 
-/***************************************
-*	Liste des plugins en memoire
-***************************************/
-//private $plugins = array();
-private $plugins = array();
-private $cachedPlugin;
-private $oCache;
+	/**
+	 * @var array
+	 * @access private
+	 */
+	private $plugins = array();
+
+	/**
+	 * @var array
+	 * @access private
+	 */
+	private $cachedPlugin;
+
+	/**
+	 * @var Cache
+	 * @access private
+	 */
+	private $oCache;
 
 	/**
 	* @var Singleton
@@ -58,69 +68,94 @@ private $oCache;
 	}
 	
 	/*** Cree un nouveau controleur ***/
-	private function __construct()
-	{
+	public function __construct() {
 		$this->oCache = new Cache('plugin');
 		$this->cachedPlugin = $this->oCache->getCache();
-		//debug($this->cachedPlugin);
-		foreach($this->cachedPlugin AS $named=>$v)
-		{
 		
-			if ($v['enable'] && !isSet($this->plugins[ $named ]))
-			{
+		if (!$this->cachedPlugin){
+			return;
+		}
+		foreach($this->cachedPlugin AS $named=>$v) {
+			if ($v['enable'] && !isSet($this->plugins[ $named ])) {
 			$name = $named.'Plugin';
-			
-			
-				if (file_exists(__APP_PATH . DS . 'plugin'  . DS . $named . DS . $name . '.php'))
-				{
+
+				if (file_exists(__APP_PATH . DS . 'plugin'  . DS . $named . DS . $name . '.php')) {
 				require __APP_PATH . DS . 'plugin'  . DS . $named . DS . $name . '.php';
 
 				Log::setLog('Load ' . $name, get_class($this));
 				$object = new $name();
 				
 					// Premier triggerEvent, onEnable
-					if (method_exists($object, 'onEnable')) 
-					{
+					if (method_exists($object, 'onEnable')) {
 						$object->onEnable(); 
 					}
 					
 				// Enregistrement du plugin
-				$this->plugins[ $named ] = $object; 				
-				
+				$this->plugins[ $named ] = $object;
 				}
-				
 			}
 		}
-
 	}
+
+    public function test($plugin){
+        $name = $plugin.'Plugin';
+
+        if (file_exists(__APP_PATH . DS . 'plugin'  . DS . $plugin . DS . $name . '.php')) {
+            require __APP_PATH . DS . 'plugin'  . DS . $plugin . DS . $name . '.php';
+
+            Log::setLog('Load ' . $name, get_class($this));
+            $object = new $name();
+
+            // Premier triggerEvent, onEnable
+            if (method_exists($object, 'onEnable')) {
+                $object->onEnable();
+            }
+
+            // Enregistrement du plugin
+            $this->plugins[ $plugin ] = $object;
+        }
+
+    }
 	
 	
-	public function getList()
-	{
+	public function getList() {
 		return $this->cachedPlugin;
 	}
 	
-	public function setList($list)
-	{
+	public function setList($list) {
 		return $this->oCache->setCache($list);
 	}
 
 	/***************************************
 	*	Attrappe l'evenement et test si un plugin en a besoin
 	***************************************/
-    public function triggerEvents($event, $param = NULL) 
-    { 
-        foreach ($this->plugins as $name => $object) 
-        { 
-            if (method_exists($object, $event)) 
-            { 
+    public function triggerEvents($event, $param = NULL) { 
+        foreach ($this->plugins as $name => $object) { 
+            if (method_exists($object, $event)) { 
                 $this->plugins[$name]->$event($param); 
             } 
         } 
     }
 	
-	public function __destruct()
-	{
+	public function execute($pluginName, $event, $param = NULL) {
+		if (isset($this->plugins[$pluginName])) {
+            if (method_exists($this->plugins[$pluginName], $event)) { 
+               return $this->plugins[$pluginName]->$event($param); 
+            } 
+		}
+	}
+	
+	public function __destruct() {
 		$this->triggerEvents('onDisable'); 
 	}
 } 
+
+
+abstract class PluginManager{
+
+	/*** Cree un nouveau controleur ***/
+	public function __construct()
+	{
+
+	}
+}

@@ -1,0 +1,41 @@
+.project {
+    list-style: none;
+    padding: 0;
+}
+.project-style {
+    margin: 10px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 0 0 2px 2px;
+}
+.project-style h3 {
+    margin:5px 0 0 0;
+}
+.project-style h3 a {
+    font-size:20px;
+    text-align: center;
+}
+.project-style h3 a:hover {
+    color:#72c02c;
+    text-decoration:none;
+}
+.project-style .project-link{
+     text-align: center;
+}
+
+
+.tasks-list {
+    padding: 0px;
+}
+.tasks-list li {
+    padding: 5px;
+    list-style: none;
+    border: 1px dotted #d7d7f1;
+}
+.tasks-list .timer {
+    float: right;
+    text-align: right;
+}
+.tasks-list .timer:hover{
+    cursor: pointer;
+}
