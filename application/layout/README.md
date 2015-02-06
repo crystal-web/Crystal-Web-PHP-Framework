@@ -1,0 +1,2 @@
+## Dossier layout
+# LayoutName.phtml
