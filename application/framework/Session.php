@@ -122,7 +122,7 @@ class Session{
 		$_SESSION['cw']['flash'][] = array(
 			'message' => $message,
 			'type'	=> $type
-		);
+		); 
 	}
 	
 	/**
@@ -131,17 +131,19 @@ class Session{
 	 * @return html tag
 	 */
 	public function flash(){
-		if(isset($_SESSION['cw']['flash'])){
+		if(isset($_SESSION['cw']['flash']) && count($_SESSION['cw']['flash'])){
 			$html = new Html();
+
 			foreach($_SESSION['cw']['flash'] AS $k => $v)://&times;
-				$html->div(array('class' => 'alert-message '.$v['type'], 'data-alert' => 'alert'))
-					->button(array('type' => 'button', 'class' => 'close'), '&times;')->end()
-					->p($v['message'])->end()
-				->end();
+                $html->div(array('style' => 'padding: 0 10px;width: 980px;margin: 0 auto;'))
+                        ->strong(ucfirst($v['type']).':')->end()
+                        ->span(' ' .$v['message'])->end()
+                    ->end();
 			endforeach;
-			$_SESSION['cw']['flash'] = array();
+			$_SESSION['cw']['flash'] = array(); 
 			return $html; 
 		}
+        return false;
 	}
 	
 	/***************************************
@@ -154,7 +156,7 @@ class Session{
 	 * @return boolean
 	 */
 	public function isLogged() {
-		return ($this->user('login')) ? true : false;
+		return ( isset($_SESSION['cw']['user']->username) );
 	}
 
 	/**
@@ -179,14 +181,14 @@ class Session{
 			return (isset($_SESSION['cw']['user']->id)) ? $_SESSION['cw']['user']->id : false;
 		break;
 		case 'login':
-			return  (isset($_SESSION['cw']['user']->user)) ? $_SESSION['cw']['user']->user : false;
+			return  (isset($_SESSION['cw']['user']->username)) ? $_SESSION['cw']['user']->username : false;
 		break;
 		case 'mail':
-			return (isset($_SESSION['cw']['user']->mail)) ? $_SESSION['cw']['user']->mail : false;
+			return (isset($_SESSION['cw']['user']->mailmember)) ? $_SESSION['cw']['user']->mailmember : false;
 		break;
 		case 'group':
-			if (isset($_SESSION['cw']['user']->group)) {
-				return $_SESSION['cw']['user']->group;
+			if (isset($_SESSION['cw']['user']->rank)) {
+				return $_SESSION['cw']['user']->rank;
 			} else {
 				$acl = AccessControlList::getInstance();
 				return $acl->getDefaultGroupGuest();

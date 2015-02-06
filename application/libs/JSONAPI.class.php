@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A PHP class for access Minecraft servers that have Bukkit with the {@link http://github.com/alecgorge/JSONAPI JSONAPI} plugin installed.
  *
@@ -8,27 +7,34 @@
  * @author Alec Gorge <alecgorge@gmail.com>
  * @version Alpha 5
  * @link http://github.com/alecgorge/JSONAPI
+ * @doc http://mcjsonapi.com/apidocs/
  * @package JSONAPI
  * @since Alpha 5
  */
-class JSONAPI {
-    private $host;
-    private $port;
-    private $username;
-    private $password;
-    const URL_FORMAT = 'http://%s:%d/api/2/call?json=%s';
-    private $timeout;
+class JSONAPI extends CrystalWebJSONAPI{
+    public $host;
+    public $port;
+    public $salt;
+    public $username;
+    public $password;
+    private $urlFormats = array(
+        "call" => "http://%s:%s/api/call?method=%s&args=%s&key=%s",
+        "callMultiple" => "http://%s:%s/api/call-multiple?method=%s&args=%s&key=%s"
+    );
 
     /**
      * Creates a new JSONAPI instance.
      */
-    public function __construct ($host, $port, $uname, $pword, $salt = '', $timeout = 10) {
+    public function __construct ($host, $port, $uname, $pword, $salt) {
         $this->host = $host;
         $this->port = $port;
         $this->username = $uname;
         $this->password = $pword;
         $this->salt = $salt;
-        $this->timeout = $timeout;
+
+        if(!extension_loaded("cURL")) {
+            throw new Exception("JSONAPI requires cURL extension in order to work.");
+        }
     }
 
     /**
@@ -41,7 +47,7 @@ class JSONAPI {
         if(is_array($method)) {
             $method = json_encode($method);
         }
-        return hash('sha256', $this->username . $method . $this->password);
+        return hash('sha256', $this->username . $method . $this->password . $this->salt);
     }
 
     /**
@@ -52,7 +58,7 @@ class JSONAPI {
      * @return string A proper standard JSONAPI API call URL. Example: "http://localhost:20059/api/call?method=methodName&args=jsonEncodedArgsArray&key=validKey".
      */
     public function makeURL($method, array $args) {
-        return sprintf(self::URL_FORMAT, $this->host, $this->port, rawurlencode(json_encode($this->constructCall($method, $args))));
+        return sprintf($this->urlFormats["call"], $this->host, $this->port, rawurlencode($method), rawurlencode(json_encode($args)), $this->createKey($method));
     }
 
     /**
@@ -63,7 +69,7 @@ class JSONAPI {
      * @return string A proper multiple JSONAPI API call URL. Example: "http://localhost:20059/api/call-multiple?method=[methodName,methodName2]&args=jsonEncodedArrayOfArgsArrays&key=validKey".
      */
     public function makeURLMultiple(array $methods, array $args) {
-        return sprintf(self::URL_FORMAT, $this->host, $this->port, rawurlencode(json_encode($this->constructCalls($methods, $args))));
+        return sprintf($this->urlFormats["callMultiple"], $this->host, $this->port, rawurlencode(json_encode($methods)), rawurlencode(json_encode($args)), $this->createKey($methods));
     }
 
     /**
@@ -84,40 +90,14 @@ class JSONAPI {
     }
 
     private function curl($url) {
-        if(extension_loaded('cURL')) {
-            $c = curl_init($url);
-            curl_setopt($c, CURLOPT_PORT, $this->port);
-            curl_setopt($c, CURLOPT_HEADER, false);
-            curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($c, CURLOPT_TIMEOUT, $this->timeout);
-            $result = curl_exec($c);
-            curl_close($c);
-            return $result;
-        }else{
-            $opts = array('http' =>
-                array(
-                    'timeout' => $this->timeout
-                )
-            );
-            return file_get_contents($url, false, stream_context_create($opts));
-        }
-    }
-
-    private function constructCall($method, array $args) {
-        $json = array();
-        $json['name'] = $method;
-        $json['arguments'] = $args;
-        $json['key'] = $this->createKey($method);
-        $json['username'] = $this->username;
-        return $json;
-    }
-
-    private function constructCalls(array $methods, array $args) {
-        $calls = array();
-        foreach ($methods as $key => $method) {
-            $calls[] = $this->constructCall($method, $args[$key]);
-        }
-        return $calls;
+        $c = curl_init($url);
+        curl_setopt($c, CURLOPT_PORT, $this->port);
+        curl_setopt($c, CURLOPT_HEADER, false);
+        curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($c, CURLOPT_TIMEOUT, 2);
+        $result = curl_exec($c);
+        curl_close($c);
+        return $result;
     }
 
     /**
@@ -130,7 +110,7 @@ class JSONAPI {
      */
     public function callMultiple(array $methods, array $args = array()) {
         if(count($methods) !== count($args)) {
-            throw new Exception(sprintf('The length of the arrays %s and %s are different! You need an array of arguments for each method!', $methods, $args));
+            throw new Exception("The length of the arrays \$methods and \$args are different! You need an array of arguments for each method!");
         }
 
         $url = $this->makeURLMultiple($methods, $args);
@@ -151,93 +131,83 @@ class JSONAPI {
             return $this->call($method, array($params));
         }
     }
+}
 
-    /**
-     * @return string
-     */
-    public function getHost() {
-        return $this->host;
+
+class CrystalWebJSONAPI{
+    private $playerName;
+    private $playerInfo;
+    private $playerMoney;
+
+    public function setPlayerName($playerName){
+        $this->playerName = $playerName;
     }
 
-    /**
-     * @param string $newhost
-     * @return JSONAPI This object, for method chaining
-     */
-    public function setHost($host) {
-        $this->host = $host;
-
-        return $this;
+    public function getPlayerName(){
+        return $this->playerName;
     }
 
-    /**
-     * @return integer
-     */
-    public function getPort() {
-        return $this->port;
-    }
-
-    /**
-     * @param integer $newport
-     * @return JSONAPI This object, for method chaining
-     */
-    public function setPort($port) {
-        $port = (int) $port;
-        if ($port < 1 || $port > 65535) {
-            throw new Exception('The port must be between 1 and 65535, you supplied ' . $port);
+    public function isPlayerOnline(){
+        if (is_null($this->getPlayerName())){
+            throw new Exception('Set player name before call this');
         }
-        $this->port = $port;
+        $this->playerInfo = $this->call("getPlayer", array($this->getPlayerName()));
+        if(!isset($this->playerInfo['success']['ip']) || $this->playerInfo['success']['ip'] == "offline" || is_null($this->playerInfo['success']['ip'])) {
+            return false;
+        }
+        return true;
+    }
 
-        return $this;
+    public function sendCommand($cmd) {
+        return $this->call("runConsoleCommand", array($cmd));
+    }
+
+    /***
+     * Système d'economy
+     ***/
+
+    /**
+     * Retourne le solde du compte
+     * @return float
+     * @throws Exception
+     */
+    public function getPlayerMoney(){
+        if (is_null($this->getPlayerName())){
+            throw new Exception('Set player name before call this');
+        }
+        $playerMoney = $this->call('players.name.bank.balance', array($this->getPlayerName()));
+        $this->playerMoney = (double) $playerMoney['success'];
+        return $this->playerMoney;
     }
 
     /**
-     * @return string
+     * Ajout de crédit sur le compte
+     * @param $amout
+     * @return mixed
+     * @throws Exception
      */
-    public function getUsername() {
-        return $this->username;
+    public function addPlayerMoney($amout){
+        if (is_null($this->getPlayerName())){
+            throw new Exception('Set player name before call this');
+        }
+        $playerMoney = $this->call('players.name.bank.deposit', array($this->getPlayerName(), $amout));
+        return $playerMoney['success'];
     }
 
     /**
-     * @param string $newusername
-     * @return JSONAPI This object, for method chaining
+     * Retire la sommes $amout du compte
+     * @param $amout
+     * @return bool
+     * @throws Exception
      */
-    public function setUsername($username) {
-        $this->username = $username;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPassword() {
-        return $this->password;
-    }
-
-    /**
-     * @param string $newpassword
-     * @return JSONAPI This object, for method chaining
-     */
-    public function setPassword($username) {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getTimeout() {
-        return $this->timeout;
-    }
-
-    /**
-     * @param integer $newtimeout
-     * @return JSONAPI This object, for method chaining
-     */
-    public function setTimeout($timeout) {
-        $this->timeout = (int) $timeout;
-
-        return $this;
+    public function removePlayerMoney($amout){
+        if (is_null($this->getPlayerName())){
+            throw new Exception('Set player name before call this');
+        }
+        $playerMoney = $this->call('players.name.bank.withdraw', array($this->getPlayerName(), $amout));
+        if (isset($playerMoney['type']) && $playerMoney['type'] == 'SUCCESS'){
+            return true;
+        }
+        return false;
     }
 }

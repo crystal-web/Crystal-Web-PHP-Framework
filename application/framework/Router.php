@@ -134,7 +134,9 @@ class Router{
 	}
 	
 	trim($url,'/'); 
-		
+
+    if (is_null($url) || $url == 'index') {return __CW_PATH;}
+
 	$url = preg_replace('#\&([A-Za-z])(?:grave|acute|circ|tilde|uml|ring|cedil)\;#', '\1', $url);
     $url = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $url);
 

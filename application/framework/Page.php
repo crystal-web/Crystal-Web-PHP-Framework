@@ -131,21 +131,16 @@ private $beforeBody;
 	}
 	
 	public function getBreadcrumb($class = 'pull-left') {
-
-		$html = '<ol class="breadcrumb '.$class.'">';
-		$html .= '<li><a href="' . Router::url() . '" title="Page d\'accueil">Accueil</a> </li>';
+		$html = '<ul class="breadcrumb '.$class.'">';
+		$html .= '<li><a href="' . __CW_PATH . '/' . i18n::getLanguage() . '" title="Page d\'accueil">Accueil</a> <span class="divider">/</span></li>'; 
 		if (count($this->breadcrumb)) {
 			foreach($this->breadcrumb AS $url => $name) {
-				$html .= '<li>' .
-                            '<a href="' . Router::url($url) . '" title="' . clean($name, 'str') .'">' . clean($name, 'str') .'</a>' .
-                        '</li>';
+				$html .= '<li><a href="' . Router::url($url) . '" title="' . clean($name, 'str') .'">' . clean($name, 'str') .'</a> <span class="divider">/</span></li>';
 			}
 		}
-        if (!is_null($this->getPageTitle())){
-            $html .= '<li class="active">'.clean($this->getPageTitle(), 'str').'</li>';
-        }
-
-		$html .= '</ol>';
+            
+		$html .= '<li class="active">'.clean($this->getPageTitle(), 'str').'</li>';
+		$html .= '</ul>';
 		return $html;
 	}
 	

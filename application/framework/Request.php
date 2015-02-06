@@ -10,12 +10,14 @@ if (!defined('__APP_PATH'))
 }
 
 class Request{
-	
+	public $method;             // Method d'acces
 	public $url; 				// URL appellé par l'utilisateur
+    public $urlElement;         // URL decoupé
+
 	public $page = 1; 			// pour la pagination 
-	public $data = false; 		// Données envoyé dans le formulaire
+	public $data = false; 		// Données envoyé dans le formulaire $_POST clean
 	public $params = array();	// Paramettre fournis par Router
-	public $get = false;
+	public $get = false;        // $_GET clean
 
 	/**
 	* @var Request
@@ -39,13 +41,18 @@ class Request{
 	}
 
 	function __construct() {
-		$this->url = isset($_SERVER['PATH_INFO'])?$_SERVER['PATH_INFO']:'index'; 
+        $this->url          = isset($_SERVER['PATH_INFO'])?$_SERVER['PATH_INFO']:'index';
+        $this->method       = (isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : 'GET';
+		$this->urlElement   = explode('/', trim($this->url, '/'));
+
 		if (get_magic_quotes_gpc()) {
 			$this->url=htmlentities($this->url, ENT_NOQUOTES, 'utf-8');
 		} else {
 			$this->url=htmlentities(addslashes($this->url), ENT_NOQUOTES, 'utf-8');
 		}
+
 		// Si on a une page dans l'url on la rentre dans $this->page
+        // Valeur sécurisé d'entré
 		if(isset($_GET['page'])){
 			if(is_numeric($_GET['page'])){
 				if($_GET['page'] > 0){
@@ -53,18 +60,19 @@ class Request{
 				}
 			}
 		}
-		
+
+        // Valeur sécurisé d'entré
 		if (!empty($_GET)) {
 			$this->get = $this->cleaner($_GET);
 		}
-		
-		
-		// Si des données ont été postées ont les entre dans data
+
+        // Valeur sécurisé d'entré
 		if(!empty($_POST)) {
 			$this->data = $this->cleaner($_POST);
 		}
+        
 	}
-	
+
 	/**
 	 * Recupere la clé, en fonction dans l'ordre d'importance
 	 * Params, suivi des post et enfin les gets
@@ -81,7 +89,6 @@ class Request{
 		} elseif (isSet($this->get[$index])) {
 			return $this->get[$index];
 		}
-		
 		return false;
 	}
 

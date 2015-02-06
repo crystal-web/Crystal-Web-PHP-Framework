@@ -77,7 +77,8 @@ Class CoolPic extends CoolPicTools{
 		} else {
 
 			$getfile = file_get_contents_curl($file);
-			$this->file = __PUBLIC_PATH . '/files/tmp/' . randCar(). '.'.pathinfo($file, PATHINFO_EXTENSION);
+
+			$this->file = __PUBLIC_PATH . '/assets/tmp/' . randCar(). '.'.pathinfo($file, PATHINFO_EXTENSION);
 			if (!file_put_contents($this->file, $getfile)) {
 				throw new Exception('File cache error');
 			}
@@ -264,13 +265,16 @@ Class CoolPic extends CoolPicTools{
 	public function show() {
 		
 		if($this->extention == 'jpeg' or $this->extention == 'jpg') {
+            header('Content-type: image/jpeg');
 			imagejpeg($this->image);
 		}
 		
 		if($this->extention == 'png') {
+            header('Content-type: image/png');
 			imagepng($this->image);
 		}
 		if($this->extention == 'gif') {
+            header('Content-type: image/gif');
 			imagegif($this->image);
 		}
 	}
@@ -373,23 +377,21 @@ Class CoolPicTools{
 	
 	public function resize($width = 0, $height = 0, $truecolor = true /* For transparenty use false*/)
 	{
-		if ($height > 0 && $width > 0)
-		{
+        if ($height == 0 && $width == 0) {
+            return $this;
+        }
 
-			
-			if ($truecolor)
-			{
-				// Creer une nouvelle image
-				$newImage = imagecreatetruecolor($width, $height);
-			}
-			else
-			{
-				// Creer une nouvelle image
-				$newImage = imagecreate($width, $height);
-			}
+		if ($height > 0 && $width > 0) {
+            if ($truecolor) {
+                // Creer une nouvelle image
+                $newImage = imagecreatetruecolor($width, $height);
+            } else {
+                // Creer une nouvelle image
+                $newImage = imagecreate($width, $height);
+            }
 
 			// On crée une transparence
-			$color = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
+			$color = imagecolorallocatealpha($newImage, 1, 2, 3, 127);
 			// On remplis de transparence... 
 			imagefill($newImage, 0, 0, $color);		
 			// Resize
@@ -403,7 +405,64 @@ Class CoolPicTools{
 			$this->imageSize['height'] = $height;
 			
 			Log::setLog('New size width ' . $this->imageSize['width'] . 'px height ' . $this->imageSize['height'] . 'px', 'CoolPicTools');
-		}
+		} elseif ($width > 0 && $height == 0) {
+            $Reduction = ( ($width * 100)/$this->imageSize['width'] );
+            $height = ( ($this->imageSize['height'] * $Reduction)/100 );
+
+            if ($truecolor) {
+                // Creer une nouvelle image
+                $newImage = imagecreatetruecolor($width, $height);
+            } else {
+                // Creer une nouvelle image
+                $newImage = imagecreate($width, $height);
+            }
+
+            // On crée une transparence
+            $color = imagecolorallocatealpha($newImage, 1, 2, 3, 127);
+            // On remplis de transparence...
+            imagefill($newImage, 0, 0, $color);
+            // Resize
+            imagecopyresampled($newImage, $this->image, 0, 0, 0, 0, $width, $height, $this->imageSize['width'], $this->imageSize['height']);
+
+            // Voila l'image est redimensionné et transparente ^^
+
+            // Echange des valeurs
+            $this->image = $newImage;
+            $this->imageSize['width'] = $width;
+            $this->imageSize['height'] = $height;
+
+            Log::setLog('New size width ' . $this->imageSize['width'] . 'px height ' . $this->imageSize['height'] . 'px', 'CoolPicTools');
+        } elseif ($width == 0 && $height > 0) {
+
+            $Reduction = ( ($height * 100)/$this->imageSize['height'] );
+            $width = ( ($this->imageSize['width'] * $Reduction)/100 );
+
+            if ($truecolor) {
+                // Creer une nouvelle image
+                $newImage = imagecreatetruecolor($width, $height);
+            } else {
+                // Creer une nouvelle image
+                $newImage = imagecreate($width, $height);
+            }
+
+            // On crée une transparence
+            $color = imagecolorallocatealpha($newImage, 1, 2, 3, 127);
+            // On remplis de transparence...
+            imagefill($newImage, 0, 0, $color);
+            // Resize
+            imagecopyresampled($newImage, $this->image, 0, 0, 0, 0, $width, $height, $this->imageSize['width'], $this->imageSize['height']);
+
+            // Voila l'image est redimensionné et transparente ^^
+
+            // Echange des valeurs
+            $this->image = $newImage;
+            $this->imageSize['width'] = $width;
+            $this->imageSize['height'] = $height;
+
+            Log::setLog('New size width ' . $this->imageSize['width'] . 'px height ' . $this->imageSize['height'] . 'px', 'CoolPicTools');
+        }
+
+
 		
 		return $this;
 	}
@@ -690,12 +749,12 @@ Class CoolPicTools{
 			noError(false);
 			
 			if ($fontStyle) {
-				@mkdir('./media/font');
+				@mkdir('./assets/fonts');
 				file_put_contents($font, $fontStyle);
 			} else {
-				@mkdir('./media/font');
+				@mkdir('./assets/fonts');
 				// ByPass file_get_content url
-				exec('cd media/font && wget http://service.crystal-web.org/aide_forum/font/pixel.ttf && chmod 777 pixel.ttf');
+				exec('cd assets/fonts && wget http://service.crystal-web.org/aide_forum/font/pixel.ttf && chmod 777 pixel.ttf');
 			}
 		}
 		

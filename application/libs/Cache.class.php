@@ -110,10 +110,8 @@ public $stat;
 	    	Log::setLog('Delete file ' . $this->filename, 'Cache');
 		    @chmod(__APP_PATH . DS . 'cache' . DS . $this->type . $this->filename . '.cache',0777);
 		    @unlink(__APP_PATH . DS . 'cache' . DS . $this->type . $this->filename . '.cache');
-		    return true;
-	    } else {
-	    	return false;
-	    }		
+	    }
+        return true;
 	}
 
 	

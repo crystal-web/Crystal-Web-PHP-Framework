@@ -119,7 +119,7 @@
 			$qc = defined('MYSQLND_QC_DISABLE_SWITCH') ? MYSQLND_QC_DISABLE_SWITCH : 'qc=on'; 
 			$sql = '/*'.$qc.'*/SELECT ';
 			
-			if (isset ( $req ['fields'] )) {
+			if (isset ( $req ['fields'] ) && $req ['fields']) {
 				if (is_array ( $req ['fields'] )) {
 					$sql .= implode ( ', ', $req ['fields'] );
 				} else {
@@ -132,35 +132,36 @@
 			$sql .= ' FROM `' . $this->table . '` as `' . $this->tableAs . '` ';
 			
 			// Liaison simple
-			if (isset ( $req ['join'] )) {
+			if (isset ( $req ['join'] ) && $req ['join']) {
 				foreach ( $req ['join'] as $k => $v ) {
 					$sql .= 'LEFT JOIN ' . $k . ' ON ' . $v . ' ';
 				}
 			}
 			
 			// Liaison a gauche (non null)
-			if (isset ( $req ['leftouter'] )) {
+			if (isset ( $req ['leftouter'] ) && $req ['leftouter']) {
 				foreach ( $req ['leftouter'] as $k => $v ) {
 					$sql .= 'LEFT OUTER JOIN ' . $k . ' ON ' . $v . ' ';
 				}
 			}
 			
 			// Liaison a droite
-			if (isset ( $req ['rightouter'] )) {
+			if (isset ( $req ['rightouter'] ) && $req ['rightouter']) {
 				foreach ( $req ['rightouter'] as $k => $v ) {
 					$sql .= 'RIGHT OUTER JOIN ' . $k . ' ON ' . $v . ' ';
 				}
 			}		
 		
-			if (isset ( $req ['inner'] )) {
+			if (isset ( $req ['inner'] ) && $req ['inner']) {
 				foreach ( $req ['inner'] as $k => $v ) {
 					$sql .= 'INNER JOIN ' . $k . ' ON ' . $v . ' ';
 				}
 			}
 			
 			// Construction de la condition
-			if (isset ( $req ['conditions'] ) or isset ( $req['like']) ) {
-				$req['conditions'] = (isSet($req['like'])) ? $req['like'] : $req['conditions'];
+            // PATCH 31 08 2014 Meilleurs gestion de l'alias LIKE dans la formule
+            $req ['conditions'] = (isset($req['like'])) ? $req['like'] : (isset( $req ['conditions'] )) ? $req ['conditions'] : false;
+			if (isset ( $req ['conditions'] ) && $req ['conditions'] ) {
 				$sql .= 'WHERE ';
 				if (! is_array ( $req ['conditions'] )) {
 					$sql .= $req ['conditions'];
@@ -183,15 +184,15 @@
 				}
 			}
 			
-			if (isset ( $req ['group'] )) {
+			if (isset ( $req ['group'] ) && $req ['group']) {
 				$sql .= ' GROUP BY ' . $req ['group'];
 			}
 			
-			if (isset ( $req ['order'] )) {
+			if (isset ( $req ['order'] ) && $req ['order']) {
 				$sql .= ' ORDER BY ' . $req ['order'];
 			}
 			
-			if (isset ( $req ['limit'] )) {
+			if (isset ( $req ['limit'] ) && $req ['limit']) {
 				$sql .= ' LIMIT ' . $req ['limit'];
 			}
 			
@@ -441,10 +442,8 @@ class Model extends methodModel{
 	
 	public function __construct() {
 		if (!isset(self::$currentConnection)) {
-
 			$this->connect();
-		} else { 
-	
+		} else {
 			$this->pdo = self::$currentConnection;
 		}//*/
 		

@@ -2,7 +2,7 @@
 set_time_limit(1);
 ini_set("max_execution_time", 1);
 Class MinecraftStats {
-	public function get($server, $port) {
+	public function get($server, $port = 25565) {
 		noError(true);
 		$socket = @stream_socket_client(sprintf('tcp://%s:%u', $server, $port), $errno, $errstr, 1);
 		//$socket = @file_get_contents_curl(sprintf('tcp://%s:%u', $server, $port), $errno, $errstr, 1);

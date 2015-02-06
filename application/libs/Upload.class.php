@@ -1,7 +1,7 @@
 <?php
 class Upload{
 private $file;					// Fichier uploader $_FILES['name']
-private $tmp = './files/tmp/';	// Dossier temporaire
+private $tmp;                   // Dossier temporaire
 public $tmp_file;
 
 public $ext;						// Extention
@@ -80,10 +80,10 @@ public $log=array();			// log ;-)
 	 * @param $file the file in $_FILE['name']
 	 * @param $strict bool use strict rules
 	 */
-	public function __construct($file, $strict=true)
-	{
+	public function __construct($file, $strict=true) {
+        $this->tmp = __APP_PATH . DS . 'cache';
+        mkdir(__APP_PATH . DS . 'cache' . DS . 'upload');
 		$this->strictMode = $strict;
-		$this->tmp = __APP_PATH . DS . 'tmp' . DS ;
 		
 		$this->file = $file;
 		$this->tmp_file = basename($this->file['name']);
@@ -95,12 +95,11 @@ public $log=array();			// log ;-)
 	 * @param $dir string path to temp directory
 	 * @return $this
 	 */
-	public function setTempDir($dir)
-	{
-		if (!is_dir($dir))
-		{
+	public function setTempDir($dir) {
+		if (!is_dir($dir)) {
 			throw new Exception('$dir is not a directory', 1);
 		}
+        $this->tmp = $dir;
 		return $this;
 	}
 	
@@ -110,15 +109,13 @@ public $log=array();			// log ;-)
 	 * Preparation de l'upload
 	 * @return bool
 	 */
-	public function prepare()
-	{
+	public function prepare() {
 		Log::setLog('File is ' . $this->tmp_file, 'Upload');
 		
 		$this->ext = strtolower(strrchr($this->file['name'], '.'));
 		Log::setLog('File extention is ' . $this->ext, 'Upload');
 		
-		if (strlen($this->file['tmp_name']) == 0)
-		{
+		if (strlen($this->file['tmp_name']) == 0) {
 			Log::setLog('Pas de fichier', 'Upload');
 			return false;
 		}
@@ -126,30 +123,23 @@ public $log=array();			// log ;-)
 		/*
 		 * Test de l'extention
 		 */
-		if (function_exists('finfo_open'))
-		{
+		if (function_exists('finfo_open')) {
 			Log::setLog('Recherche du mime-type par finfo', 'Upload');
 			$finfo = finfo_open(FILEINFO_MIME_TYPE); // Retourne le type mime à l'extension mimetype
 			$this->mime = finfo_file($finfo, $this->file['tmp_name']);
 			Log::setLog('Mime-type est ' . $this->mime, 'Upload');
 			finfo_close($finfo);
-		}
-		elseif (function_exists('mime_content_type'))
-		{
+		} elseif (function_exists('mime_content_type')) {
 			Log::setLog('Recherche du mime-type par mime_content_type', 'Upload');
 			$this->mime = mime_content_type($this->file['tmp_name']);
 			Log::setLog('Mime-type est ' . $this->mime, 'Upload');
-		}
-		else
-		{
+		} else {
 			$this->mime = $this->file['type'];
 			Log::setLog('/!\ Serveur insuffisament s&eacute;ris&eacute; : Requ&egrave;te Mime-Type non trait&eacute;', 'Upload');
 		}
 		
-		if ($this->strictMode)
-		{
-			if ($this->isBlacklisted())
-			{
+		if ($this->strictMode) {
+			if ($this->isBlacklisted()) {
 				throw new Exception('File type is blacklisted', 2);
 			}
 		}
@@ -162,23 +152,17 @@ public $log=array();			// log ;-)
 	 * 
 	 * Test si le fichier est blacklister
 	 */
-	public function isBlacklisted()
-	{
+	public function isBlacklisted() {
 		/*
 		 * Controle si l'extention est blacklisté
 		 */
-		if ( array_search($this->mime, $this->MimeTypeBlacklist) !== false )
-		{
+		if ( array_search($this->mime, $this->MimeTypeBlacklist) !== false ) {
 			Log::setLog('Mime-type, blacklister  ('.$this->mime.')', 'Upload');
 			return true;
-		}
-		elseif ( array_search(trim($this->ext, '.'), $this->extBlacklist) !== false )
-		{
+		} elseif ( array_search(trim($this->ext, '.'), $this->extBlacklist) !== false ) {
 			Log::setLog('Extention, blacklister ('.$this->ext.')', 'Upload');
 			return true;
-		}
-		else
-		{
+		} else {
 			Log::setLog('Extention et mime-type, non-blacklister  ('.$this->ext.')', 'Upload');
 			return false;
 		}		
@@ -190,23 +174,17 @@ public $log=array();			// log ;-)
 	 * Test si le mime-type est dans la whitelist
 	 * @param $aListExtent array ext, ext, ext 
 	 */
-	public function isWhitelisted($aListExtent)
-	{
+	public function isWhitelisted($aListExtent) {
 		/*
 		 * Controle si l'extention est blacklisté
 		 */
-		if ( array_search(strtolower(trim($this->ext, '.')), $aListExtent) !== false )
-		{
+		if ( array_search(strtolower(trim($this->ext, '.')), $aListExtent) !== false ) {
 			Log::setLog('Extention, whitelister ('.$this->ext.')', 'Upload');
 			return true;
-		}
-		elseif ( array_search(strtolower($this->ext), $aListExtent) !== false )
-		{
+		} elseif ( array_search(strtolower($this->ext), $aListExtent) !== false ) {
 			Log::setLog('Extention, whitelister ('.$this->ext.')', 'Upload');
 			return true;
-		}
-		else
-		{
+		} else {
 			Log::setLog('Extention, non-whitelister  ('.$this->ext.')', 'Upload');
 			return false;
 		}		
@@ -217,16 +195,12 @@ public $log=array();			// log ;-)
 	 * 
 	 * Deplace le fichier du tampon, vers le dossier temporaire du systeme
 	 */
-	public function move()
-	{
+	public function move() {
 		//Si la fonction renvoie TRUE, c'est que ça a fonctionné...
-		if(move_uploaded_file($this->file['tmp_name'], $this->tmp . $this->tmp_file)) 
-		{
-			Log::setLog( 'Upload effectu&eacute; avec succ&egrave;s ! ' . $this->tmp . $this->tmp_file, 'Upload');
+		if(move_uploaded_file($this->file['tmp_name'], $this->tmp . DS . $this->tmp_file)) {
+			Log::setLog( 'Upload effectu&eacute; avec succ&egrave;s ! ' . $this->tmp . DS . $this->tmp_file, 'Upload');
 			return true;
-		}
-		else //Sinon (la fonction renvoie FALSE).
-		{
+		} else { //Sinon (la fonction renvoie FALSE).
 			Log::setLog( 'Echec de l\'upload ! Vérifié que ' . $this->tmp . ' soit accessible en écriture', 'Upload');
 			return false;
 		}
@@ -398,7 +372,7 @@ public $log=array();			// log ;-)
 	 * 
 	 * Retourne le chemin vers le fichier temporaire
 	 */
-	public function getUploadPath(){return $this->tmp . $this->tmp_file;}
+	public function getUploadPath(){return $this->tmp . DS .  $this->tmp_file;}
 	
 	 
 	/**
@@ -409,7 +383,7 @@ public $log=array();			// log ;-)
 
 	
 	public function removeFile() {
-		if (file_exists($this->tmp . $this->tmp_file) && !is_dir($this->tmp .$this->tmp_file)) {
+		if (file_exists($this->tmp . $this->tmp_file) && !is_dir($this->tmp  . DS . $this->tmp_file)) {
 			Log::setLog( 'Effacement du tampon', 'Upload');
 			@unlink($this->tmp .$this->tmp_file);
 		}

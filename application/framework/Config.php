@@ -17,7 +17,25 @@ Class Config {
 private $siteTitle = NULL;
 private $siteSlogan = NULL;
 
-	
+    public function getCache() {
+        return $this->cache;
+    }
+
+    public function __get($name){
+        return (isset($this->cache->{$name})) ? $this->cache->{$name} : false;
+    }
+
+    public function __set($name, $value) {
+        $this->cache->{$name} = $value;
+    }
+
+    public function __unset($name) {
+        unset($this->cache->{$name});
+    }
+
+    public function __isset($name) {
+        return isset($this->cache->{$name}) ? true : false;
+    }
 	/**
 	* @var Singleton
 	* @access private
@@ -55,8 +73,8 @@ private $siteSlogan = NULL;
 		$config->layout = 'default';
 		
 		try {
-		// Recherche la configuration, si elle n'existe pas, on prend celle généré
-		$oConfig = new Cache ( 'config', $config);
+            // Recherche la configuration, si elle n'existe pas, on prend celle généré
+            $oConfig = new Cache ( 'config', $config);
 		} catch(Exception $e) {
 			die($e->getMessage());
 		}		
@@ -110,7 +128,7 @@ private $siteSlogan = NULL;
 	 * Retourne le layout du site
 	 */
 	public function getLayout() {
-		return isset($this->cache->layout) ? $this->cache->layout : 'default';
+		return isset($this->cache->layout) ? $this->cache->layout : 'warnfight';
 	}
 	
 	/**
@@ -121,10 +139,13 @@ private $siteSlogan = NULL;
 	public function setLayout($layout) {
 		if (file_exists(__APP_PATH.DS.'layout'.DS.$layout.'.phtml')) {
 			$this->cache->layout = $layout;
-            Log::setLog('Layout changez pour ' . $this->cache->layout, get_class($this));
 			return $this;
 		}
-		throw new Exception("Layout not found", 1);
+        // Affiche le template par defaut
+        if ($layout == 'default') {
+		    throw new Exception("Layout not found", 1);
+        }
+        $this->setLayout('default');
 	}
 	
 	
@@ -177,7 +198,7 @@ private $siteSlogan = NULL;
 	}
 	
 	public function getSiteMail() {
-		return isset($this->cache->mailSite) ? $this->cache->mailSite : 'no@mail.com';
+		return isset($this->cache->mailSite) ? $this->cache->mailSite : 'no-reply@'.$_SERVER['SERVER_NAME'];
 	}
 	
 	public function setSiteMail($mail) {
@@ -201,11 +222,5 @@ private $siteSlogan = NULL;
 	public function setSiteTeam($teamname) {
 		$this->cache->siteTeamName = $teamname;
 		return $this;
-	}
-	
-	public function __get($index) {
-		/* Est logique ? */
-		$index = clean($index, 'str');
-		return isSet($this->cache->$index) ? $this->cache->$index : false;
 	}
 }

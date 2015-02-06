@@ -30,14 +30,17 @@ Class AccessControlList extends PermissionsModel{
 	* Méthode qui crée l'unique instance de la classe
 	* si elle n'existe pas encore puis la retourne.
 	*
+    * @changeLog
+    *  * changement de retour de self::$_instance a new static();
 	* @param void
 	* @return Singleton
 	*/
 	public static function getInstance() {
-		if(is_null(self::$_instance)) {
-			self::$_instance = new AccessControlList();
-		}
-		return self::$_instance;
+        static $instance = null;
+        if($instance === null){
+            $instance = new static();
+        }
+        return $instance;
 	}
 	
 	public function remove_expery_date() {

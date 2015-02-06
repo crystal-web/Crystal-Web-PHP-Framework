@@ -10,15 +10,16 @@ if (!defined('__APP_PATH'))
 }
 
 abstract class Controller{
+    public $master = 'Crystal-Web.org';
+    public $version = 'v3.1.0';
+    public $branch = 'mc1.7.2';
+    public $team = 'devphp.me';
+
 	/*** Cree un nouveau controleur ***/
 	function __construct() {
 		$request = Request::getInstance();
 		$plugin = Plugin::getInstance();
 		$plugin->triggerEvents('load' . $request->getController());
-        ControllerRegister::setController($request->getController());
-        if (!ControllerRegister::isRegistered()){
-            ControllerRegister::register();
-        }
 	}
 
 	/**

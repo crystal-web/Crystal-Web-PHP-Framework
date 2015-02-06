@@ -16,17 +16,24 @@ Class PaypalAPI extends ShopPaypalModel {
 	
 	
 	// Utilisateur API
-	private $paypalApiUsername = 'quesnel.a_api1.free.fr';
+	private $paypalApiUsername = '';
 	// Mot de passe API
-	private $paypalApiPassword = 'AQM4K5USSNRDXBHA';
+	private $paypalApiPassword = '';
 	// Signature de l'API
-	private $payPalApiSignature = 'ASAtKZ6pIlpHZKNnINDI-Q58uf1sApBMjVuB4YaAMV4gVTn3sYOS.zy.';
+	private $payPalApiSignature = '';
 	// Site de l'API PayPal.
 	private $payPalMode = '';
  
 	private $payPalCurrencyCode = 'EUR';
 	private $payPalLocaleCode = 'FR'; 
-	
+
+    public function setAPI($paypalApiUsername, $paypalApiPassword, $payPalApiSignature) {
+        $this->paypalApiUsername = $paypalApiUsername;
+        $this->paypalApiPassword = $paypalApiPassword;
+        $this->payPalApiSignature = $payPalApiSignature;
+    }
+
+
 	public function setCurrencyCode($currencyCode) {
 		$this->payPalCurrencyCode = urlencode($currencyCode);
 	}
@@ -75,7 +82,7 @@ Class PaypalAPI extends ShopPaypalModel {
 			return 'https://www'.$paypalmode.'.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token='.$httpParsedResponseAr["TOKEN"];
 		} else {
             //Show error message
-            throw new Exception('<b>Error : </b>'.urldecode($httpParsedResponseAr["L_LONGMESSAGE0"]) );
+            throw new Exception('<b>Error : </b>'.urldecode($httpParsedResponseAr["L_LONGMESSAGE0"]));
 		}
 	}
 
@@ -160,7 +167,6 @@ Class PaypalAPI extends ShopPaypalModel {
 		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
 			return $httpParsedResponseAr;
 		} else {
-			debug($httpParsedResponseAr);
 			throw new Exception('<b>Error : </b>'.urldecode($httpParsedResponseAr["L_LONGMESSAGE0"]), $httpParsedResponseAr['L_ERRORCODE0']);
         }
 		return $httpParsedResponseAr;

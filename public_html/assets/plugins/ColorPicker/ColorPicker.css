@@ -1,0 +1,33 @@
+[data=colorPicker] {
+    background:transparent url(images/palette.png) no-repeat 99% center;
+    padding-right:20px;
+}
+#colorPicker {
+    background-color:#000;
+    border:1px solid #000;
+    margin:-1px;
+    width:390px;
+}
+#colorPicker ul {
+    width:360px;
+    margin-right:30px;
+}
+#colorPicker * {
+    margin:0; padding:0;
+}
+#colorPicker a {
+    cursor:pointer;
+    display:block;
+    width:10px; height:10px;
+}
+#colorPicker li {
+    float:left;
+    list-style:none;
+}
+#colorPicker a.close {
+    background:transparent url(images/close.png) center center;
+    position:absolute;
+    text-indent:-5000px;
+    top:-10px; right:-10px;
+    width:20px; height:20px;
+}

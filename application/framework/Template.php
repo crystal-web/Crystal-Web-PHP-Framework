@@ -86,7 +86,7 @@ class Template {
      *
      * @return void
      */
-    function show($name) {
+    function show($name, $return = false) {
         $name = preg_replace('#/#', DIRECTORY_SEPARATOR, $name);
 
         $path = $this->path . DS . $name . '.php';
@@ -113,10 +113,19 @@ class Template {
         }
 
         if (isset($_GET['debug']) && $_GET['debug'] == 'isdev') {
-            cwDebug($this->vars);
+            debug($this->vars);
         }
 
+        ob_start();
         include ($path);
+
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        if ($return) {
+            return $content;
+        }
+        echo $content;
     }
 
     /**
@@ -127,5 +136,4 @@ class Template {
     public function getVars() {
         return $this->vars;
     }
-
 }
