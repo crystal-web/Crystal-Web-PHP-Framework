@@ -36,6 +36,8 @@ if( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTE
     $isAjax = true;
 }
 define('__ISAJAX', $isAjax);
+// Init SERVER_NAME for cli usage
+$_SERVER['SERVER_NAME'] = (isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : NULL;
 
 /* TODO Probably outdated */ 
 define ( '__LOADER', 'browser' );
@@ -47,8 +49,8 @@ set_exception_handler(function ($exception) {
    // Logs anonymous 
     $logs = function ($fileName, $line, $max = 1000) {
         if (!file_exists($fileName)){
-            fopen($fileName, 'w') or die("Can't open file: " . $fileName . '<br>Please chmod "cache" directory');
-            fclose($fileName);
+            $file = fopen($fileName, 'w') or die("Can't open file: " . $fileName . '<br>Please chmod "cache" directory');
+            fclose($file);
         }
         // Remove Empty Spaces
         $file = array_filter(array_map("trim", file($fileName)));
@@ -124,8 +126,8 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     // Lecture du cache
     $fileName = __APP_PATH . DS . 'cache' . DS . __SQL . '_erreur_alerte.cache';
     if (!file_exists($fileName)){
-        fopen($fileName, 'w') or die("Can't open file: " . $fileName . '<br>Please chmod "cache" directory');
-        fclose($fileName);
+        $file = fopen($fileName, 'w') or die("Can't open file: " . $fileName . '<br>Please chmod "cache" directory');
+        fclose($file);
     }
     $error_cache = unserialize(file_get_contents($fileName));
     $error_cache [md5( $erreur )] = $error_array;
