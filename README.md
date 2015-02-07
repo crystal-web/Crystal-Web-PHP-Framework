@@ -34,6 +34,12 @@ Les autorisations au-delà du champ de cette licence peuvent être obtenues à h
 > Soyer honnète, si vous utilisez le script de quelqu'un, indiqué qui est le propriétaire.
 > Dans le cas contraire, vous risquez de tuer le partage et les ressources open-sources, qui font la richesse de l'internet actuelle.
 
+## Soutenir le projet
+
+Vous pouvez soutenir le développement du projet avec des méthodes différentes;
+
+[![Bountysource](https://img.shields.io/badge/Bountysource-donate-green.svg?style=plastic)](https://www.bountysource.com/teams/crystal-web-service/issues) [![PayPayl donate button](https://img.shields.io/badge/paypal-donate-green.svg?style=plastic)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2J3ZZU4N9HUHW "Donate once-off to this project using Paypal")
+
 
 ## Site réalisé avec Crystal-Web: 
 
