@@ -1,10 +1,11 @@
 <?php
 /**
-* @title Crystal-Web Framework
-* @author Christophe BUFFET <developpeur@crystal-web.org> 
-* @license Creative Commons By 
-* @license http://creativecommons.org/licenses/by/2.0/fr/
-*/
+ * @title Crystal-Web Framework
+ * @author Christophe BUFFET <developpeur@crystal-web.org>
+ * @license Creative Commons By
+ * @license http://creativecommons.org/licenses/by/2.0/fr/
+ * CQFD
+ */
 if (!defined('__APP_PATH'))
 {
 	echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this file on this server.</p></body></html>'; die;
