@@ -1,6 +1,6 @@
 <?php
 /**
-* @title Simple MVC systeme 
+* @title Crystal-Web Framework
 * @author Christophe BUFFET <developpeur@crystal-web.org> 
 * @license Creative Commons By 
 * @license http://creativecommons.org/licenses/by/2.0/fr/
