@@ -143,14 +143,23 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     }
 });
 
+// Every all in includes file
+if ($handle = opendir(__SITE_PATH . DS . 'includes')) {
+    while (false !== ($entry = readdir($handle))) {
+        if (preg_match('#.php$#', $entry)) {
+            require_once __SITE_PATH . DS . 'includes' . DS . $entry;
+        }
+    }
+    closedir($handle);
+} else {
+    die('Can\'t access to includes folder in public path');
+}
 
-// Require initialization file
-require_once __SITE_PATH . DS . 'includes' . DS . 'init.php';
 // Report pour les erreurs
 $err = (__DEV_MODE) ? error_reporting ( - 1 ) : error_reporting ( 0 );
 //  Function library
 require_once __APP_PATH . DS . 'function' . DS . 'function.inc.php';
-// Router systeme
+// Router systeme obligatoirement AVANT le reste ?
 require_once __APP_PATH . DS . 'framework' . DS . 'Router.php';
 
 // Every all in framework file
@@ -162,6 +171,8 @@ if ($handle = opendir(__APP_PATH . DS . 'framework')) {
         }
     }
     closedir($handle);
+} else {
+    die('Can\'t access to framework folder in application path');
 }
 
 class Crystal {

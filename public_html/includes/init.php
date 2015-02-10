@@ -4,6 +4,7 @@
  * @author Christophe BUFFET <developpeur@crystal-web.org>
  * @license Creative Commons By
  * @license http://creativecommons.org/licenses/by/2.0/fr/
+ * /!\ push this file in .gitignore before commit
  */
 if (!defined('__APP_PATH'))
 {
