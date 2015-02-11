@@ -15,3 +15,6 @@
     * Système réputation
         * Comptage/ajout et suppression de point en fonction d'une action dans une catégorie défini
         * Calcul et affichage graphique des évenments dans le temps (like Morris)
+    * Sitecash
+        * Ajout du BTC avec blockchain.info api pour les payemets
+        

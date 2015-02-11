@@ -48,4 +48,5 @@ Vous pouvez soutenir le développement du projet avec des méthodes différentes
 * http://LegendCraft.fr - Serveur Minecraft 
 
 ## Just Analytics
-![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/crystal-web/crystal-web-php-framework/trend.png)
+[![GitHub Graph](https://img.shields.io/badge/GitHub-Graph-blue.svg?style=plastic)](https://github.com/crystal-web/Crystal-Web-PHP-Framework/graphs/contributors)
+
