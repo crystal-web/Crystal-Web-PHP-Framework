@@ -3,84 +3,124 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
     <title>Cms-for-developer-php by crystal-web</title>
   </head>
 
   <body>
-    <div id="container">
+    <header>
       <div class="inner">
+        <h1>Cms-for-developer-php</h1>
+        <h2>Simple CMS pour développeur PHP</h2>
+        <a href="https://github.com/crystal-web/Crystal-Web-PHP-Framework" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
 
-        <header>
-          <h1>Cms-for-developer-php</h1>
-          <h2>Simple CMS pour développeur PHP</h2>
-        </header>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h2>
+<a id="information" class="anchor" href="#information" aria-hidden="true"><span class="octicon octicon-link"></span></a>Information:</h2>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/crystal-web/CMS-for-Developer-PHP/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/crystal-web/CMS-for-Developer-PHP/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/crystal-web/CMS-for-Developer-PHP" id="view-on-github" class="button"><span>View on GitHub</span></a>
+<p>Open-Source depuis le 11 février 2012
+Version: 15.01      (YY.MM)
+Auteur: Christophe BUFFET
+Description: Système MVC permettant au développeurs PHP de réaliser des sites web, rapidement et efficacement.</p>
+
+<p>Nécessite: PHP 5, une base de donnée et mod_rewrite on</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation:</h2>
+
+<p>ATTENTION public_html/ correspond à la racine du site, le dossier peut être renommé si nécéssaire
+Si vous ne disposez pas d'un dossier public_html ou <a href="http://www">www</a>. Renommé application/ et indiqué le nouveau nom dans index.php ligne 26 </p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s2"><span class="pl-s3">define</span> ( <span class="pl-s1"><span class="pl-pds">'</span>__APP_PATH<span class="pl-pds">'</span></span>, <span class="pl-s3">dirname</span> ( <span class="pl-c1">__SITE_PATH</span> ) <span class="pl-k">.</span> <span class="pl-c1">DS</span> <span class="pl-k">.</span> <span class="pl-s1"><span class="pl-pds">'</span>application<span class="pl-pds">'</span></span> );</span></pre></div>
+
+<h1>
+<a id="modifier-le-fichier-includesinitphp" class="anchor" href="#modifier-le-fichier-includesinitphp" aria-hidden="true"><span class="octicon octicon-link"></span></a>Modifier le fichier /includes/init.php</h1>
+
+<ul>
+<li>Indiquer les informations de connexion SQL</li>
+<li>Chmod en 777 est requis pour application/cache</li>
+<li>Le script doit générer les tables SQL automatiquement.</li>
+<li>En cas d'erreur, merci de prendre contact</li>
+</ul>
+
+<h2>
+<a id="information-de-license" class="anchor" href="#information-de-license" aria-hidden="true"><span class="octicon octicon-link"></span></a>Information de license:</h2>
+
+<p>Licence Creative Commons
+Crystal-Web Framework de Christophe BUFFET est mis à disposition selon les termes de la licence Creative Commons Attribution 4.0 International.
+Fondé(e) sur une œuvre à <a href="https://github.com/crystal-web/CMS-for-Developer-PHP">https://github.com/crystal-web/CMS-for-Developer-PHP</a>.
+Les autorisations au-delà du champ de cette licence peuvent être obtenues à <a href="https://github.com/crystal-web/CMS-for-Developer-PHP/issues">https://github.com/crystal-web/CMS-for-Developer-PHP/issues</a>.</p>
+
+<blockquote>
+<p>Soyer honnète, si vous utilisez le script de quelqu'un, indiqué qui est le propriétaire.
+Dans le cas contraire, vous risquez de tuer le partage et les ressources open-sources, qui font la richesse de l'internet actuelle.</p>
+</blockquote>
+
+<h2>
+<a id="soutenir-le-projet" class="anchor" href="#soutenir-le-projet" aria-hidden="true"><span class="octicon octicon-link"></span></a>Soutenir le projet</h2>
+
+<p>Vous pouvez soutenir le développement du projet avec des méthodes différentes;</p>
+
+<p><a href="https://www.bountysource.com/teams/crystal-web-service/issues"><img src="https://img.shields.io/badge/Bountysource-donate-green.svg?style=plastic" alt="Bountysource"></a> <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=2J3ZZU4N9HUHW" title="Donate once-off to this project using Paypal"><img src="https://img.shields.io/badge/paypal-donate-green.svg?style=plastic" alt="PayPal donate button"></a> <a href="https://tip4commit.com/github/crystal-web/CMS-for-Developer-PHP"><img src="https://tip4commit.com/projects/43116.svg" alt="prochain pourboire"></a></p>
+
+<h2>
+<a id="site-réalisé-avec-crystal-web" class="anchor" href="#site-r%C3%A9alis%C3%A9-avec-crystal-web" aria-hidden="true"><span class="octicon octicon-link"></span></a>Site réalisé avec Crystal-Web:</h2>
+
+<ul>
+<li>
+<a href="http://Crystal-Web.org">http://Crystal-Web.org</a> - Site de l'éditeur</li>
+<li>
+<a href="http://ImagineYourCraft.com">http://ImagineYourCraft.com</a> - Serveur MineCraft hautement modé.</li>
+<li>
+<a href="http://LegendCraft.fr">http://LegendCraft.fr</a> - Serveur Minecraft </li>
+</ul>
+
+<h2>
+<a id="just-analytics" class="anchor" href="#just-analytics" aria-hidden="true"><span class="octicon octicon-link"></span></a>Just Analytics</h2>
+
+<p><a href="https://github.com/crystal-web/Crystal-Web-PHP-Framework/graphs/contributors"><img src="https://img.shields.io/badge/GitHub-Graph-blue.svg?style=plastic" alt="GitHub Graph"></a></p>
         </section>
 
-        <hr>
+        <aside id="sidebar">
+          <a href="https://github.com/crystal-web/Crystal-Web-PHP-Framework/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/crystal-web/Crystal-Web-PHP-Framework/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
 
-        <section id="main_content">
-          <h3>Welcome to GitHub Pages.</h3>
+          <p class="repo-owner"><a href="https://github.com/crystal-web/Crystal-Web-PHP-Framework"></a> is maintained by <a href="https://github.com/crystal-web">crystal-web</a>.</p>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-        </section>
-
-        <footer>
-          Cms-for-developer-php is maintained by <a href="https://github.com/crystal-web">crystal-web</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
-
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-29895156-4']);
-  _gaq.push(['_setDomainName', 'github.com']);
-  _gaq.push(['_setAllowLinker', true]);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
       </div>
     </div>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-29895156-4");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
