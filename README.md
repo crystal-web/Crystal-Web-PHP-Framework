@@ -38,7 +38,7 @@ Les autorisations au-delà du champ de cette licence peuvent être obtenues à h
 
 Vous pouvez soutenir le développement du projet avec des méthodes différentes;
 
-[![Bountysource](https://img.shields.io/badge/Bountysource-donate-green.svg?style=plastic)](https://www.bountysource.com/teams/crystal-web-service/issues) [![PayPayl donate button](https://img.shields.io/badge/paypal-donate-green.svg?style=plastic)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2J3ZZU4N9HUHW "Donate once-off to this project using Paypal")
+[![Bountysource](https://img.shields.io/badge/Bountysource-donate-green.svg?style=plastic)](https://www.bountysource.com/teams/crystal-web-service/issues) [![PayPal donate button](https://img.shields.io/badge/paypal-donate-green.svg?style=plastic)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2J3ZZU4N9HUHW "Donate once-off to this project using Paypal") [![prochain pourboire](https://tip4commit.com/projects/43116.svg)](https://tip4commit.com/github/crystal-web/CMS-for-Developer-PHP)
 
 
 ## Site réalisé avec Crystal-Web: 
@@ -46,3 +46,6 @@ Vous pouvez soutenir le développement du projet avec des méthodes différentes
 * http://Crystal-Web.org - Site de l'éditeur
 * http://ImagineYourCraft.com - Serveur MineCraft hautement modé.
 * http://LegendCraft.fr - Serveur Minecraft 
+
+## Just Analytics
+![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/crystal-web/crystal-web-php-framework/trend.png)
