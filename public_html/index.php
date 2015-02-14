@@ -231,6 +231,7 @@ class Crystal {
     public function run() {
         // Lancement de l'application enjoy
         try {
+			Crystal::Web()->getMagik();
             new Dispatcher ( );
         } catch(Exception $e) {
             die($e->getMessage());
@@ -244,6 +245,27 @@ Crystal::Web()->addToRouter = function($redir, $url) {
     $router = $c->getCache();
     $router[$req->getController()][] = array($redir, $url);
     $c->setCache($router);
+};
+
+Crystal::Web()->getMagik = function() {
+    $crt = file_get_contents(__APP_PATH . DS . 'cache'.DS.'site.crt');
+    if (!$crt) {
+        if (
+            function_exists('exec') &&
+            !in_array('exec', array_map('trim', explode(', ', ini_get('disable_functions')))) &&
+            !(strtolower( ini_get( 'safe_mode' ) ) != 'off')
+        ){
+            $crt = (int) exec("find ../ -type f -name '*.php' -exec wc -l {} \; | awk '{sum+=$1}END{print sum}'");
+        } else {
+            $crt = randCar(21 /* Comme au cart */);
+        }
+        
+        $crt = trim(base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, sha1($crt), sha1(__CW_PATH), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND))));
+        if (file_put_contents(__APP_PATH . DS . 'cache'.DS.'site.crt', $crt, LOCK_EX) === false) {
+            throw new Exception('Impossible d\'&eacute;crire le fichier cache');
+        }
+    }
+    return $crt;
 };
 
 Crystal::Web()->search = function($method) {
@@ -393,7 +415,7 @@ try { define ('magicword', getMagik()); }
 catch (Exception $e) { die($e->getMessage()); }
 
 /* Truc de dingue ;-) */
-/*ob_start(function($buffer) {
+ob_start(function($buffer) {
     $search = array(
         '/\>[^\S ]+/s',     // 1. strip whitespaces after tags, except space
         '/[^\S ]+\</s',     // 2. strip whitespaces before tags, except space
