@@ -1,8 +1,13 @@
+# Flash info:
+14/05/2015: Une nouvelle version est en développement et sera mise en ligne après les tests. Celle-ci apporte de très nombreuses modifications et adaptation.du système. 
+
+
+
 ## Information:
 
 Open-Source depuis le 11 février 2012
 Version: 15.01		(YY.MM)
-Auteur: Christophe BUFFET
+Auteur: Christophe BUFFET alias DevPHP
 Description: Système MVC permettant au développeurs PHP de réaliser des sites web, rapidement et efficacement.
 
 Nécessite: PHP 5, une base de donnée et mod_rewrite on
